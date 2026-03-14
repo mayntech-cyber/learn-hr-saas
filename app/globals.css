@@ -1,0 +1,8 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  background-color: #f8fafc; /* Nježno siva/plava pozadina (slate-50) */
+  color: #0f172a; /* Tamni tekst (slate-900) */
+}
