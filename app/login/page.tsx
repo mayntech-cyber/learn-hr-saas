@@ -1,46 +1,57 @@
 "use client";
 
 import { createClient } from '@/utils/supabase/client';
-import { useState } from 'react'; // Dodali smo useState za praćenje upisanog maila i poruka
+import { useState } from 'react';
 
 export default function LoginPage() {
   const supabase = createClient();
   
-  // Stanja (states) za našu formu
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
 
+  // POMOĆNA FUNKCIJA: Određuje kamo vratiti korisnika
+  const getURL = () => {
+    let url =
+      process?.env?.NEXT_PUBLIC_SITE_URL ?? // Prvo gleda Vercel varijablu
+      (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000'); // Onda gleda tvoj preglednik
+    
+    // Osiguraj da URL završava ispravno za callback
+    url = url.endsWith('/') ? url : `${url}/`;
+    return `${url}auth/callback`;
+  };
+
   // 1. Funkcija za Magic Link
   const signInWithMagicLink = async (e: React.FormEvent) => {
-    e.preventDefault(); // Sprječava osvježavanje stranice
+    e.preventDefault();
     setLoading(true);
     setMessage(null);
 
     const { error } = await supabase.auth.signInWithOtp({
       email: email,
       options: {
-        // Kada korisnik klikne na link u mailu, vraćamo ga u našu aplikaciju
-        emailRedirectTo: `${location.origin}/auth/callback`,
+        // Koristi našu pametnu funkciju
+        emailRedirectTo: getURL(),
       },
     });
 
     if (error) {
       setMessage({ text: error.message, type: 'error' });
     } else {
-      setMessage({ text: 'Poslali smo ti magični link! Provjeri svoj inbox (i spam mapu).', type: 'success' });
-      setEmail(''); // Očistimo polje
+      setMessage({ text: 'Poslali smo ti magični link! Provjeri svoj inbox.', type: 'success' });
+      setEmail('');
     }
     
     setLoading(false);
   };
 
-  // 2. Funkcija za Google (Ostaje ista)
+  // 2. Funkcija za Google
   const signInWithGoogle = async () => {
     await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${location.origin}/auth/callback`,
+        // Koristi našu pametnu funkciju
+        redirectTo: getURL(),
       },
     });
   };
@@ -48,26 +59,18 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 p-4">
       <div className="w-full max-w-md space-y-8 rounded-2xl bg-white p-8 shadow-xl">
-        
         <div className="text-center">
-          <h2 className="text-3xl font-bold tracking-tight text-gray-900">
-            Dobrodošli u LearnHR
-          </h2>
-          <p className="mt-2 text-sm text-gray-600">
-            Prijavite se za nastavak učenja
-          </p>
+          <h2 className="text-3xl font-bold tracking-tight text-gray-900">Dobrodošli u LearnHR</h2>
+          <p className="mt-2 text-sm text-gray-600">Prijavite se za nastavak učenja</p>
         </div>
 
         <div className="mt-8 space-y-6">
-          
-          {/* Poruke o uspjehu ili grešci */}
           {message && (
             <div className={`p-4 rounded-md text-sm font-medium ${message.type === 'success' ? 'bg-green-50 text-green-800 border border-green-200' : 'bg-red-50 text-red-800 border border-red-200'}`}>
               {message.text}
             </div>
           )}
 
-          {/* MAGIC LINK FORMA */}
           <form onSubmit={signInWithMagicLink} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700">Email adresa</label>
@@ -80,7 +83,6 @@ export default function LoginPage() {
                 placeholder="vas@email.com" 
               />
             </div>
-            
             <button 
               type="submit" 
               disabled={loading}
@@ -99,7 +101,6 @@ export default function LoginPage() {
             </div>
           </div>
 
-          {/* OŽIVLJENI GOOGLE GUMB */}
           <button
             onClick={signInWithGoogle}
             type="button"
