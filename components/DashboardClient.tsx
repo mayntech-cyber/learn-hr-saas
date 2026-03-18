@@ -13,11 +13,14 @@ import {
 import Link from "next/link";
 import { useLanguage } from "./LanguageContext";
 
-export default function DashboardClient({ job }: { job: any }) {
+// Dodali smo 'profile' u listu onoga što komponenta prima
+export default function DashboardClient({ job, profile }: { job: any, profile: any }) {
   const { euLang, nativeLang, t, uiMode } = useLanguage();
 
   // --- STATIČNI PRIJEVODI ---
-  const greeting = t("Bok, Radniče! 👋");
+  // Koristimo tvoje ime iz profila. Ako ga nema, piše "Radniče"
+  const displayName = profile?.full_name?.split(' ')[0] || "Radniče";
+  const greeting = t(`Bok, ${displayName}! 👋`);
   const greetingSub = t("Tvoj put do majstora hrvatskog jezika se nastavlja.");
   const streak = t("Dnevni niz");
   const days = t("dana");
@@ -52,7 +55,7 @@ export default function DashboardClient({ job }: { job: any }) {
 
   const jobName = getJobName();
 
-  // Simulirani testovi (Kasnije ovo možeš vući iz baze)
+  // Simulirani testovi
   const availableTests = [
     { titleHr: "Osnove gradilišta", xp: "+50 XP", color: "bg-emerald-50 text-emerald-600" },
     { titleHr: "Komunikacija s kolegama", xp: "+80 XP", color: "bg-blue-50 text-blue-600" },
@@ -85,26 +88,30 @@ export default function DashboardClient({ job }: { job: any }) {
             <div>
               <p className="text-[10px] font-black text-orange-800 uppercase tracking-wider">{streak.main}</p>
               <p className="text-xl font-black text-orange-600 flex items-baseline gap-1">
-                 5 <span className="text-sm">{days.main}</span>
+                  5 <span className="text-sm">{days.main}</span>
               </p>
             </div>
           </div>
+
+          {/* OVDJE PRIKAZUJEMO TVOJE PRAVE BODOVE IZ BAZE */}
           <div className="bg-blue-50 border border-blue-100 p-4 rounded-3xl flex items-center gap-3 shadow-sm">
             <div className="bg-blue-500 p-2 rounded-2xl text-white">
               <Star size={20} fill="currentColor" />
             </div>
             <div>
               <p className="text-[10px] font-black text-blue-800 uppercase tracking-wider">{points.main}</p>
-              <p className="text-xl font-black text-blue-600">1,250</p>
+              <p className="text-xl font-black text-blue-600">
+                {profile?.xp_points?.toLocaleString() || 0}
+              </p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* MAIN MODULES - VELIKE KARTICE */}
+      {/* MAIN MODULES */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         
-        {/* OPĆI JEZIK - PLAVA KARTICA */}
+        {/* OPĆI JEZIK */}
         <Link href="/general" className="group relative overflow-hidden bg-blue-600 rounded-[2.5rem] p-8 text-white shadow-xl hover:shadow-blue-200 transition-all hover:-translate-y-1">
           <div className="relative z-10 flex flex-col h-full">
             <div className="bg-white/20 self-start p-3 rounded-2xl mb-6 backdrop-blur-md">
@@ -125,7 +132,7 @@ export default function DashboardClient({ job }: { job: any }) {
           </div>
         </Link>
 
-        {/* STRUČNI JEZIK - DARK KARTICA */}
+        {/* STRUČNI JEZIK */}
         <Link href={`/learn/${job?.id || '1'}`} className="group relative overflow-hidden bg-slate-900 rounded-[2.5rem] p-8 text-white shadow-xl hover:shadow-slate-300 transition-all hover:-translate-y-1">
           <div className="relative z-10 flex flex-col h-full">
             <div className="bg-orange-500 self-start p-3 rounded-2xl mb-6 shadow-lg shadow-orange-500/50">
@@ -150,7 +157,7 @@ export default function DashboardClient({ job }: { job: any }) {
 
       </div>
 
-      {/* SECONDARY SECTION - NAPREDAK I TESTOVI */}
+      {/* SECONDARY SECTION */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         
         {/* TESTOVI ZNANJA */}
@@ -165,9 +172,7 @@ export default function DashboardClient({ job }: { job: any }) {
           
           <div className="space-y-4">
             {availableTests.map((test, i) => {
-              // Brzinski prijevod naziva testova koristeći postojeći 't' (Ovo bi bilo idealno vući iz baze u budućnosti)
               const testTrans = t(test.titleHr); 
-              
               return (
                 <div key={i} className="flex items-center justify-between p-4 rounded-3xl border border-slate-50 hover:bg-slate-50 transition-colors cursor-pointer group">
                   <div className="flex items-center gap-4">

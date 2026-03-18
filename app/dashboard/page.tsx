@@ -1,19 +1,34 @@
-import { supabase } from "@/lib/supabase";
+import { createClient } from "@/utils/supabase/server"; // Koristimo novi server klijent
+import { redirect } from "next/navigation";
 import DashboardClient from "@/components/DashboardClient";
 
 export const revalidate = 0;
 
 export default async function DashboardPage() {
-  // Simuliramo korisnika (npr. Zidara). 
-  // Kasnije ćeš ovdje ubaciti pravu logiku (npr. await supabase.auth.getUser())
-  const jobId = 1; 
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
 
-  // Vučemo ime posla i prijevode kako bi Dashboard znao ispisati ime struke na stranom jeziku
-  const { data: job } = await supabase
-    .from('jobs')
-    .select('id, name_hr, translations')
-    .eq('id', jobId)
+  if (!user) redirect("/login");
+
+  // Dohvaćamo profil iz baze
+  const { data: profile, error } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("id", user.id)
     .single();
 
-  return <DashboardClient job={job} />;
+  console.log("DEBUG - Korisnik ID:", user.id);
+  console.log("DEBUG - Profil iz baze:", profile);
+
+  // ---> NOVO: ČUVAR KOJI PREUSMJERAVA NA ONBOARDING <---
+  // Ako je ime prazno ili zanimanje nije odabrano, pošalji ga na onboarding!
+  if (!profile?.full_name || !profile?.current_job_id) {
+    redirect("/onboarding");
+  }
+
+  // Ako smo došli do ovdje, znači da korisnik sigurno ima 'current_job_id'
+  const jobId = profile.current_job_id;
+  const { data: job } = await supabase.from('jobs').select('*').eq('id', jobId).single();
+
+  return <DashboardClient job={job} profile={profile} />;
 }

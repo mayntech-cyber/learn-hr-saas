@@ -1,10 +1,20 @@
 "use client";
 
-import { User, Mail, Calendar, Briefcase, Settings, Globe2, LogOut, Award } from "lucide-react";
+import { User, Mail, Calendar, Briefcase, Settings, Globe2, LogOut, Award, Edit2, CheckCircle2, Loader2 } from "lucide-react";
 import { useLanguage } from "./LanguageContext";
+import { useState } from "react";
+import { createClient } from "@/utils/supabase/client"; // Treba nam klijent za promjenu u bazi
+import { useRouter } from "next/navigation"; // Za osvježavanje stranice
 
-export default function ProfileClient({ user, job }: { user: any, job: any }) {
+export default function ProfileClient({ user, job, allJobs }: { user: any, job: any, allJobs: any[] }) {
   const { euLangName, nativeLangName, uiMode, openModal, t } = useLanguage();
+  const router = useRouter();
+  const supabase = createClient();
+
+  // State za promjenu zanimanja
+  const [isEditingJob, setIsEditingJob] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [selectedJobId, setSelectedJobId] = useState(user.jobId);
 
   // --- STATIČNI PRIJEVODI ---
   const tProfile = t("Profil");
@@ -17,11 +27,34 @@ export default function ProfileClient({ user, job }: { user: any, job: any }) {
   const tCoursesFinished = t("Završeni tečajevi");
 
   // Dinamični naziv posla
-  const getJobName = () => {
-    if (!job) return "";
-    if (uiMode === 'hr') return job.name_hr;
-    const trans = job.translations || {};
-    return trans[uiMode === 'native' ? 'nativeLang' : 'euLang'] || job.name_hr;
+  const getJobName = (jobData: any) => {
+    if (!jobData) return "";
+    if (uiMode === 'hr') return jobData.name_hr;
+    const trans = jobData.translations || {};
+    return trans[uiMode === 'native' ? 'nativeLang' : 'euLang'] || jobData.name_hr;
+  };
+
+  // FUNKCIJA ZA SPREMANJE NOVOG POSLA U BAZU
+  const handleSaveJob = async () => {
+    setIsSaving(true);
+    
+    // Dohvati ID ulogiranog korisnika
+    const { data: { user: authUser } } = await supabase.auth.getUser();
+    
+    if (authUser) {
+      // Šaljemo Supabaseu: "Ažuriraj profil za ovog korisnika i stavi novi current_job_id"
+      const { error } = await supabase
+        .from('profiles')
+        .update({ current_job_id: selectedJobId })
+        .eq('id', authUser.id);
+
+      if (!error) {
+        setIsEditingJob(false);
+        // Osvježavamo cijelu stranicu da se promjena vidi na ekranu
+        router.refresh(); 
+      }
+    }
+    setIsSaving(false);
   };
 
   return (
@@ -92,22 +125,71 @@ export default function ProfileClient({ user, job }: { user: any, job: any }) {
           </div>
         </div>
 
-        {/* ZANIMANJE I NAPREDAK */}
+        {/* ZANIMANJE KARTICA */}
         <div className="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-sm flex flex-col justify-between">
           <div>
-            <div className="flex items-center gap-3 mb-6">
-              <div className="bg-blue-50 p-3 rounded-2xl text-blue-600">
-                <Briefcase size={24} />
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="bg-blue-50 p-3 rounded-2xl text-blue-600">
+                  <Briefcase size={24} />
+                </div>
+                <div>
+                  <h3 className="text-lg font-black text-slate-800 leading-none">{tJob.main}</h3>
+                  {!tJob.isOnlyHr && <p className="text-[10px] font-bold text-slate-400 uppercase mt-1 tracking-widest">{tJob.sub}</p>}
+                </div>
               </div>
-              <div>
-                <h3 className="text-lg font-black text-slate-800 leading-none">{tJob.main}</h3>
-                {!tJob.isOnlyHr && <p className="text-[10px] font-bold text-slate-400 uppercase mt-1 tracking-widest">{tJob.sub}</p>}
-              </div>
+              
+              {/* Gumb za izmjenu */}
+              {!isEditingJob && (
+                <button 
+                  onClick={() => setIsEditingJob(true)}
+                  className="text-sm font-bold text-blue-600 hover:bg-blue-50 p-2 rounded-xl transition-colors flex items-center gap-1.5"
+                >
+                  <Edit2 size={16} /> Izmijeni
+                </button>
+              )}
             </div>
             
-            <div className="bg-slate-50 p-5 rounded-3xl border border-slate-100">
-              <p className="text-2xl font-black text-slate-800">{getJobName()}</p>
-              <p className="text-sm font-bold text-blue-500 uppercase mt-1 tracking-tighter italic">Stručni program: {job?.name_hr}</p>
+            <div className="bg-slate-50 p-5 rounded-3xl border border-slate-100 min-h-[100px]">
+              {isEditingJob ? (
+                // PADAJUĆI IZBORNIK KADA SE KLIKNE "IZMIJENI"
+                <div className="flex flex-col gap-3 animate-in fade-in zoom-in-95 duration-200">
+                  <select 
+                    value={selectedJobId}
+                    onChange={(e) => setSelectedJobId(Number(e.target.value))}
+                    className="w-full bg-white border border-slate-200 rounded-xl p-3 text-slate-800 font-bold focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    {allJobs?.map((j) => (
+                      <option key={j.id} value={j.id}>
+                        {j.name_hr}
+                      </option>
+                    ))}
+                  </select>
+                  
+                  <div className="flex gap-2">
+                    <button 
+                      onClick={() => setIsEditingJob(false)}
+                      className="flex-1 py-2 text-sm font-bold text-slate-500 hover:bg-slate-200 rounded-xl transition-colors"
+                    >
+                      Odustani
+                    </button>
+                    <button 
+                      onClick={handleSaveJob}
+                      disabled={isSaving}
+                      className="flex-1 py-2 text-sm font-black text-white bg-blue-600 hover:bg-blue-500 rounded-xl transition-colors shadow-md shadow-blue-500/30 flex justify-center items-center gap-2 disabled:opacity-50"
+                    >
+                      {isSaving ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle2 size={16} />}
+                      Spremi
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                // NORMALAN PRIKAZ
+                <div className="animate-in fade-in duration-300">
+                  <p className="text-2xl font-black text-slate-800">{getJobName(job)}</p>
+                  <p className="text-sm font-bold text-blue-500 uppercase mt-1 tracking-tighter italic">Stručni program: {job?.name_hr}</p>
+                </div>
+              )}
             </div>
           </div>
 
