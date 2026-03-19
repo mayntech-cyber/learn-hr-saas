@@ -34,6 +34,8 @@ export default function QuizPlayer({
   const [isAnswered, setIsAnswered] = useState(false);
   const [isFinished, setIsFinished] = useState(false);
   const [shuffledOptions, setShuffledOptions] = useState<any[]>([]);
+  const [earnedXp, setEarnedXp] = useState<number | null>(null);
+  const [xpDiff, setXpDiff] = useState<number | null>(null);
 
   const themeColor = isProfessional ? "orange" : "blue";
 
@@ -79,10 +81,7 @@ export default function QuizPlayer({
   };
 
   // GLAVNA FUNKCIJA ZA SPREMANJE
-  // GLAVNA FUNKCIJA ZA SPREMANJE
   const saveQuizResult = async (finalScore: number, total: number) => {
-    
-    // 1. PITAJ BAZU TKO JE TRENUTNO ULOGIRAN (Ne oslanjamo se na props!)
     const { data: { user }, error: authError } = await supabase.auth.getUser();
 
     if (authError || !user) {
@@ -94,13 +93,30 @@ export default function QuizPlayer({
     const xpEarned = finalScore * 10;
     const gameType = `ABC_QUIZ_${activeLevel}`;
 
-    console.log("Spremam rezultat za korisnika:", user.id); // Ovo ćeš vidjeti u konzoli
+    // 1. DOHVATI STARI REKORD PRIJE SPREMANJA NOVOG
+    const { data: oldData } = await supabase
+      .from('user_test_results')
+      .select('xp_earned')
+      .eq('user_id', user.id)
+      .eq('category_id', lesson.id)
+      .eq('game_type', gameType);
 
-    // 2. SPREMI REZULTAT S 100% TOČNIM ID-jem
+    // Nađi najveći XP koji je korisnik do sad imao za ovaj kviz
+    const oldBest = oldData && oldData.length > 0
+      ? Math.max(...oldData.map(r => r.xp_earned || 0))
+      : 0;
+
+    const diff = xpEarned - oldBest;
+    
+    // Spremamo u state da UI može ispisati poruku
+    setEarnedXp(xpEarned);
+    setXpDiff(diff);
+
+    // 2. SPREMI NOVI REZULTAT
     const { error } = await supabase
       .from('user_test_results')
       .insert({
-        user_id: user.id, // OVO SADA SIGURNO PROLAZI RLS!
+        user_id: user.id, 
         category_id: lesson.id || null,
         game_type: gameType,
         score: finalScore,
@@ -110,9 +126,7 @@ export default function QuizPlayer({
       });
 
     if (error) {
-      alert("Baza je odbila spremiti: " + error.message);
-    } else {
-      console.log("Bodovi uspješno spremljeni! 🎉");
+      console.error("Baza je odbila spremiti:", error.message);
     }
   };
   const nextQuestion = () => {
@@ -141,14 +155,26 @@ export default function QuizPlayer({
           <Trophy size={48} className={passed ? `text-${themeColor}-500` : 'text-slate-400'} />
         </div>
         
-        {/* NOVO: Pametna poruka ovisno o prolazu */}
         <h2 className="text-4xl font-black text-slate-800 mb-2">
           {passed ? t("Bravo!").main : "Više sreće idući put"}
         </h2>
         
-        <p className="text-slate-500 font-bold mb-8 italic">
+        <p className="text-slate-500 font-bold mb-6 italic">
           Točnost: {Math.round(accuracy)}% ({score}/{words.length})
         </p>
+
+        {/* PAMETNA PORUKA ZA BODOVE */}
+        {xpDiff !== null && earnedXp !== null && (
+          <div className="mb-8 p-4 rounded-2xl bg-slate-50 border-2 border-slate-100">
+            {xpDiff > 0 && earnedXp === xpDiff ? (
+              <p className="text-emerald-600 font-black">Prvi put odigrano! 🎉 <br/><span className="text-2xl">+{earnedXp} XP</span></p>
+            ) : xpDiff > 0 ? (
+              <p className="text-emerald-600 font-black">Srušen rekord! 🏆 <br/>Dodatnih <span className="text-2xl">+{xpDiff} XP</span></p>
+            ) : (
+              <p className="text-slate-500 font-bold">Tvoj stari rekord od <span className="text-slate-700">{earnedXp - xpDiff} XP</span> je i dalje nedostižan. Probaj opet! 💪</p>
+            )}
+          </div>
+        )}
         
         <div className="space-y-3">
           <button onClick={restart} className={`w-full bg-${themeColor}-500 text-white py-4 rounded-2xl font-black flex items-center justify-center gap-2 shadow-lg shadow-${themeColor}-500/30 hover:scale-105 transition-transform`}>
