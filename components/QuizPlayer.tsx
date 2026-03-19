@@ -78,22 +78,28 @@ export default function QuizPlayer({
   };
 
   // GLAVNA FUNKCIJA ZA SPREMANJE
+  // GLAVNA FUNKCIJA ZA SPREMANJE
   const saveQuizResult = async (finalScore: number, total: number) => {
-    if (!userId) {
-      alert("Greška: Kviz nema tvoj ID. Pokušaj osvježiti stranicu.");
+    
+    // 1. PITAJ BAZU TKO JE TRENUTNO ULOGIRAN (Ne oslanjamo se na props!)
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      alert("Greška: Nisi ulogiran ili je istekla sesija.");
       return;
     }
 
     const accuracy = (finalScore / total) * 100;
     const xpEarned = finalScore * 10;
-    
-    // NOVO: Sprema se točna razina igre u bazu (npr. 'ABC_QUIZ_1', 'ABC_QUIZ_2')
     const gameType = `ABC_QUIZ_${activeLevel}`;
 
+    console.log("Spremam rezultat za korisnika:", user.id); // Ovo ćeš vidjeti u konzoli
+
+    // 2. SPREMI REZULTAT S 100% TOČNIM ID-jem
     const { error } = await supabase
       .from('user_test_results')
       .insert({
-        user_id: userId,
+        user_id: user.id, // OVO SADA SIGURNO PROLAZI RLS!
         category_id: lesson.id || null,
         game_type: gameType,
         score: finalScore,
@@ -104,9 +110,10 @@ export default function QuizPlayer({
 
     if (error) {
       alert("Baza je odbila spremiti: " + error.message);
+    } else {
+      console.log("Bodovi uspješno spremljeni! 🎉");
     }
   };
-
   const nextQuestion = () => {
     if (currentIndex < words.length - 1) {
       setCurrentIndex(prev => prev + 1);
