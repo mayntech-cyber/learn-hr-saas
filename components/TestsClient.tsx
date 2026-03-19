@@ -58,8 +58,12 @@ export default function TestsClient({ userId }: { userId?: string }) {
 
   // Pametno računanje High Scorea i kvačica (Anti-farming)
   useEffect(() => {
-    const fetchResults = async () => {
-      if (!userId) return;
+  console.log("Trenutni userId na ovoj domeni:", userId); // DODAJ OVO
+  const fetchResults = async () => {
+    if (!userId) {
+      console.warn("userId je prazan, preskačem dohvaćanje rezultata.");
+      return;
+    }
       const { data, error } = await supabase
         .from("user_test_results")
         .select("*")
