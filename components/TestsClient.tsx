@@ -57,22 +57,33 @@ export default function TestsClient({ userId }: { userId?: string }) {
   }, [activeTab]);
 
   // Pametno računanje High Scorea i kvačica (Anti-farming)
+  // Pametno računanje High Scorea i kvačica (Anti-farming)
   useEffect(() => {
-  console.log("Trenutni userId na ovoj domeni:", userId); // DODAJ OVO
-  const fetchResults = async () => {
-    if (!userId) {
-      console.warn("userId je prazan, preskačem dohvaćanje rezultata.");
-      return;
-    }
+    const fetchResults = async () => {
+      // 1. Provjera ID-a (ne radimo ništa dok ga nemamo)
+      if (!userId) {
+        console.warn("userId je prazan, čekam...");
+        return;
+      }
+
+      console.log("Provjera ID-a na domeni:", userId);
+
+      // 2. Dohvaćanje rezultata iz baze
       const { data, error } = await supabase
         .from("user_test_results")
         .select("*")
         .eq("user_id", userId);
 
-      if (data && !error) {
+      if (error) {
+        console.error("Greška baze:", error.message);
+        return;
+      }
+
+      if (data) {
+        console.log("✅ Bodovi uspješno dohvaćeni:", data.length, "redova");
         setUserResults(data);
         
-        // Anti-Farming Logika: Uzmi samo najbolji XP za svaki Level svake lekcije
+        // Anti-Farming Logika: Uzmi samo najbolji XP
         const xpMap = new Map();
         data.forEach(row => {
           const key = `${row.category_id}_${row.game_type}`;
@@ -87,8 +98,10 @@ export default function TestsClient({ userId }: { userId?: string }) {
         setTotalXP(sum);
       }
     };
+
     fetchResults();
-  }, [userId, activeGame]); // <-- Osvježava se kad zatvoriš igru
+    // Osvježavamo samo kad se userId promijeni ili kad se ugasi igra (activeGame postane NONE)
+  }, [userId, activeGame === "NONE"]);
 
   // Pomoćne funkcije za provjeru kvačica
   const isLessonCompleted = (lessonId: string) => {
