@@ -57,6 +57,13 @@ export default function ProfileClient({ user, job, allJobs }: { user: any, job: 
     setIsSaving(false);
   };
 
+  // FUNKCIJA ZA ODJAVU
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.push("/login"); // ili "/auth" ovisno o tome kako ti se zove stranica za prijavu
+    router.refresh();
+  };
+
   return (
     <div className="p-4 md:p-10 max-w-4xl mx-auto space-y-8 animate-in fade-in duration-500">
       
@@ -200,9 +207,12 @@ export default function ProfileClient({ user, job, allJobs }: { user: any, job: 
                 </div>
                 <span className="font-black text-slate-700">12 {tCoursesFinished.main}</span>
              </div>
-             <button className="text-slate-400 hover:text-red-500 transition-colors flex items-center gap-2 font-bold text-sm">
-                <LogOut size={18} /> {tLogout.main}
-             </button>
+             <button 
+  onClick={handleLogout}
+  className="text-slate-400 hover:text-red-500 transition-colors flex items-center gap-2 font-bold text-sm"
+>
+   <LogOut size={18} /> {tLogout.main}
+</button>
           </div>
         </div>
 
