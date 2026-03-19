@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import DashboardClient from "@/components/DashboardClient";
 
 export const revalidate = 0;
+export const dynamic = "force-dynamic";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
