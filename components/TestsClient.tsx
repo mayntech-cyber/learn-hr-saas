@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { supabase } from "@/lib/supabase"; 
+import { createClient } from "@/utils/supabase/client"; 
 import { Gamepad2, Loader2, Trophy, ArrowRight, BookOpen, Layers, Link2, ArrowLeft, Globe, HardHat, CheckCircle2, Lock } from "lucide-react";
 import { useLanguage } from "./LanguageContext";
 import FlashcardPlayer from "./FlashcardPlayer"; 
@@ -8,6 +8,7 @@ import MatchGamePlayer from "./MatchGamePlayer";
 import QuizPlayer from "./QuizPlayer";
 
 export default function TestsClient({ userId }: { userId?: string }) {
+  const supabase = createClient();
   const [lessons, setLessons] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"general" | "professional">("general");
