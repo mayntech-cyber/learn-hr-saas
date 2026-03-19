@@ -104,13 +104,27 @@ export default function TestsClient({ userId }: { userId?: string }) {
     // Osvježavamo samo kad se userId promijeni ili kad se ugasi igra (activeGame postane NONE)
   }, [userId, activeGame === "NONE"]);
 
-  // Pomoćne funkcije za provjeru kvačica
-  const isLessonCompleted = (lessonId: string) => {
-    return userResults.some(r => r.category_id === lessonId && r.game_type === "ABC_QUIZ_1" && r.accuracy_percentage >= 80);
-  };
+  // NOVO: Tražimo koji je najveći level radnik prošao za ovu lekciju
+  const getHighestLevelPassed = (lessonId: string) => {
+    const passedQuizzes = userResults.filter(r => 
+      r.category_id === lessonId && 
+      r.game_type?.startsWith("ABC_QUIZ_") && 
+      r.accuracy_percentage >= 80
+    );
 
+    if (passedQuizzes.length === 0) return 0;
+
+    // Izvlačimo brojeve iz imena (npr. iz "ABC_QUIZ_2" izvlači broj 2)
+    const levels = passedQuizzes.map(r => parseInt(r.game_type.split("_")[2]) || 1);
+    return Math.max(...levels);
+  };
+  // Pomoćna funkcija za modal: Provjerava je li specifičan level položen
   const isLevelPassed = (lessonId: string, level: number) => {
-    return userResults.some(r => r.category_id === lessonId && r.game_type === `ABC_QUIZ_${level}` && r.accuracy_percentage >= 80);
+    return userResults.some(r => 
+      r.category_id === lessonId && 
+      r.game_type === `ABC_QUIZ_${level}` && 
+      r.accuracy_percentage >= 80
+    );
   };
 
   // KAD RADNIK KLIKNE "KVIZ" -> OTVARAMO MODAL
@@ -348,41 +362,68 @@ export default function TestsClient({ userId }: { userId?: string }) {
           <p className="font-bold">{tLoading.main}</p>
         </div>
       ) : (
+        // OVDJE JE FALIO OVAJ DIV KOJI PRAVI GRID (MREŽU)
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {lessons.map((lesson) => {
-            const completed = isLessonCompleted(lesson.id); // NOVO: Gledamo kvačicu
+            const highestLevel = getHighestLevelPassed(lesson.id);
+            const hasStarted = highestLevel > 0;
 
             return (
               <div key={lesson.id} 
-                   className={`relative bg-white rounded-[2rem] p-6 border-2 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col ${
-                     completed 
+                   className={`group relative bg-white rounded-[2rem] p-6 border-2 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col ${
+                     hasStarted 
                        ? 'border-emerald-500/50' 
                        : activeTab === 'professional' ? 'border-orange-50/50' : 'border-blue-50/50'
                    }`}
               >
-                {/* ZELENA KVAČICA PREKO KARTICE AKO JE ZAVRŠENO */}
-                {completed && (
-                  <div className="absolute -top-3 -right-3 bg-emerald-500 text-white p-2 rounded-full shadow-lg border-4 border-white z-10">
-                    <CheckCircle2 size={24} />
+                
+                {/* --- POČETAK GORNJEG DIJELA (SLIKA ILI IKONA) --- */}
+                {lesson.image_url ? ( 
+                  
+                  // AKO IMA SLIKU:
+                  <div className="relative w-full h-32 mb-4 rounded-xl overflow-hidden shadow-sm">
+                    <img 
+                      src={lesson.image_url} 
+                      alt={lesson.name} 
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                    <div className="absolute top-2 right-2">
+                      <div className={`px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider flex items-center gap-1 shadow-md backdrop-blur-md ${
+                        hasStarted 
+                          ? 'bg-emerald-500/90 text-white border border-emerald-400' 
+                          : 'bg-white/90 text-slate-700 border border-slate-100'
+                      }`}>
+                        {hasStarted ? <>🌟 Položen Lvl {highestLevel}</> : <>Novi kviz</>}
+                      </div>
+                    </div>
                   </div>
-                )}
 
-                <div className="flex items-start justify-between mb-4">
-                  <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-colors shadow-sm ${
-                    completed 
-                      ? 'bg-emerald-50 text-emerald-600' 
-                      : activeTab === 'professional' ? 'bg-orange-50 text-orange-600' : 'bg-blue-50 text-blue-600'
-                  }`}>
-                    <BookOpen size={24} />
+                ) : (
+                  
+                  // AKO NEMA SLIKU: Prikazuje staru ikonu (Knjigu)
+                  <div className="flex items-start justify-between mb-4">
+                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-colors shadow-sm ${
+                      hasStarted 
+                        ? 'bg-emerald-50 text-emerald-600' 
+                        : activeTab === 'professional' ? 'bg-orange-50 text-orange-600' : 'bg-blue-50 text-blue-600'
+                    }`}>
+                      <BookOpen size={24} />
+                    </div>
+                    
+                    <div className={`px-3 py-1.5 rounded-full border text-[10px] font-black uppercase tracking-wider flex items-center gap-1 shadow-sm transition-all ${
+                      hasStarted 
+                        ? 'bg-emerald-50 border-emerald-200 text-emerald-700' 
+                        : 'bg-slate-50 border-slate-200 text-slate-400'
+                    }`}>
+                      {hasStarted ? <>🌟 Položen Lvl {highestLevel}</> : <>Novi kviz</>}
+                    </div>
                   </div>
-                  <div className="bg-slate-50 px-3 py-1 rounded-full border border-slate-100 text-[10px] font-black text-slate-400 uppercase">
-                     Lvl {lesson.difficulty_level || 1}
-                  </div>
-                </div>
+
+                )}
+                {/* --- KRAJ GORNJEG DIJELA --- */}
                 
                 <h3 className="text-xl font-black text-slate-800 mb-2 leading-tight">{lesson.name}</h3>
                 <p className="text-sm text-slate-500 font-medium mb-6 flex-1">{tUnlock.main}</p>
-
                 <div className="grid grid-cols-2 gap-2 mt-auto">
                   <button 
                     onClick={() => openFlashcards(lesson)}
@@ -399,9 +440,9 @@ export default function TestsClient({ userId }: { userId?: string }) {
                 </div>
 
                 <button 
-                  onClick={() => openQuizMenu(lesson)} // NOVO: Otvara izbornik, ne direktno kviz
+                  onClick={() => openQuizMenu(lesson)} 
                   className={`w-full mt-3 text-white py-3.5 rounded-xl font-black flex items-center justify-center gap-2 shadow-md transition-all ${
-                    completed 
+                    hasStarted 
                       ? 'bg-emerald-500 hover:bg-emerald-600 shadow-emerald-500/20' 
                       : activeTab === 'professional' 
                         ? 'bg-orange-500 hover:bg-orange-600 shadow-orange-500/20' 
