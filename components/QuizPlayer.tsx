@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { Check, X, ArrowRight, Trophy, RefreshCcw, ArrowLeft, HelpCircle } from "lucide-react";
-import { supabase } from "@/lib/supabase"; 
+import { createClient } from "@/utils/supabase/client"; 
 import { useLanguage } from "./LanguageContext";
 
 interface Word {
@@ -26,6 +26,7 @@ export default function QuizPlayer({
   activeLevel?: number 
 }) {
   const { euLang, nativeLang, t } = useLanguage();
+  const supabase = createClient();
   
   const [currentIndex, setCurrentIndex] = useState(0);
   const [score, setScore] = useState(0);
