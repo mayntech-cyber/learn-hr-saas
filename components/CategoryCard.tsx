@@ -14,10 +14,14 @@ interface CategoryCardProps {
 }
 
 export default function CategoryCard({ id, nameHr, translations, imageUrl, audioUrl, jobCount }: CategoryCardProps) {
-  const { euLang, nativeLang } = useLanguage();
+  // 1. Dodali smo 't' funkciju ovdje
+  const { euLang, nativeLang, t } = useLanguage();
 
   const euTranslation = translations?.[euLang] || "";
   const nativeTranslation = translations?.[nativeLang] || "";
+
+  // 2. Dohvaćamo prijevod (Pazi: ključ ovdje mora biti točno onakav kakav si unio u bazu, npr. "zanimanja")
+  const tZanimanja = t("zanimanja");
 
   const playAudio = (e: React.MouseEvent) => {
     e.preventDefault(); // Sprečava otvaranje linka kartice!
@@ -70,8 +74,9 @@ export default function CategoryCard({ id, nameHr, translations, imageUrl, audio
           )}
         </div>
 
+        {/* 3. Ovdje ubacujemo dinamiku umjesto fiksne riječi */}
         <p className="text-[10px] md:text-xs font-black uppercase tracking-widest text-slate-400 mt-3 md:mt-4">
-          {jobCount} zanimanja
+          {jobCount} {tZanimanja.main}
         </p>
 
         <div className="absolute bottom-4 right-4 bg-slate-50 w-8 h-8 flex items-center justify-center rounded-full text-slate-400 group-hover:bg-blue-500 group-hover:text-white transition-all shadow-sm">

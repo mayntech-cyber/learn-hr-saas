@@ -14,10 +14,14 @@ interface ProfessionCardProps {
 }
 
 export default function ProfessionCard({ id, nameHr, translations, imageUrl, audioUrl, wordCount }: ProfessionCardProps) {
-  const { euLang, nativeLang } = useLanguage();
+  // 1. Dodajemo 't' funkciju
+  const { euLang, nativeLang, t } = useLanguage();
 
   const euTranslation = translations?.[euLang] || "";
   const nativeTranslation = translations?.[nativeLang] || "";
+
+  // 2. Povlačimo prijevod za riječ "pojmova"
+  const tPojmova = t("pojmova");
 
   const playAudio = (e: React.MouseEvent) => {
     e.preventDefault(); 
@@ -70,8 +74,9 @@ export default function ProfessionCard({ id, nameHr, translations, imageUrl, aud
           )}
         </div>
 
+        {/* 3. Ubacujemo dinamički prijevod umjesto fiksne riječi */}
         <p className="text-[10px] md:text-xs font-black uppercase tracking-widest text-slate-400 mt-3 md:mt-4">
-          {wordCount} pojmova
+          {wordCount} {tPojmova.main}
         </p>
 
         <div className="absolute bottom-4 right-4 bg-slate-50 w-8 h-8 flex items-center justify-center rounded-full text-slate-400 group-hover:bg-orange-500 group-hover:text-white transition-all shadow-sm">

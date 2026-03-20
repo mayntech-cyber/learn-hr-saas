@@ -28,7 +28,7 @@ export default function TestsClient({ userId }: { userId?: string }) {
   const [allLessonWords, setAllLessonWords] = useState<any[]>([]);
   const [activeLevel, setActiveLevel] = useState(1);
 
-  // Prijevodi
+  // PRIJEVODI
   const tTitle = t("Testovi i Vježbe");
   const tSubTitle = t("Provjeri svoje znanje kroz interaktivne igre i kvizove.");
   const tRank = t("Tvoj Rang");
@@ -40,6 +40,17 @@ export default function TestsClient({ userId }: { userId?: string }) {
   const tMainQuiz = t("Glavni Kviz");
   const tGeneral = t("Opći jezik");
   const tProfessional = t("Stručni jezik");
+  
+  // NOVI PRIJEVODI
+  const tChooseLevel = t("Odaberi razinu težine za ovaj kviz.");
+  const tLevel = t("Razina");
+  const tCancel = t("Odustani");
+  const tPassedLevel = t("Položen Lvl");
+  const tNewQuiz = t("Novi kviz");
+  const tNoTests = t("Nema dostupnih testova u ovoj kategoriji.");
+  const tLoadingCards = t("Učitavam kartice...");
+  const tBackToTests = t("Nazad na Testove");
+  const tPreparingGame = t("Pripremam igru...");
 
   // Dohvaćanje lekcija
   useEffect(() => {
@@ -58,18 +69,13 @@ export default function TestsClient({ userId }: { userId?: string }) {
   }, [activeTab]);
 
   // Pametno računanje High Scorea i kvačica (Anti-farming)
-  // Pametno računanje High Scorea i kvačica (Anti-farming)
   useEffect(() => {
     const fetchResults = async () => {
-      // 1. Provjera ID-a (ne radimo ništa dok ga nemamo)
       if (!userId) {
         console.warn("userId je prazan, čekam...");
         return;
       }
 
-      console.log("Provjera ID-a na domeni:", userId);
-
-      // 2. Dohvaćanje rezultata iz baze
       const { data, error } = await supabase
         .from("user_test_results")
         .select("*")
@@ -81,10 +87,7 @@ export default function TestsClient({ userId }: { userId?: string }) {
       }
 
       if (data) {
-        console.log("✅ Bodovi uspješno dohvaćeni:", data.length, "redova");
         setUserResults(data);
-        
-        // Anti-Farming Logika: Uzmi samo najbolji XP
         const xpMap = new Map();
         data.forEach(row => {
           const key = `${row.category_id}_${row.game_type}`;
@@ -101,10 +104,8 @@ export default function TestsClient({ userId }: { userId?: string }) {
     };
 
     fetchResults();
-    // Osvježavamo samo kad se userId promijeni ili kad se ugasi igra (activeGame postane NONE)
   }, [userId, activeGame === "NONE"]);
 
-  // NOVO: Tražimo koji je najveći level radnik prošao za ovu lekciju
   const getHighestLevelPassed = (lessonId: string) => {
     const passedQuizzes = userResults.filter(r => 
       r.category_id === lessonId && 
@@ -113,12 +114,10 @@ export default function TestsClient({ userId }: { userId?: string }) {
     );
 
     if (passedQuizzes.length === 0) return 0;
-
-    // Izvlačimo brojeve iz imena (npr. iz "ABC_QUIZ_2" izvlači broj 2)
     const levels = passedQuizzes.map(r => parseInt(r.game_type.split("_")[2]) || 1);
     return Math.max(...levels);
   };
-  // Pomoćna funkcija za modal: Provjerava je li specifičan level položen
+
   const isLevelPassed = (lessonId: string, level: number) => {
     return userResults.some(r => 
       r.category_id === lessonId && 
@@ -127,7 +126,6 @@ export default function TestsClient({ userId }: { userId?: string }) {
     );
   };
 
-  // KAD RADNIK KLIKNE "KVIZ" -> OTVARAMO MODAL
   const openQuizMenu = async (lesson: any) => {
     setLoadingWords(true);
     const { data, error } = await supabase
@@ -154,7 +152,6 @@ export default function TestsClient({ userId }: { userId?: string }) {
     setLoadingWords(false);
   };
 
-  // KAD U MODALU ODABERE LEVEL -> POKREĆEMO KVIZ
   const startQuizLevel = (level: number) => {
     const filteredWords = allLessonWords.filter(w => w.level === level);
     setLessonWords(filteredWords);
@@ -168,7 +165,6 @@ export default function TestsClient({ userId }: { userId?: string }) {
     setSelectedLesson(lesson);
     setActiveGame("FLASHCARDS");
     
-    // Za vježbu vuče samo Level 1
     const { data, error } = await supabase
       .from("edu_vocabulary")
       .select("id, hr_word, translations") 
@@ -195,7 +191,6 @@ export default function TestsClient({ userId }: { userId?: string }) {
     setSelectedLesson(lesson);
     setActiveGame("MATCH");
     
-    // Spajanje zasad vuče Level 1
     const { data, error } = await supabase
       .from("edu_vocabulary")
       .select("id, hr_word, translations")
@@ -220,14 +215,14 @@ export default function TestsClient({ userId }: { userId?: string }) {
     if (loadingWords) return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-slate-50">
         <Loader2 size={40} className="animate-spin mb-4 text-orange-500" />
-        <p className="font-bold">Učitavam kartice...</p>
+        <p className="font-bold">{tLoadingCards.main}</p>
       </div>
     );
     return (
       <div className="min-h-screen bg-slate-50 pt-4 md:pt-10">
         <div className="max-w-4xl mx-auto px-4 md:px-10 mb-[-2rem] relative z-10">
            <button onClick={() => setActiveGame("NONE")} className="flex items-center gap-2 text-sm font-bold text-slate-400 hover:text-orange-500 transition-colors bg-white px-4 py-2 rounded-xl shadow-sm border border-slate-100">
-             <ArrowLeft size={16} /> Nazad na Testove
+             <ArrowLeft size={16} /> {tBackToTests.main}
            </button>
         </div>
         <FlashcardPlayer 
@@ -243,7 +238,7 @@ export default function TestsClient({ userId }: { userId?: string }) {
     if (loadingWords) return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-slate-50">
         <Loader2 size={40} className="animate-spin mb-4 text-emerald-500" />
-        <p className="font-bold">Pripremam igru...</p>
+        <p className="font-bold">{tPreparingGame.main}</p>
       </div>
     );
     return (
@@ -263,7 +258,7 @@ export default function TestsClient({ userId }: { userId?: string }) {
           onClose={() => setActiveGame("NONE")}
           isProfessional={activeTab === "professional"}
           userId={userId} 
-          activeLevel={activeLevel} // <--- PROSLEDJUJEMO ODABRANI LEVEL U KVIZ
+          activeLevel={activeLevel} 
         />
       </div>
     );
@@ -271,14 +266,14 @@ export default function TestsClient({ userId }: { userId?: string }) {
 
   // --- GLAVNI UI ---
   return (
-    <div className="p-4 md:p-8 lg:p-12 max-w-6xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500 pt-10 md:pt-12 relative">
+    <div className="w-full max-w-5xl p-4 md:p-6 lg:p-10 pt-10 relative animate-in fade-in slide-in-from-bottom-4 duration-500">
       
-      {/* NOVO: MODAL ZA ODABIR LEVELA */}
+      {/* MODAL ZA ODABIR LEVELA */}
       {showLevelModal && selectedLesson && (
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50 animate-in fade-in duration-200 px-4">
           <div className="bg-white p-8 rounded-[2.5rem] shadow-2xl max-w-sm w-full animate-in zoom-in-95">
             <h3 className="text-2xl font-black text-slate-800 mb-2">{selectedLesson.name}</h3>
-            <p className="text-slate-500 text-sm font-medium mb-6">Odaberi razinu težine za ovaj kviz.</p>
+            <p className="text-slate-500 text-sm font-medium mb-6">{tChooseLevel.main}</p>
             
             <div className="space-y-3 mb-6">
               {availableLevels.map((lvl) => {
@@ -299,7 +294,7 @@ export default function TestsClient({ userId }: { userId?: string }) {
                     }`}
                   >
                     <span className="flex items-center gap-2">
-                      Razina {lvl}
+                      {tLevel.main} {lvl}
                       {!isUnlocked && <Lock size={16} className="text-slate-400" />}
                     </span>
                     {hasPassedThis && <CheckCircle2 size={20} className="text-emerald-500" />}
@@ -309,7 +304,7 @@ export default function TestsClient({ userId }: { userId?: string }) {
             </div>
             
             <button onClick={() => setShowLevelModal(false)} className="w-full py-4 font-bold text-slate-500 hover:text-slate-800 bg-slate-100 rounded-2xl transition-colors">
-              Odustani
+              {tCancel.main}
             </button>
           </div>
         </div>
@@ -362,7 +357,6 @@ export default function TestsClient({ userId }: { userId?: string }) {
           <p className="font-bold">{tLoading.main}</p>
         </div>
       ) : (
-        // OVDJE JE FALIO OVAJ DIV KOJI PRAVI GRID (MREŽU)
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {lessons.map((lesson) => {
             const highestLevel = getHighestLevelPassed(lesson.id);
@@ -377,10 +371,7 @@ export default function TestsClient({ userId }: { userId?: string }) {
                    }`}
               >
                 
-                {/* --- POČETAK GORNJEG DIJELA (SLIKA ILI IKONA) --- */}
                 {lesson.image_url ? ( 
-                  
-                  // AKO IMA SLIKU:
                   <div className="relative w-full h-32 mb-4 rounded-xl overflow-hidden shadow-sm">
                     <img 
                       src={lesson.image_url} 
@@ -393,14 +384,12 @@ export default function TestsClient({ userId }: { userId?: string }) {
                           ? 'bg-emerald-500/90 text-white border border-emerald-400' 
                           : 'bg-white/90 text-slate-700 border border-slate-100'
                       }`}>
-                        {hasStarted ? <>🌟 Položen Lvl {highestLevel}</> : <>Novi kviz</>}
+                        {hasStarted ? <>🌟 {tPassedLevel.main} {highestLevel}</> : <>{tNewQuiz.main}</>}
                       </div>
                     </div>
                   </div>
 
                 ) : (
-                  
-                  // AKO NEMA SLIKU: Prikazuje staru ikonu (Knjigu)
                   <div className="flex items-start justify-between mb-4">
                     <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-colors shadow-sm ${
                       hasStarted 
@@ -415,12 +404,11 @@ export default function TestsClient({ userId }: { userId?: string }) {
                         ? 'bg-emerald-50 border-emerald-200 text-emerald-700' 
                         : 'bg-slate-50 border-slate-200 text-slate-400'
                     }`}>
-                      {hasStarted ? <>🌟 Položen Lvl {highestLevel}</> : <>Novi kviz</>}
+                      {hasStarted ? <>🌟 {tPassedLevel.main} {highestLevel}</> : <>{tNewQuiz.main}</>}
                     </div>
                   </div>
 
                 )}
-                {/* --- KRAJ GORNJEG DIJELA --- */}
                 
                 <h3 className="text-xl font-black text-slate-800 mb-2 leading-tight">{lesson.name}</h3>
                 <p className="text-sm text-slate-500 font-medium mb-6 flex-1">{tUnlock.main}</p>
@@ -457,7 +445,7 @@ export default function TestsClient({ userId }: { userId?: string }) {
           
           {lessons.length === 0 && (
             <div className="col-span-full py-20 text-center bg-slate-50 rounded-[2rem] border-2 border-dashed border-slate-200">
-               <p className="font-bold text-slate-400 uppercase tracking-widest text-sm">Nema dostupnih testova u ovoj kategoriji.</p>
+               <p className="font-bold text-slate-400 uppercase tracking-widest text-sm">{tNoTests.main}</p>
             </div>
           )}
         </div>

@@ -19,6 +19,7 @@ export default function MatchGamePlayer({ lesson, words, onClose }: { lesson: an
   const tSuccess = t("Bravo!");
   const tSuccessMsg = t("Uspješno si spojio sve parove.");
   const tPlayAgain = t("Igraj ponovno");
+  const tNotEnoughWords = t("Ova lekcija nema dovoljno riječi za igru (minimum 3)."); // <-- NOVO
 
   const [hrWords, setHrWords] = useState<any[]>([]);
   const [trWords, setTrWords] = useState<any[]>([]);
@@ -84,7 +85,7 @@ export default function MatchGamePlayer({ lesson, words, onClose }: { lesson: an
   if (!words || words.length < 3) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[50vh] text-center px-4">
-        <p className="text-slate-500 font-bold mb-4">Ova lekcija nema dovoljno riječi za igru (minimum 3).</p>
+        <p className="text-slate-500 font-bold mb-4">{tNotEnoughWords.main}</p>
         <button onClick={onClose} className="bg-white px-6 py-3 rounded-xl border border-slate-200 font-bold text-slate-600 shadow-sm flex items-center gap-2">
           <ArrowLeft size={18} /> {tBack.main}
         </button>

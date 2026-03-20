@@ -45,15 +45,15 @@ export default function GeneralHubClient() {
 
   const dict = t("Rječnik");
   const dictDesc = t("Pretraži stotine općih riječi uz pametne filtere.");
-  const dictBtn = t("Otvori Rječnik");
+  const dictBtn = t("OTVORI RJEČNIK");
 
   const scen = t("Scenariji");
   const scenDesc = t("Nauči svakodnevne rečenice u trgovini, kod doktora i na ulici.");
-  const scenBtn = t("Otvori Scenarije");
+  const scenBtn = t("OTVORI SCENARIJE");
 
   const prac = t("Vježba");
   const pracDesc = t("Testiraj naučene opće riječi kroz interaktivne kartice.");
-  const pracBtn = t("Započni vježbu");
+  const pracBtn = t("ZAPOČNI VJEŽBU");
 
   const gram = t("Gramatika");
   const gramDesc = t("Nauči kako pravilno spajati riječi u rečenice.");

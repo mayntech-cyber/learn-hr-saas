@@ -28,7 +28,7 @@ export default function RootLayout({
           
           <div className="flex min-h-screen bg-slate-50">
             <Navigation />
-            <main className="flex-1 w-full md:ml-64 pb-20 md:pb-0">
+            <main className="flex-1 md:ml-64 pb-20 md:pb-0 flex justify-center">
               {children}
             </main>
           </div>

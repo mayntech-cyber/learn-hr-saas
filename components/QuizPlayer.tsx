@@ -16,7 +16,7 @@ export default function QuizPlayer({
   onClose, 
   isProfessional, 
   userId,
-  activeLevel = 1 // <-- NOVO: Kviz prima level koji radnik igra
+  activeLevel = 1 
 }: { 
   lesson: any, 
   words: Word[], 
@@ -38,6 +38,20 @@ export default function QuizPlayer({
   const [xpDiff, setXpDiff] = useState<number | null>(null);
 
   const themeColor = isProfessional ? "orange" : "blue";
+
+  // PRIJEVODI
+  const tAuthError = t("Greška: Nisi ulogiran ili je istekla sesija.");
+  const tBetterLuck = t("Više sreće idući put");
+  const tAccuracy = t("Točnost:");
+  const tFirstTime = t("Prvi put odigrano!");
+  const tRecordBroken = t("Srušen rekord!");
+  const tAdditional = t("Dodatnih");
+  const tOldRecord1 = t("Tvoj stari rekord od");
+  const tOldRecord2 = t("je i dalje nedostižan. Probaj opet!");
+  const tLevel = t("Razina");
+  const tQuestion = t("Pitanje");
+  const tOf = t("od");
+  const tHowToSay = t("Kako se kaže:");
 
   const getTranslation = (word: Word) => {
     let parsed = typeof word.translations === 'string' ? JSON.parse(word.translations || '{}') : (word.translations || {});
@@ -80,12 +94,11 @@ export default function QuizPlayer({
     if (option.isCorrect) setScore(s => s + 1);
   };
 
-  // GLAVNA FUNKCIJA ZA SPREMANJE
   const saveQuizResult = async (finalScore: number, total: number) => {
     const { data: { user }, error: authError } = await supabase.auth.getUser();
 
     if (authError || !user) {
-      alert("Greška: Nisi ulogiran ili je istekla sesija.");
+      alert(tAuthError.main);
       return;
     }
 
@@ -93,7 +106,6 @@ export default function QuizPlayer({
     const xpEarned = finalScore * 10;
     const gameType = `ABC_QUIZ_${activeLevel}`;
 
-    // 1. DOHVATI STARI REKORD PRIJE SPREMANJA NOVOG
     const { data: oldData } = await supabase
       .from('user_test_results')
       .select('xp_earned')
@@ -101,18 +113,15 @@ export default function QuizPlayer({
       .eq('category_id', lesson.id)
       .eq('game_type', gameType);
 
-    // Nađi najveći XP koji je korisnik do sad imao za ovaj kviz
     const oldBest = oldData && oldData.length > 0
       ? Math.max(...oldData.map(r => r.xp_earned || 0))
       : 0;
 
     const diff = xpEarned - oldBest;
     
-    // Spremamo u state da UI može ispisati poruku
     setEarnedXp(xpEarned);
     setXpDiff(diff);
 
-    // 2. SPREMI NOVI REZULTAT
     const { error } = await supabase
       .from('user_test_results')
       .insert({
@@ -129,6 +138,7 @@ export default function QuizPlayer({
       console.error("Baza je odbila spremiti:", error.message);
     }
   };
+
   const nextQuestion = () => {
     if (currentIndex < words.length - 1) {
       setCurrentIndex(prev => prev + 1);
@@ -156,22 +166,22 @@ export default function QuizPlayer({
         </div>
         
         <h2 className="text-4xl font-black text-slate-800 mb-2">
-          {passed ? t("Bravo!").main : "Više sreće idući put"}
+          {passed ? t("Bravo!").main : tBetterLuck.main}
         </h2>
         
         <p className="text-slate-500 font-bold mb-6 italic">
-          Točnost: {Math.round(accuracy)}% ({score}/{words.length})
+          {tAccuracy.main} {Math.round(accuracy)}% ({score}/{words.length})
         </p>
 
         {/* PAMETNA PORUKA ZA BODOVE */}
         {xpDiff !== null && earnedXp !== null && (
           <div className="mb-8 p-4 rounded-2xl bg-slate-50 border-2 border-slate-100">
             {xpDiff > 0 && earnedXp === xpDiff ? (
-              <p className="text-emerald-600 font-black">Prvi put odigrano! 🎉 <br/><span className="text-2xl">+{earnedXp} XP</span></p>
+              <p className="text-emerald-600 font-black">{tFirstTime.main} 🎉 <br/><span className="text-2xl">+{earnedXp} XP</span></p>
             ) : xpDiff > 0 ? (
-              <p className="text-emerald-600 font-black">Srušen rekord! 🏆 <br/>Dodatnih <span className="text-2xl">+{xpDiff} XP</span></p>
+              <p className="text-emerald-600 font-black">{tRecordBroken.main} 🏆 <br/>{tAdditional.main} <span className="text-2xl">+{xpDiff} XP</span></p>
             ) : (
-              <p className="text-slate-500 font-bold">Tvoj stari rekord od <span className="text-slate-700">{earnedXp - xpDiff} XP</span> je i dalje nedostižan. Probaj opet! 💪</p>
+              <p className="text-slate-500 font-bold">{tOldRecord1.main} <span className="text-slate-700">{earnedXp - xpDiff} XP</span> {tOldRecord2.main} 💪</p>
             )}
           </div>
         )}
@@ -199,7 +209,7 @@ export default function QuizPlayer({
         </button>
         <div className="text-center">
            <h2 className="text-xl font-black text-slate-800 flex items-center gap-2">
-             <HelpCircle className={`text-${themeColor}-500`} /> {t("Kviz").main} (Razina {activeLevel})
+             <HelpCircle className={`text-${themeColor}-500`} /> {t("Kviz").main} ({tLevel.main} {activeLevel})
            </h2>
            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{lesson.name}</p>
         </div>
@@ -208,7 +218,7 @@ export default function QuizPlayer({
 
       <div className="mb-8">
         <div className="flex justify-between text-[10px] font-black text-slate-400 uppercase mb-2">
-          <span>Pitanje {currentIndex + 1} od {words.length}</span>
+          <span>{tQuestion.main} {currentIndex + 1} {tOf.main} {words.length}</span>
           <span>{Math.round(progress)}%</span>
         </div>
         <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
@@ -217,7 +227,7 @@ export default function QuizPlayer({
       </div>
 
       <div className="bg-white rounded-[2.5rem] p-8 md:p-12 shadow-xl border border-slate-50 text-center mb-8">
-        <span className={`text-[10px] font-black text-${themeColor}-400 uppercase tracking-[0.2em] mb-4 block`}>Kako se kaže:</span>
+        <span className={`text-[10px] font-black text-${themeColor}-400 uppercase tracking-[0.2em] mb-4 block`}>{tHowToSay.main}</span>
         <h3 className="text-4xl md:text-5xl font-black text-slate-800 tracking-tight mb-2 italic">
           "{currentWord?.word_hr}"
         </h3>
