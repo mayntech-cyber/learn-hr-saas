@@ -37,7 +37,22 @@ export default function QuizPlayer({
   const [earnedXp, setEarnedXp] = useState<number | null>(null);
   const [xpDiff, setXpDiff] = useState<number | null>(null);
 
-  const themeColor = isProfessional ? "orange" : "blue";
+  // ✅ NOVO: Definiranje čvrstih klasa umjesto dinamičnih varijabli!
+  const theme = isProfessional 
+    ? {
+        bg: "bg-orange-500",
+        bgLight: "bg-orange-100",
+        text: "text-orange-500",
+        textLight: "text-orange-400",
+        shadow: "shadow-orange-500/30"
+      }
+    : {
+        bg: "bg-blue-500",
+        bgLight: "bg-blue-100",
+        text: "text-blue-500",
+        textLight: "text-blue-400",
+        shadow: "shadow-blue-500/30"
+      };
 
   // PRIJEVODI
   const tAuthError = t("Greška: Nisi ulogiran ili je istekla sesija.");
@@ -161,8 +176,8 @@ export default function QuizPlayer({
 
     return (
       <div className="max-w-md mx-auto p-8 text-center bg-white rounded-[3rem] shadow-xl border border-slate-100 animate-in zoom-in-95">
-        <div className={`w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6 ${passed ? `bg-${themeColor}-100` : 'bg-slate-100'}`}>
-          <Trophy size={48} className={passed ? `text-${themeColor}-500` : 'text-slate-400'} />
+        <div className={`w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6 ${passed ? theme.bgLight : 'bg-slate-100'}`}>
+          <Trophy size={48} className={passed ? theme.text : 'text-slate-400'} />
         </div>
         
         <h2 className="text-4xl font-black text-slate-800 mb-2">
@@ -187,7 +202,7 @@ export default function QuizPlayer({
         )}
         
         <div className="space-y-3">
-          <button onClick={restart} className={`w-full bg-${themeColor}-500 text-white py-4 rounded-2xl font-black flex items-center justify-center gap-2 shadow-lg shadow-${themeColor}-500/30 hover:scale-105 transition-transform`}>
+          <button onClick={restart} className={`w-full ${theme.bg} text-white py-4 rounded-2xl font-black flex items-center justify-center gap-2 shadow-lg ${theme.shadow} hover:scale-105 transition-transform`}>
             <RefreshCcw size={20} /> {t("Pokušaj ponovno").main}
           </button>
           <button onClick={onClose} className="w-full bg-slate-100 text-slate-600 py-4 rounded-2xl font-black hover:bg-slate-200 transition-colors">
@@ -209,7 +224,7 @@ export default function QuizPlayer({
         </button>
         <div className="text-center">
            <h2 className="text-xl font-black text-slate-800 flex items-center gap-2">
-             <HelpCircle className={`text-${themeColor}-500`} /> {t("Kviz").main} ({tLevel.main} {activeLevel})
+             <HelpCircle className={`${theme.text}`} /> {t("Kviz").main} ({tLevel.main} {activeLevel})
            </h2>
            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{lesson.name}</p>
         </div>
@@ -222,12 +237,12 @@ export default function QuizPlayer({
           <span>{Math.round(progress)}%</span>
         </div>
         <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
-          <div className={`h-full bg-${themeColor}-500 transition-all duration-500`} style={{ width: `${progress}%` }}></div>
+          <div className={`h-full ${theme.bg} transition-all duration-500`} style={{ width: `${progress}%` }}></div>
         </div>
       </div>
 
       <div className="bg-white rounded-[2.5rem] p-8 md:p-12 shadow-xl border border-slate-50 text-center mb-8">
-        <span className={`text-[10px] font-black text-${themeColor}-400 uppercase tracking-[0.2em] mb-4 block`}>{tHowToSay.main}</span>
+        <span className={`text-[10px] font-black ${theme.textLight} uppercase tracking-[0.2em] mb-4 block`}>{tHowToSay.main}</span>
         <h3 className="text-4xl md:text-5xl font-black text-slate-800 tracking-tight mb-2 italic">
           "{currentWord?.word_hr}"
         </h3>

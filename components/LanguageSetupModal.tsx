@@ -2,10 +2,13 @@
 
 import { useState, useEffect } from "react";
 import { Globe2, CheckCircle2 } from "lucide-react";
-import { supabase } from "@/lib/supabase";
+import { createClient } from "@/utils/supabase/client"; // ✅ Novi import za klijent
 import { useLanguage } from "./LanguageContext";
 
 export default function LanguageSetupModal() {
+  // ✅ Inicijaliziramo Supabase klijent unutar komponente
+  const supabase = createClient();
+
   const { isModalOpen, setLanguages, closeModal, euLang, nativeLang, uiMode } = useLanguage();
   
   const [languages, setDbLanguages] = useState<any[]>([]);
@@ -23,6 +26,7 @@ export default function LanguageSetupModal() {
   }, [isModalOpen]);
 
   const fetchLanguages = async () => {
+    // ✅ Ovdje će sada koristiti onaj sigurni klijent odozgo
     const { data } = await supabase.from('languages').select('*').order('name', { ascending: true });
     if (data) setDbLanguages(data);
   };

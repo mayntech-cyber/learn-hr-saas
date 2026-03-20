@@ -1,9 +1,12 @@
-import { supabase } from "@/lib/supabase";
+import { createClient } from "@/utils/supabase/server"; // ✅ Novi import za server
 import FlashcardPlayer from "@/components/FlashcardPlayer";
 
 export const revalidate = 0;
 
 export default async function PracticePage({ params }: { params: Promise<{ jobId: string }> }) {
+  // ✅ Inicijaliziramo sigurni server klijent unutar funkcije
+  const supabase = await createClient();
+
   const resolvedParams = await params;
   const jobId = resolvedParams.jobId;
 

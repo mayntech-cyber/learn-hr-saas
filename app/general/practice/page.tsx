@@ -1,9 +1,12 @@
-import { supabase } from "@/lib/supabase";
+import { createClient } from "@/utils/supabase/server"; // ✅ Novi import za server
 import FlashcardPlayer from "@/components/FlashcardPlayer";
 
 export const revalidate = 0;
 
 export default async function GeneralPracticePage() {
+  // ✅ Inicijaliziramo sigurni server klijent unutar funkcije
+  const supabase = await createClient();
+
   // Vučemo opće riječi iz baze (slično kao u rječniku, ali recimo prvih 100 za vježbu)
   const { data: words, error } = await supabase
     .from('dictionary')

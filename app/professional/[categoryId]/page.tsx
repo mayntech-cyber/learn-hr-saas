@@ -1,9 +1,12 @@
-import { supabase } from "@/lib/supabase";
+import { createClient } from "@/utils/supabase/server"; // ✅ Novi import za server
 import CategoryJobsClient from "@/components/CategoryJobsClient";
 
 export const revalidate = 0;
 
 export default async function CategoryJobsPage({ params }: { params: Promise<{ categoryId: string }> }) {
+  // ✅ Inicijaliziramo sigurni server klijent unutar funkcije
+  const supabase = await createClient();
+
   const resolvedParams = await params;
   const categoryId = resolvedParams.categoryId;
 

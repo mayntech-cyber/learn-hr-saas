@@ -38,9 +38,7 @@ export default function OnboardingClient({ allJobs }: { allJobs: any[] }) {
     const trans = job.translations || {};
     const currentLangCode = uiMode === 'native' ? nativeLang : euLang;
     
-    // 🔴 DETEKTIV ZA TEBE: Ovo će ispisati u konzoli što aplikacija točno pokušava pročitati
-    console.log(`Tražim jezik: ${currentLangCode} za posao: ${job.name_hr}`, trans);
-
+   
     // Ako u JSON-u postoji ključ (npr. 'ar'), vrati njega. Ako ne, vrati hrvatski.
     return trans[currentLangCode] || job.name_hr;
   };

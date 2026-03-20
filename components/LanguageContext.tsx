@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import { supabase } from "@/lib/supabase";
+import { createClient } from "@/utils/supabase/client"; 
 
 type LanguageContextType = {
   euLang: string;
@@ -19,16 +19,21 @@ type LanguageContextType = {
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
+  const supabase = createClient();
+
+  // ZADANE VRIJEDNOSTI (Sigurne za server)
   const [euLang, setEuLang] = useState("");
   const [nativeLang, setNativeLang] = useState("");
   const [euLangName, setEuLangName] = useState("");
   const [nativeLangName, setNativeLangName] = useState("");
-  const [uiMode, setUiMode] = useState<'hr' | 'eu' | 'native'>('hr');
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [mounted, setMounted] = useState(false);
+  const [uiMode, setUiMode] = useState<'hr' | 'eu' | 'native'>('hr'); // Zadano je Hrvatski
+  const [isModalOpen, setIsModalOpen] = useState(false); // Modal je zadano zatvoren
+  
+  // UKLONILI SMO 'mounted' STATE JER NAM VIŠE NE TREBA!
   const [uiTranslations, setUiTranslations] = useState<any[]>([]);
 
   useEffect(() => {
+    // 1. Čitanje iz LocalStorage-a (Ovo se događa samo u browseru)
     const savedEu = localStorage.getItem("LEARNHR_EU_CODE");
     const savedNative = localStorage.getItem("LEARNHR_NATIVE_CODE");
     const savedUiMode = localStorage.getItem("LEARNHR_UI_MODE") as 'hr' | 'eu' | 'native';
@@ -40,16 +45,17 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
       setNativeLangName(localStorage.getItem("LEARNHR_NATIVE_NAME") || "Materinji");
       setUiMode(savedUiMode || 'hr');
     } else {
+      // Ako nema spremljenog jezika, tek SADA otvaramo modal
       setIsModalOpen(true);
     }
 
+    // 2. Povlačenje prijevoda iz baze
     const fetchUi = async () => {
       const { data } = await supabase.from('ui_translations').select('*');
       if (data) setUiTranslations(data);
     };
     fetchUi();
-    setMounted(true);
-  }, []);
+  }, [supabase]); // <-- dodali smo supabase u dependency array da React bude sretan
 
   const t = (text: string) => {
     const item = uiTranslations.find(x => x.hr_text === text);
@@ -79,8 +85,9 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     setIsModalOpen(false);
   };
 
-  if (!mounted) return null;
-
+  // ❌ OBRISANO: if (!mounted) return null;
+  // ✅ SADA ODMAH VRAĆAMO CHILDREN! Aplikacija se odmah prikazuje!
+  
   return (
     <LanguageContext.Provider value={{
       euLang, nativeLang, euLangName, nativeLangName, uiMode,

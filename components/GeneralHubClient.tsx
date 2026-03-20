@@ -4,9 +4,12 @@ import { useEffect, useState } from "react";
 import { BookOpen, MessageSquare, BrainCircuit, Globe2, Puzzle, FileDown } from "lucide-react";
 import Link from "next/link";
 import { useLanguage } from "./LanguageContext";
-import { supabase } from "@/lib/supabase"; 
+import { createClient } from "@/utils/supabase/client"; // ✅ Novi import za klijent
 
 export default function GeneralHubClient() {
+  // ✅ Inicijaliziramo Supabase klijent unutar komponente
+  const supabase = createClient();
+
   // 1. Pravilno izvlačenje varijabli iz tvog Contexta
   const { t, uiMode, euLang, nativeLang } = useLanguage(); 
   
@@ -37,7 +40,7 @@ export default function GeneralHubClient() {
     }
 
     fetchManual();
-  }, [uiMode, euLang, nativeLang]); // Pokreni ponovo ako korisnik prebaci jezik
+  }, [uiMode, euLang, nativeLang, supabase]); // Pokreni ponovo ako korisnik prebaci jezik
 
   // --- PRIJEVODI IZ BAZE ---
   const title = t("Opći jezik");

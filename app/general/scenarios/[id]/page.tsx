@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/supabase";
+import { createClient } from "@/utils/supabase/server"; // ✅ Novi import za server
 import ScenarioClient from "@/components/ScenarioClient";
 import { ArrowLeft, MessageSquare } from "lucide-react";
 import Link from "next/link";
@@ -10,6 +10,9 @@ export default async function GeneralScenarioDetailPage({
 }: { 
   params: Promise<{ id: string }> 
 }) {
+  // ✅ Inicijaliziramo sigurni server klijent unutar funkcije
+  const supabase = await createClient();
+
   const resolvedParams = await params;
   const scenarioId = resolvedParams.id;
 
