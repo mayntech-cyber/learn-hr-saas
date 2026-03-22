@@ -12,7 +12,7 @@ export default function ScenariosGridClient({ scenarios }: { scenarios: any[] })
   const head = t("Svakodnevni scenariji");
 
   return (
-    <div className="p-4 md:p-10 max-w-7xl mx-auto min-h-screen flex flex-col animate-in fade-in duration-500">
+    <div className="w-full max-w-7xl p-4 md:p-10 mx-auto min-h-screen flex flex-col animate-in fade-in duration-500">
       
       {/* 1. DVOJEZIČNA NAVIGACIJA */}
       <div className="mb-8">

@@ -27,7 +27,7 @@ export default function Navigation() {
 
   // Rekonstrukcija navItems-a s dinamičnim t() podacima
   const navItems = [
-    { nameObj: tNavDash, href: "/", icon: Home },
+    { nameObj: tNavDash, href: "/dashboard", icon: Home },
     { nameObj: tNavGen, href: "/general", icon: BookOpen },
     { nameObj: tNavProf, href: "/professional", icon: HardHat },
     { nameObj: tNavTests, href: "/quizzes", icon: GraduationCap },

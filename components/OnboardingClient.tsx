@@ -41,12 +41,13 @@ export default function OnboardingClient({ allJobs }: { allJobs: any[] }) {
 
     if (user) {
       await supabase
-        .from('profiles')
-        .update({ 
-          full_name: name,
-          current_job_id: Number(jobId) 
-        })
-        .eq('id', user.id);
+  .from('profiles')
+  .update({ 
+    full_name: name,
+    current_job_id: Number(jobId),
+    onboarding_completed: true
+  })
+  .eq('id', user.id);
 
       router.push('/dashboard');
       router.refresh();

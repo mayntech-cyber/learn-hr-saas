@@ -33,29 +33,31 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   const [uiTranslations, setUiTranslations] = useState<any[]>([]);
 
   useEffect(() => {
-    // 1. Čitanje iz LocalStorage-a (Ovo se događa samo u browseru)
-    const savedEu = localStorage.getItem("LEARNHR_EU_CODE");
-    const savedNative = localStorage.getItem("LEARNHR_NATIVE_CODE");
-    const savedUiMode = localStorage.getItem("LEARNHR_UI_MODE") as 'hr' | 'eu' | 'native';
+  const savedEu = localStorage.getItem("LEARNHR_EU_CODE");
+  const savedNative = localStorage.getItem("LEARNHR_NATIVE_CODE");
+  const savedUiMode = localStorage.getItem("LEARNHR_UI_MODE") as 'hr' | 'eu' | 'native';
 
-    if (savedEu && savedNative) {
-      setEuLang(savedEu);
-      setEuLangName(localStorage.getItem("LEARNHR_EU_NAME") || "EU");
-      setNativeLang(savedNative);
-      setNativeLangName(localStorage.getItem("LEARNHR_NATIVE_NAME") || "Materinji");
-      setUiMode(savedUiMode || 'hr');
-    } else {
-      // Ako nema spremljenog jezika, tek SADA otvaramo modal
+  if (savedEu && savedNative) {
+    setEuLang(savedEu);
+    setEuLangName(localStorage.getItem("LEARNHR_EU_NAME") || "EU");
+    setNativeLang(savedNative);
+    setNativeLangName(localStorage.getItem("LEARNHR_NATIVE_NAME") || "Materinji");
+    setUiMode(savedUiMode || 'hr');
+  } else {
+    // Ne otvara modal na login i onboarding stranicama
+    const path = window.location.pathname;
+    const isPublicPage = path === '/login' || path === '/onboarding' || path.startsWith('/auth');
+    if (!isPublicPage) {
       setIsModalOpen(true);
     }
+  }
 
-    // 2. Povlačenje prijevoda iz baze
-    const fetchUi = async () => {
-      const { data } = await supabase.from('ui_translations').select('*');
-      if (data) setUiTranslations(data);
-    };
-    fetchUi();
-  }, [supabase]); // <-- dodali smo supabase u dependency array da React bude sretan
+  const fetchUi = async () => {
+    const { data } = await supabase.from('ui_translations').select('*');
+    if (data) setUiTranslations(data);
+  };
+  fetchUi();
+}, [supabase]);
 
   const t = (text: string) => {
     const item = uiTranslations.find(x => x.hr_text === text);

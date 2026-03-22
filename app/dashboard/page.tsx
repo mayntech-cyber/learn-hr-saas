@@ -23,7 +23,7 @@ export default async function DashboardPage() {
 
   // ---> NOVO: ČUVAR KOJI PREUSMJERAVA NA ONBOARDING <---
   // Ako je ime prazno ili zanimanje nije odabrano, pošalji ga na onboarding!
-  if (!profile?.full_name || !profile?.current_job_id) {
+  if (!profile?.onboarding_completed) {
     redirect("/onboarding");
   }
 
