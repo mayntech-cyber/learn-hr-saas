@@ -93,6 +93,7 @@ export default function PricingClient({
   const tPerYear = t("/ god.");
   const tNoHidden = t("Bez skrivenih troškova · Otkaz u bilo koje vrijeme");
   const tAllCurrencies = t("Sve cijene u eurima");
+  const tPopular = t("Najpopularnije");
 
   const planOrder = ["ind_free", "ind_general", "ind_pro"];
 
@@ -157,7 +158,7 @@ export default function PricingClient({
               {/* Badge */}
               {isPopular && (
                 <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-blue-600 text-white text-xs font-black px-4 py-1.5 rounded-full shadow-lg whitespace-nowrap">
-                  ⭐ {config.badge}
+                  ⭐ {tPopular.main}
                 </div>
               )}
 
