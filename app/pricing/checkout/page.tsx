@@ -1,4 +1,5 @@
 "use client";
+import { Suspense } from "react";
 import { useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
@@ -11,7 +12,7 @@ const PLAN_NAMES: Record<string, string> = {
   ind_pro: "Full Pro",
 };
 
-export default function CheckoutPage() {
+function CheckoutContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const planId = searchParams.get("plan");
@@ -20,7 +21,6 @@ export default function CheckoutPage() {
 
   useEffect(() => {
     const startCheckout = async () => {
-      // Free plan — nema naplate, samo update u bazi
       if (planId === "ind_free") {
         const supabase = createClient();
         const { data: { user } } = await supabase.auth.getUser();
@@ -49,7 +49,6 @@ export default function CheckoutPage() {
           return;
         }
 
-        // Pozovi backend Stripe checkout API
         const response = await fetch(`${BACKEND_URL}/api/stripe/checkout`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -98,12 +97,20 @@ export default function CheckoutPage() {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen gap-4">
       <Loader2 className="animate-spin text-blue-600" size={40} />
-      <p className="text-slate-600 font-bold">
-        Preusmjeravamo te na sigurno plaćanje...
-      </p>
-      <p className="text-slate-400 text-sm">
-        Plan: {PLAN_NAMES[planId || ""] || planId}
-      </p>
+      <p className="text-slate-600 font-bold">Preusmjeravamo te na sigurno plaćanje...</p>
+      <p className="text-slate-400 text-sm">Plan: {PLAN_NAMES[planId || ""] || planId}</p>
     </div>
+  );
+}
+
+export default function CheckoutPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="animate-spin text-blue-600" size={40} />
+      </div>
+    }>
+      <CheckoutContent />
+    </Suspense>
   );
 }
