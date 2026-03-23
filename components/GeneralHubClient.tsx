@@ -107,10 +107,10 @@ export default function GeneralHubClient() {
             <BookOpen size={28} className="md:hidden" /><BookOpen size={48} className="block" />
           </div>
           <h2 className="text-sm md:text-2xl font-black text-slate-800 mb-1">{dict.main}</h2>
-          {!dict.isOnlyHr && <p className="text-[9px] md:text-[10px] font-bold text-blue-400 uppercase mb-2 md:mb-4 tracking-tighter italic">{dict.sub}</p>}
+          {!dict.isOnlyHr && <p className="hidden md:block text-[10px] font-bold text-blue-400 uppercase mb-4 tracking-tighter italic">{dict.sub}</p>}
           <div className="text-slate-500 font-medium mb-3 md:mb-8 flex-1 text-[10px] md:text-base line-clamp-2 md:line-clamp-none block">
              <p>{dictDesc.main}</p>
-             {!dictDesc.isOnlyHr && <p className="text-[10px] text-slate-400 font-bold mt-1 uppercase italic">{dictDesc.sub}</p>}
+             {!dictDesc.isOnlyHr && <p className="hidden md:block text-[10px] text-slate-400 font-bold mt-1 uppercase italic">{dictDesc.sub}</p>}
           </div>
           <span className="w-full bg-blue-100 text-blue-700 font-black py-2 md:py-4 rounded-xl md:rounded-2xl text-[10px] md:text-xs uppercase tracking-wider group-hover:bg-blue-600 group-hover:text-white transition-colors">
             {dictBtn.main}
@@ -123,10 +123,10 @@ export default function GeneralHubClient() {
             <MessageSquare size={28} className="md:hidden" /><MessageSquare size={48} className="block" />
           </div>
           <h2 className="text-sm md:text-2xl font-black text-slate-800 mb-1">{scen.main}</h2>
-          {!scen.isOnlyHr && <p className="text-[9px] md:text-[10px] font-bold text-emerald-500 uppercase mb-2 md:mb-4 tracking-tighter italic">{scen.sub}</p>}
+          {!scen.isOnlyHr && <p className="hidden md:block text-[10px] font-bold text-emerald-500 uppercase mb-4 tracking-tighter italic">{scen.sub}</p>}
           <div className="text-slate-500 font-medium mb-3 md:mb-8 flex-1 text-[10px] md:text-base line-clamp-2 md:line-clamp-none block">
              <p>{scenDesc.main}</p>
-             {!scenDesc.isOnlyHr && <p className="text-[10px] text-slate-400 font-bold mt-1 uppercase italic">{scenDesc.sub}</p>}
+             {!scenDesc.isOnlyHr && <p className="hidden md:block text-[10px] text-slate-400 font-bold mt-1 uppercase italic">{scenDesc.sub}</p>}
           </div>
           <span className="w-full bg-emerald-100 text-emerald-700 font-black py-2 md:py-4 rounded-xl md:rounded-2xl text-[10px] md:text-xs uppercase tracking-wider group-hover:bg-emerald-600 group-hover:text-white transition-colors">
             {scenBtn.main}
@@ -139,10 +139,10 @@ export default function GeneralHubClient() {
             <BrainCircuit size={28} className="md:hidden" /><BrainCircuit size={48} className="block" />
           </div>
           <h2 className="text-sm md:text-2xl font-black text-white mb-1">{prac.main}</h2>
-          {!prac.isOnlyHr && <p className="text-[9px] md:text-[10px] font-bold text-orange-400 uppercase mb-2 md:mb-4 tracking-tighter italic">{prac.sub}</p>}
+          {!prac.isOnlyHr && <p className="hidden md:block text-[10px] font-bold text-orange-400 uppercase mb-4 tracking-tighter italic">{prac.sub}</p>}
           <div className="text-slate-300 font-medium mb-3 md:mb-8 flex-1 text-[10px] md:text-base line-clamp-2 md:line-clamp-none block">
              <p>{pracDesc.main}</p>
-             {!pracDesc.isOnlyHr && <p className="text-[10px] text-slate-400 font-bold mt-1 uppercase italic">{pracDesc.sub}</p>}
+             {!pracDesc.isOnlyHr && <p className="hidden md:block text-[10px] text-slate-400 font-bold mt-1 uppercase italic">{pracDesc.sub}</p>}
           </div>
           <span className="w-full bg-orange-500 text-white font-black py-2 md:py-4 rounded-xl md:rounded-2xl shadow-md group-hover:bg-orange-600 transition-colors text-[10px] md:text-xs uppercase tracking-wider">
             {pracBtn.main}
@@ -155,10 +155,10 @@ export default function GeneralHubClient() {
             <Puzzle size={28} className="md:hidden" /><Puzzle size={48} className="block" />
           </div>
           <h2 className="text-sm md:text-2xl font-black text-slate-800 mb-1">{gram.main}</h2>
-          {!gram.isOnlyHr && <p className="text-[9px] md:text-[10px] font-bold text-purple-400 uppercase mb-2 md:mb-4 tracking-tighter italic">{gram.sub}</p>}
+          {!gram.isOnlyHr && <p className="hidden md:block text-[10px] font-bold text-purple-400 uppercase mb-4 tracking-tighter italic">{gram.sub}</p>}
           <div className="text-slate-500 font-medium mb-3 md:mb-8 flex-1 text-[10px] md:text-base line-clamp-2 md:line-clamp-none block">
              <p>{gramDesc.main}</p>
-             {!gramDesc.isOnlyHr && <p className="text-[10px] text-slate-400 font-bold mt-1 uppercase italic">{gramDesc.sub}</p>}
+             {!gramDesc.isOnlyHr && <p className="hidden md:block text-[10px] text-slate-400 font-bold mt-1 uppercase italic">{gramDesc.sub}</p>}
           </div>
           <span className="w-full bg-purple-100 text-purple-700 font-black py-2 md:py-4 rounded-xl md:rounded-2xl text-[10px] md:text-xs uppercase tracking-wider group-hover:bg-purple-600 group-hover:text-white transition-colors">
             {gramBtn.main}
