@@ -71,13 +71,13 @@ export default function GeneralHubClient() {
     <div className="p-4 md:p-10 max-w-6xl mx-auto min-h-screen flex flex-col animate-in fade-in duration-500">
       
       {/* HEADER */}
-      <div className="mb-12 text-center md:text-left">
-        <div className="flex flex-col md:flex-row items-center gap-5 mb-4 justify-center md:justify-start">
-          <div className="bg-blue-600 p-4 rounded-[1.5rem] text-white shadow-lg shadow-blue-200">
-            <Globe2 size={32} />
+      <div className="mb-6 md:mb-12 text-center md:text-left">
+        <div className="flex flex-col md:flex-row items-center gap-3 md:gap-5 mb-3 md:mb-4 justify-center md:justify-start">
+          <div className="bg-blue-600 p-3 md:p-4 rounded-2xl md:rounded-[1.5rem] text-white shadow-lg shadow-blue-200">
+            <Globe2 size={24} className="md:hidden" /><Globe2 size={32} className="hidden md:block" />
           </div>
           <div>
-            <h1 className="text-3xl md:text-5xl font-black text-slate-800 tracking-tight leading-none">
+            <h1 className="text-2xl md:text-5xl font-black text-slate-800 tracking-tight leading-none">
               {title.main}
             </h1>
             {!title.isOnlyHr && (
@@ -88,7 +88,7 @@ export default function GeneralHubClient() {
           </div>
         </div>
         
-        <div className="text-slate-500 font-medium text-lg max-w-2xl leading-tight">
+        <div className="text-slate-500 font-medium text-sm md:text-lg max-w-2xl leading-tight hidden md:block">
            <p>{subtitle.main}</p>
            {!subtitle.isOnlyHr && (
              <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mt-1">
@@ -99,68 +99,68 @@ export default function GeneralHubClient() {
       </div>
 
       {/* GLAVNE KARTICE - 2x2 grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+      <div className="grid grid-cols-2 gap-3 md:gap-8">
         
         {/* RJEČNIK */}
-        <Link href="/general/dictionary" className="group bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-xl transition-all flex flex-col items-center text-center h-full">
-          <div className="bg-blue-50 p-6 rounded-full text-blue-600 mb-6 group-hover:scale-110 transition-transform shadow-inner">
-            <BookOpen size={48} />
+        <Link href="/general/dictionary" className="group bg-white p-4 md:p-8 rounded-2xl md:rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-xl transition-all flex flex-col items-center text-center h-full">
+          <div className="bg-blue-50 p-3 md:p-6 rounded-full text-blue-600 mb-3 md:mb-6 group-hover:scale-110 transition-transform shadow-inner">
+            <BookOpen size={28} className="md:hidden" /><BookOpen size={48} className="hidden md:block" />
           </div>
-          <h2 className="text-2xl font-black text-slate-800 mb-1">{dict.main}</h2>
-          {!dict.isOnlyHr && <p className="text-[10px] font-bold text-blue-400 uppercase mb-4 tracking-tighter italic">{dict.sub}</p>}
-          <div className="text-slate-500 font-medium mb-8 flex-1">
+          <h2 className="text-sm md:text-2xl font-black text-slate-800 mb-1">{dict.main}</h2>
+          {!dict.isOnlyHr && <p className="text-[9px] md:text-[10px] font-bold text-blue-400 uppercase mb-2 md:mb-4 tracking-tighter italic">{dict.sub}</p>}
+          <div className="text-slate-500 font-medium mb-3 md:mb-8 flex-1 hidden md:block">
              <p>{dictDesc.main}</p>
              {!dictDesc.isOnlyHr && <p className="text-[10px] text-slate-400 font-bold mt-1 uppercase italic">{dictDesc.sub}</p>}
           </div>
-          <span className="w-full bg-blue-100 text-blue-700 font-black py-4 rounded-2xl text-xs uppercase tracking-wider group-hover:bg-blue-600 group-hover:text-white transition-colors">
+          <span className="w-full bg-blue-100 text-blue-700 font-black py-2 md:py-4 rounded-xl md:rounded-2xl text-[10px] md:text-xs uppercase tracking-wider group-hover:bg-blue-600 group-hover:text-white transition-colors">
             {dictBtn.main}
           </span>
         </Link>
 
         {/* SCENARIJI */}
-        <Link href="/general/scenarios" className="group bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-xl transition-all flex flex-col items-center text-center h-full">
-          <div className="bg-emerald-50 p-6 rounded-full text-emerald-600 mb-6 group-hover:scale-110 transition-transform shadow-inner">
-            <MessageSquare size={48} />
+        <Link href="/general/scenarios" className="group bg-white p-4 md:p-8 rounded-2xl md:rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-xl transition-all flex flex-col items-center text-center h-full">
+          <div className="bg-emerald-50 p-3 md:p-6 rounded-full text-emerald-600 mb-3 md:mb-6 group-hover:scale-110 transition-transform shadow-inner">
+            <MessageSquare size={28} className="md:hidden" /><MessageSquare size={48} className="hidden md:block" />
           </div>
-          <h2 className="text-2xl font-black text-slate-800 mb-1">{scen.main}</h2>
-          {!scen.isOnlyHr && <p className="text-[10px] font-bold text-emerald-500 uppercase mb-4 tracking-tighter italic">{scen.sub}</p>}
-          <div className="text-slate-500 font-medium mb-8 flex-1">
+          <h2 className="text-sm md:text-2xl font-black text-slate-800 mb-1">{scen.main}</h2>
+          {!scen.isOnlyHr && <p className="text-[9px] md:text-[10px] font-bold text-emerald-500 uppercase mb-2 md:mb-4 tracking-tighter italic">{scen.sub}</p>}
+          <div className="text-slate-500 font-medium mb-3 md:mb-8 flex-1 hidden md:block">
              <p>{scenDesc.main}</p>
              {!scenDesc.isOnlyHr && <p className="text-[10px] text-slate-400 font-bold mt-1 uppercase italic">{scenDesc.sub}</p>}
           </div>
-          <span className="w-full bg-emerald-100 text-emerald-700 font-black py-4 rounded-2xl text-xs uppercase tracking-wider group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+          <span className="w-full bg-emerald-100 text-emerald-700 font-black py-2 md:py-4 rounded-xl md:rounded-2xl text-[10px] md:text-xs uppercase tracking-wider group-hover:bg-emerald-600 group-hover:text-white transition-colors">
             {scenBtn.main}
           </span>
         </Link>
 
         {/* VJEŽBA */}
-        <Link href="/general/practice" className="group bg-slate-900 p-8 rounded-[2.5rem] border border-slate-800 shadow-lg hover:shadow-xl transition-all flex flex-col items-center text-center h-full">
-          <div className="bg-white/10 p-6 rounded-full text-orange-400 mb-6 group-hover:scale-110 transition-transform">
-            <BrainCircuit size={48} />
+        <Link href="/general/practice" className="group bg-slate-900 p-4 md:p-8 rounded-2xl md:rounded-[2.5rem] border border-slate-800 shadow-lg hover:shadow-xl transition-all flex flex-col items-center text-center h-full">
+          <div className="bg-white/10 p-3 md:p-6 rounded-full text-orange-400 mb-3 md:mb-6 group-hover:scale-110 transition-transform">
+            <BrainCircuit size={28} className="md:hidden" /><BrainCircuit size={48} className="hidden md:block" />
           </div>
-          <h2 className="text-2xl font-black text-white mb-1">{prac.main}</h2>
-          {!prac.isOnlyHr && <p className="text-[10px] font-bold text-orange-400 uppercase mb-4 tracking-tighter italic">{prac.sub}</p>}
-          <div className="text-slate-300 font-medium mb-8 flex-1">
+          <h2 className="text-sm md:text-2xl font-black text-white mb-1">{prac.main}</h2>
+          {!prac.isOnlyHr && <p className="text-[9px] md:text-[10px] font-bold text-orange-400 uppercase mb-2 md:mb-4 tracking-tighter italic">{prac.sub}</p>}
+          <div className="text-slate-300 font-medium mb-3 md:mb-8 flex-1 hidden md:block">
              <p>{pracDesc.main}</p>
              {!pracDesc.isOnlyHr && <p className="text-[10px] text-slate-400 font-bold mt-1 uppercase italic">{pracDesc.sub}</p>}
           </div>
-          <span className="w-full bg-orange-500 text-white font-black py-4 rounded-2xl shadow-md group-hover:bg-orange-600 transition-colors text-xs uppercase tracking-wider">
+          <span className="w-full bg-orange-500 text-white font-black py-2 md:py-4 rounded-xl md:rounded-2xl shadow-md group-hover:bg-orange-600 transition-colors text-[10px] md:text-xs uppercase tracking-wider">
             {pracBtn.main}
           </span>
         </Link>
 
         {/* GRAMATIKA */}
-        <Link href="/general/grammar" className="group bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-xl transition-all flex flex-col items-center text-center h-full">
-          <div className="bg-purple-50 p-6 rounded-full text-purple-600 mb-6 group-hover:scale-110 transition-transform shadow-inner">
-            <Puzzle size={48} />
+        <Link href="/general/grammar" className="group bg-white p-4 md:p-8 rounded-2xl md:rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-xl transition-all flex flex-col items-center text-center h-full">
+          <div className="bg-purple-50 p-3 md:p-6 rounded-full text-purple-600 mb-3 md:mb-6 group-hover:scale-110 transition-transform shadow-inner">
+            <Puzzle size={28} className="md:hidden" /><Puzzle size={48} className="hidden md:block" />
           </div>
-          <h2 className="text-2xl font-black text-slate-800 mb-1">{gram.main}</h2>
-          {!gram.isOnlyHr && <p className="text-[10px] font-bold text-purple-400 uppercase mb-4 tracking-tighter italic">{gram.sub}</p>}
-          <div className="text-slate-500 font-medium mb-8 flex-1">
+          <h2 className="text-sm md:text-2xl font-black text-slate-800 mb-1">{gram.main}</h2>
+          {!gram.isOnlyHr && <p className="text-[9px] md:text-[10px] font-bold text-purple-400 uppercase mb-2 md:mb-4 tracking-tighter italic">{gram.sub}</p>}
+          <div className="text-slate-500 font-medium mb-3 md:mb-8 flex-1 hidden md:block">
              <p>{gramDesc.main}</p>
              {!gramDesc.isOnlyHr && <p className="text-[10px] text-slate-400 font-bold mt-1 uppercase italic">{gramDesc.sub}</p>}
           </div>
-          <span className="w-full bg-purple-100 text-purple-700 font-black py-4 rounded-2xl text-xs uppercase tracking-wider group-hover:bg-purple-600 group-hover:text-white transition-colors">
+          <span className="w-full bg-purple-100 text-purple-700 font-black py-2 md:py-4 rounded-xl md:rounded-2xl text-[10px] md:text-xs uppercase tracking-wider group-hover:bg-purple-600 group-hover:text-white transition-colors">
             {gramBtn.main}
           </span>
         </Link>
