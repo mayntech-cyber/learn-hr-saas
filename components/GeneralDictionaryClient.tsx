@@ -116,7 +116,7 @@ export default function GeneralDictionaryClient({ words }: { words: any[] }) {
       </div>
 
       {/* FILTER NIVO 1 — Tip */}
-      <div className="flex gap-2 mb-3 overflow-x-auto pb-1 scrollbar-hide">
+      <div className="flex gap-2 mb-3 overflow-x-auto pb-1 scrollbar-hide overscroll-x-contain">
         {typeButtons.map((btn) => (
           <button
             key={btn.key}
@@ -135,7 +135,7 @@ export default function GeneralDictionaryClient({ words }: { words: any[] }) {
 
       {/* FILTER NIVO 2 — Kategorije */}
       {(selectedType === "sve" || selectedType === "imenica") && availableCategories.length > 0 && (
-        <div className="flex gap-2 mb-5 overflow-x-auto pb-2 scrollbar-hide">
+        <div className="flex gap-2 mb-5 overflow-x-auto pb-2 scrollbar-hide overscroll-x-contain">
           <button
             onClick={() => setSelectedCategory("sve")}
             className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-black whitespace-nowrap transition-all border ${
