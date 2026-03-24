@@ -3,6 +3,7 @@
 body {
   background-color: #f8fafc; /* Nježno siva/plava pozadina (slate-50) */
   color: #0f172a; /* Tamni tekst (slate-900) */
+  overscroll-behavior-x: none; /* ← DODAJ OVO */
 }
 
 /* ANIMACIJA ZA GREŠKU U IGRAMA */
@@ -16,3 +17,4 @@ body {
 .animate-shake {
   animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
 }
+
