@@ -62,7 +62,8 @@ export default function FlipDictionaryCard({
   return (
     <>
       <style>{`
-        .flip-card { perspective: 1000px; height: 300px; cursor: pointer; position: relative; }
+        .flip-card { perspective: 1000px; height: 220px; cursor: pointer; position: relative; }
+@media (min-width: 768px) { .flip-card { height: 300px; } }
         .flip-card-inner { position: relative; width: 100%; height: 100%; transition: transform 0.5s; transform-style: preserve-3d; }
         .flip-card.flipped .flip-card-inner { transform: rotateY(180deg); }
         .flip-card-front, .flip-card-back { 
