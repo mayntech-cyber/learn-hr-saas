@@ -29,6 +29,7 @@ export default function GeneralDictionaryClient({ words }: { words: any[] }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedType, setSelectedType] = useState("sve");
   const [selectedCategory, setSelectedCategory] = useState("sve");
+  const [showAllCats, setShowAllCats] = useState(false);
 
   const head = t("Cjelokupni rječnik");
   const back = t("Nazad");
@@ -116,7 +117,7 @@ export default function GeneralDictionaryClient({ words }: { words: any[] }) {
       </div>
 
       {/* FILTER NIVO 1 — Tip */}
-      <div className="flex gap-2 mb-3 pb-1 scrollbar-hide" style={{ overflowX: "auto", overscrollBehaviorX: "contain", WebkitOverflowScrolling: "touch", touchAction: "pan-x" }}>
+      <div className="flex flex-wrap gap-2 mb-3">
         {typeButtons.map((btn) => (
           <button
             key={btn.key}
@@ -135,7 +136,7 @@ export default function GeneralDictionaryClient({ words }: { words: any[] }) {
 
       {/* FILTER NIVO 2 — Kategorije */}
       {(selectedType === "sve" || selectedType === "imenica") && availableCategories.length > 0 && (
-        <div className="flex gap-2 mb-5 pb-2 scrollbar-hide" style={{ overflowX: "auto", overscrollBehaviorX: "contain", WebkitOverflowScrolling: "touch", touchAction: "pan-x" }}>
+        <div className="flex flex-wrap gap-2 mb-5">
           <button
             onClick={() => setSelectedCategory("sve")}
             className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-black whitespace-nowrap transition-all border ${
@@ -147,7 +148,7 @@ export default function GeneralDictionaryClient({ words }: { words: any[] }) {
             🗂️ Sve
           </button>
 
-          {availableCategories.map((cat) => {
+          {(showAllCats ? availableCategories : availableCategories.slice(0, 4)).map((cat) => {
             const cfg = CATEGORY_CONFIG[cat] || { emoji: "📦", color: "text-slate-600", bg: "bg-slate-50 border-slate-200" };
             const isActive = selectedCategory === cat;
             return (
@@ -165,6 +166,13 @@ export default function GeneralDictionaryClient({ words }: { words: any[] }) {
               </button>
             );
           })}
+
+           <button
+          onClick={() => setShowAllCats(!showAllCats)}
+          className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-black border bg-white text-blue-500 border-blue-200"
+        >
+          {showAllCats ? "← Manje" : `+${availableCategories.length - 4} više`}
+        </button>
         </div>
       )}
 
