@@ -96,11 +96,6 @@ export default function GeneralDictionaryClient({ words }: { words: any[] }) {
             </div>
           </div>
           <div className="flex items-center gap-2 text-slate-500 text-sm font-medium">
-            <BookOpen size={14} className="text-orange-500" />
-            <span className="text-orange-600 font-black px-2 py-0.5 bg-orange-50 rounded-lg border border-orange-100">
-              {filteredWords.length}
-            </span>
-            <span className="text-xs">{inBase.main}</span>
           </div>
         </div>
       </div>

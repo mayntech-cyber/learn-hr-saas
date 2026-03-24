@@ -143,6 +143,9 @@ export default function FlipDictionaryCard({
             </div>
 
             <div style={{ padding: "10px 16px", textAlign: "center", background: "white" }}>
+              <p style={{ fontSize: 16, fontWeight: 900, color: "#1e293b", marginBottom: 2 }}>
+                {wordHr}
+              </p>
               <p style={{ fontSize: 10, color: "#cbd5e1", fontWeight: 700, textTransform: "uppercase", letterSpacing: 2 }}>
                 {t("Tap za prijevod").main} →
               </p>
