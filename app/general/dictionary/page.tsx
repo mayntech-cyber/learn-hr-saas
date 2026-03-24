@@ -12,7 +12,7 @@ export default async function GeneralDictionaryPage() {
 
   const { data: words, error } = await supabase
     .from('dictionary')
-    .select('id, hr_word, translations, image_url, audio_url, word_type') 
+    .select('id, hr_word, translations, image_url, audio_url, word_type, category') 
     .order('hr_word', { ascending: true })
     .limit(10000); 
 
