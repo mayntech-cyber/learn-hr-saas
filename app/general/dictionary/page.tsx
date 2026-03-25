@@ -1,13 +1,10 @@
 // app/general/dictionary/page.tsx
-import { createClient } from "@/utils/supabase/server"; // ✅ Koristimo server.ts
+import { createClient } from "@/utils/supabase/server";
 import GeneralDictionaryClient from "@/components/GeneralDictionaryClient";
 
 export const revalidate = 0;
 
 export default async function GeneralDictionaryPage() {
-  // ✅ 1. Inicijaliziramo Supabase unutar funkcije
-  // Napomena: ovisno o verziji tvog server.ts fajla, možda će raditi i bez 'await', 
-  // ali po najnovijim standardima ide s await.
   const supabase = await createClient(); 
 
   const { data: words, error } = await supabase
@@ -16,8 +13,13 @@ export default async function GeneralDictionaryPage() {
     .order('hr_word', { ascending: true })
     .limit(10000); 
 
+  // Dohvati kategorije s prijevodima
+  const { data: categories } = await supabase
+    .from('dictionary_categories')
+    .select('slug, label, emoji, translations')
+    .order('sort_order', { ascending: true });
+
   if (error) console.error("Greška:", error);
 
-  // Samo prosljeđujemo čiste podatke klijentskoj komponenti
-  return <GeneralDictionaryClient words={words || []} />;
+  return <GeneralDictionaryClient words={words || []} categoryData={categories || []} />;
 }

@@ -24,8 +24,8 @@ const CATEGORY_CONFIG: Record<string, { emoji: string; color: string; bg: string
   "ostalo":    { emoji: "📦", color: "text-slate-600",  bg: "bg-slate-50 border-slate-200" },
 };
 
-export default function GeneralDictionaryClient({ words }: { words: any[] }) {
-  const { euLang, nativeLang, t } = useLanguage();
+export default function GeneralDictionaryClient({ words, categoryData = [] }: { words: any[], categoryData?: any[] }) {
+  const { euLang, nativeLang, uiMode, t } = useLanguage();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedType, setSelectedType] = useState("sve");
   const [selectedCategory, setSelectedCategory] = useState("sve");
@@ -37,6 +37,28 @@ export default function GeneralDictionaryClient({ words }: { words: any[] }) {
   const inBase = t("riječi u bazi");
   const placeholder = t("Pretraži rječnik...");
   const noWords = t("Nema pronađenih riječi...");
+
+  // Mapa slug → {emoji, label, translations} iz baze
+  const catDataMap = useMemo(() => {
+    const map: Record<string, any> = {};
+    categoryData.forEach(c => { map[c.slug] = c; });
+    return map;
+  }, [categoryData]);
+
+  // Dohvati label kategorije na trenutnom jeziku
+  const getCatLabel = (slug: string): string => {
+    const cat = catDataMap[slug];
+    if (!cat) return slug;
+    const trans = cat.translations || {};
+    if (uiMode === 'native' && trans[nativeLang]) return trans[nativeLang];
+    if (uiMode === 'eu' && trans[euLang]) return trans[euLang];
+    return cat.label || slug; // fallback na HR
+  };
+
+  const getCatEmoji = (slug: string): string => {
+    const cat = catDataMap[slug];
+    return cat?.emoji || CATEGORY_CONFIG[slug]?.emoji || "📦";
+  };
 
   const availableCategories = useMemo(() => {
     const cats = new Set(words.map((w) => w.category).filter(Boolean));
@@ -60,6 +82,9 @@ export default function GeneralDictionaryClient({ words }: { words: any[] }) {
     { key: "broj",    label: t("Brojevi").main,  emoji: "🔢" },
     { key: "glagol",  label: t("Glagoli").main,  emoji: "⚡" },
   ];
+
+  const labelManje = t("Manje").main || "← Manje";
+  const labelVise = t("više").main || "više";
 
   return (
     <div className="w-full p-4 md:p-10 max-w-7xl mx-auto min-h-screen flex flex-col animate-in fade-in duration-500">
@@ -140,7 +165,7 @@ export default function GeneralDictionaryClient({ words }: { words: any[] }) {
                 : "bg-white text-slate-400 border-slate-200 hover:border-slate-400"
             }`}
           >
-            🗂️ Sve
+            🗂️ {t("Sve").main}
           </button>
 
           {(showAllCats ? availableCategories : availableCategories.slice(0, 4)).map((cat) => {
@@ -156,8 +181,8 @@ export default function GeneralDictionaryClient({ words }: { words: any[] }) {
                     : "bg-white text-slate-400 border-slate-200 hover:border-slate-300 hover:text-slate-600"
                 }`}
               >
-                <span>{cfg.emoji}</span>
-                <span>{cat}</span>
+                <span>{getCatEmoji(cat)}</span>
+                <span>{getCatLabel(cat)}</span>
               </button>
             );
           })}
@@ -166,7 +191,7 @@ export default function GeneralDictionaryClient({ words }: { words: any[] }) {
           onClick={() => setShowAllCats(!showAllCats)}
           className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-black border bg-white text-blue-500 border-blue-200"
         >
-          {showAllCats ? "← Manje" : `+${availableCategories.length - 4} više`}
+          {showAllCats ? `← ${labelManje}` : `+${availableCategories.length - 4} ${labelVise}`}
         </button>
         </div>
       )}
