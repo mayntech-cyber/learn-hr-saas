@@ -3,6 +3,7 @@
 import { ArrowLeft, BookOpen } from "lucide-react";
 import Link from "next/link";
 import DictionaryCard from "./DictionaryCard";
+import FlipDictionaryCardJob from "./FlipDictionaryCardJob";
 import { useLanguage } from "./LanguageContext";
 
 // DODALI SMO 'job' U PROPS KAKO BI ZNALI NAZIV ZANIMANJA
@@ -30,7 +31,7 @@ export default function DictionaryClient({ words, job }: { words: any[], job?: a
 
   return (
     // GLAVNI OMOTAČ (Sada je ovdje umjesto u page.tsx)
-    <div className="p-4 md:p-10 max-w-7xl mx-auto min-h-screen flex flex-col animate-in fade-in duration-500">
+    <div className="w-full p-4 md:p-10 max-w-7xl mx-auto min-h-screen flex flex-col animate-in fade-in duration-500">
       
       {/* --- DVOJEZIČNI HEADER --- */}
       <div className="mb-8">
@@ -82,13 +83,14 @@ export default function DictionaryClient({ words, job }: { words: any[], job?: a
           const nativeTrans = parsedTranslations[safeNative] || "Prijevod nedostaje";
 
           return (
-            <DictionaryCard 
+            <FlipDictionaryCardJob 
               key={w.id}
               wordHr={w.hr_word}
               euTranslation={euTrans}
               nativeTranslation={nativeTrans}
               imageUrl={w.image_url}
               audioUrl={w.audio_url}
+              wordType={w.word_type}
             />
           );
         })}

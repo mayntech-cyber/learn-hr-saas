@@ -120,7 +120,21 @@ export default function FlipDictionaryCard({
                   <span style={{ fontSize: 13, fontWeight: 700, color: "rgba(255,255,255,0.6)", textTransform: "uppercase", letterSpacing: 2 }}>{wordHr}</span>
                 </div>
               ) : imageUrl ? (
-                <img src={imageUrl} alt={wordHr} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                <div style={{ position: "relative", width: "100%", height: "100%" }}>
+                  <img src={imageUrl} alt={wordHr} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                  {/* HR naziv overlay */}
+                  <div style={{
+                    position: "absolute",
+                    bottom: 0, left: 0, right: 0,
+                    background: "linear-gradient(to top, rgba(0,0,0,0.72) 0%, transparent 100%)",
+                    padding: "28px 12px 10px",
+                    textAlign: "center"
+                  }}>
+                    <span style={{ color: "white", fontWeight: 900, fontSize: 18, textShadow: "0 1px 4px rgba(0,0,0,0.4)", letterSpacing: 0.5 }}>
+                      {wordHr}
+                    </span>
+                  </div>
+                </div>
               ) : (
                 <div style={{ width: "100%", height: "100%", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8 }}>
                   <span style={{ fontSize: 32 }}>🖼️</span>
@@ -143,9 +157,6 @@ export default function FlipDictionaryCard({
             </div>
 
             <div style={{ padding: "10px 16px", textAlign: "center", background: "white" }}>
-              <p style={{ fontSize: 16, fontWeight: 900, color: "#1e293b", marginBottom: 2 }}>
-                {wordHr}
-              </p>
               <p style={{ fontSize: 10, color: "#cbd5e1", fontWeight: 700, textTransform: "uppercase", letterSpacing: 2 }}>
                 {t("Tap za prijevod").main} →
               </p>
