@@ -16,7 +16,7 @@ export default async function GeneralDictionaryPage() {
   // Dohvati kategorije s prijevodima
   const { data: categories } = await supabase
     .from('dictionary_categories')
-    .select('slug, label, emoji, translations')
+    .select('id, slug, label, emoji, translations, parent_id')
     .order('sort_order', { ascending: true });
 
   if (error) console.error("Greška:", error);

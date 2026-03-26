@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep -r \"word_type\\\\|selectedType\\\\|selectedCategory\" C:language-front/components --include=*.ts --include=*.tsx)"
+    ]
+  }
+}

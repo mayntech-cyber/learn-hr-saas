@@ -27,9 +27,8 @@ const CATEGORY_CONFIG: Record<string, { emoji: string; color: string; bg: string
 export default function GeneralDictionaryClient({ words, categoryData = [] }: { words: any[], categoryData?: any[] }) {
   const { euLang, nativeLang, uiMode, t } = useLanguage();
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedType, setSelectedType] = useState("sve");
-  const [selectedCategory, setSelectedCategory] = useState("sve");
-  const [showAllCats, setShowAllCats] = useState(false);
+  const [selectedMainCat, setSelectedMainCat] = useState<string | null>(null);
+  const [selectedSubCat, setSelectedSubCat] = useState("sve");
 
   const head = t("Cjelokupni rječnik");
   const back = t("Nazad");
@@ -38,12 +37,23 @@ export default function GeneralDictionaryClient({ words, categoryData = [] }: { 
   const placeholder = t("Pretraži rječnik...");
   const noWords = t("Nema pronađenih riječi...");
 
-  // Mapa slug → {emoji, label, translations} iz baze
+  // Mapa slug → {id, emoji, label, translations, parent_id} iz baze
   const catDataMap = useMemo(() => {
     const map: Record<string, any> = {};
     categoryData.forEach(c => { map[c.slug] = c; });
     return map;
   }, [categoryData]);
+
+  const mainCategories = useMemo(() =>
+    categoryData.filter(c => !c.parent_id),
+  [categoryData]);
+
+  const subCategories = useMemo(() => {
+    if (selectedMainCat === null) return [];
+    const mainCat = catDataMap[selectedMainCat];
+    if (!mainCat) return [];
+    return categoryData.filter(c => c.parent_id === mainCat.id);
+  }, [categoryData, catDataMap, selectedMainCat]);
 
   // Dohvati label kategorije na trenutnom jeziku
   const getCatLabel = (slug: string): string => {
@@ -60,31 +70,25 @@ export default function GeneralDictionaryClient({ words, categoryData = [] }: { 
     return cat?.emoji || CATEGORY_CONFIG[slug]?.emoji || "📦";
   };
 
-  const availableCategories = useMemo(() => {
-    const cats = new Set(words.map((w) => w.category).filter(Boolean));
-    return Array.from(cats).sort();
-  }, [words]);
-
   const filteredWords = useMemo(() => {
     return words.filter((w) => {
-      const matchesType = selectedType === "sve" || w.word_type === selectedType;
-      const matchesCategory = selectedCategory === "sve" || w.category === selectedCategory;
+      let matchesCategory = true;
+      if (selectedSubCat !== "sve") {
+        matchesCategory = w.category === selectedSubCat;
+      } else if (selectedMainCat !== null) {
+        if (subCategories.length > 0) {
+          matchesCategory = subCategories.some((s: any) => s.slug === w.category);
+        } else {
+          matchesCategory = w.category === selectedMainCat;
+        }
+      }
       const matchesSearch = w.hr_word?.toLowerCase().includes(searchTerm.toLowerCase());
-      return matchesType && matchesCategory && matchesSearch;
+      return matchesCategory && matchesSearch;
     });
-  }, [words, searchTerm, selectedType, selectedCategory]);
+  }, [words, searchTerm, selectedMainCat, selectedSubCat, subCategories]);
 
   if (!euLang || !nativeLang) return null;
 
-  const typeButtons = [
-    { key: "sve",     label: t("Sve").main,     emoji: "📚" },
-    { key: "imenica", label: t("Imenice").main,  emoji: "🔤" },
-    { key: "broj",    label: t("Brojevi").main,  emoji: "🔢" },
-    { key: "glagol",  label: t("Glagoli").main,  emoji: "⚡" },
-  ];
-
-  const labelManje = t("Manje").main || "← Manje";
-  const labelVise = t("više").main || "više";
 
   return (
     <div className="w-full p-4 md:p-10 max-w-7xl mx-auto min-h-screen flex flex-col animate-in fade-in duration-500">
@@ -136,65 +140,60 @@ export default function GeneralDictionaryClient({ words, categoryData = [] }: { 
         />
       </div>
 
-      {/* FILTER NIVO 1 — Tip */}
-      <div className="flex flex-wrap gap-2 mb-3">
-        {typeButtons.map((btn) => (
-          <button
-            key={btn.key}
-            onClick={() => { setSelectedType(btn.key); setSelectedCategory("sve"); }}
-            className={`flex items-center gap-1.5 px-3 md:px-4 py-2 rounded-xl text-xs font-black whitespace-nowrap transition-all border ${
-              selectedType === btn.key
-                ? "bg-blue-600 text-white border-blue-600 shadow-md"
-                : "bg-white text-slate-500 border-slate-200 hover:border-blue-200 hover:text-blue-500"
-            }`}
-          >
-            <span>{btn.emoji}</span>
-            <span>{btn.label}</span>
-          </button>
-        ))}
-      </div>
-
-      {/* FILTER NIVO 2 — Kategorije */}
-      {(selectedType === "sve" || selectedType === "imenica") && availableCategories.length > 0 && (
-        <div className="flex flex-wrap gap-2 mb-5">
-          <button
-            onClick={() => setSelectedCategory("sve")}
-            className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-black whitespace-nowrap transition-all border ${
-              selectedCategory === "sve"
-                ? "bg-slate-800 text-white border-slate-800 shadow-md"
-                : "bg-white text-slate-400 border-slate-200 hover:border-slate-400"
-            }`}
-          >
-            🗂️ {t("Sve").main}
-          </button>
-
-          {(showAllCats ? availableCategories : availableCategories.slice(0, 4)).map((cat) => {
-            const cfg = CATEGORY_CONFIG[cat] || { emoji: "📦", color: "text-slate-600", bg: "bg-slate-50 border-slate-200" };
-            const isActive = selectedCategory === cat;
+      {/* FILTER NIVO 1 — Glavne kategorije (tabovi) */}
+      {mainCategories.length > 0 && (
+        <div className="flex flex-wrap gap-2 mb-2">
+          {mainCategories.map((cat: any) => {
+            const isActive = selectedMainCat === cat.slug;
+            const cfg = CATEGORY_CONFIG[cat.slug] || { emoji: "📦", color: "text-slate-600", bg: "bg-slate-50 border-slate-200" };
             return (
               <button
-                key={cat}
-                onClick={() => setSelectedCategory(cat)}
-                className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-black whitespace-nowrap transition-all border capitalize ${
+                key={cat.slug}
+                onClick={() => { setSelectedMainCat(isActive ? null : cat.slug); setSelectedSubCat("sve"); }}
+                className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-black whitespace-nowrap transition-all border ${
                   isActive
                     ? `${cfg.bg} ${cfg.color} shadow-sm`
                     : "bg-white text-slate-400 border-slate-200 hover:border-slate-300 hover:text-slate-600"
                 }`}
               >
-                <span>{getCatEmoji(cat)}</span>
-                <span>{getCatLabel(cat)}</span>
+                <span>{getCatEmoji(cat.slug)}</span>
+                <span>{getCatLabel(cat.slug)}</span>
+                {isActive && (
+                  <span className="ml-0.5 opacity-60 hover:opacity-100">×</span>
+                )}
               </button>
             );
           })}
-
-           <button
-          onClick={() => setShowAllCats(!showAllCats)}
-          className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-black border bg-white text-blue-500 border-blue-200"
-        >
-          {showAllCats ? `← ${labelManje}` : `+${availableCategories.length - 4} ${labelVise}`}
-        </button>
         </div>
       )}
+
+      {/* FILTER NIVO 2 — Podkategorije */}
+      {selectedMainCat !== null && subCategories.length > 0 && (
+        <div className="flex flex-wrap gap-2 mb-5 pl-2 border-l-2 border-slate-200">
+          {subCategories.map((cat: any) => {
+            const isActive = selectedSubCat === cat.slug;
+            const cfg = CATEGORY_CONFIG[cat.slug] || { emoji: "📦", color: "text-slate-600", bg: "bg-slate-50 border-slate-200" };
+            return (
+              <button
+                key={cat.slug}
+                onClick={() => setSelectedSubCat(isActive ? "sve" : cat.slug)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-black whitespace-nowrap transition-all border capitalize ${
+                  isActive
+                    ? `${cfg.bg} ${cfg.color} shadow-sm`
+                    : "bg-white text-slate-400 border-slate-200 hover:border-slate-300 hover:text-slate-600"
+                }`}
+              >
+                <span>{getCatEmoji(cat.slug)}</span>
+                <span>{getCatLabel(cat.slug)}</span>
+                {isActive && (
+                  <span className="ml-0.5 opacity-60 hover:opacity-100">×</span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      )}
+      <div className="mb-5" />
 
       {/* GRID */}
       {filteredWords.length === 0 ? (
