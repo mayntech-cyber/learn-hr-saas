@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import { Search, Globe2, ArrowLeft, BookOpen } from "lucide-react";
+import { useState, useMemo, useEffect, useRef } from "react";
+import { Search, Globe2, ArrowLeft, SlidersHorizontal, X } from "lucide-react";
 import Link from "next/link";
 import FlipDictionaryCard from "./FlipDictionaryCard";
 import { useLanguage } from "./LanguageContext";
@@ -29,11 +29,14 @@ export default function GeneralDictionaryClient({ words, categoryData = [] }: { 
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedMainCat, setSelectedMainCat] = useState<string | null>(null);
   const [selectedSubCat, setSelectedSubCat] = useState("sve");
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [draftMainCat, setDraftMainCat] = useState<string | null>(null);
+  const [draftSubCat, setDraftSubCat] = useState("sve");
+  const defaultsApplied = useRef(false);
+  const touchStartY = useRef(0);
 
   const head = t("Cjelokupni rječnik");
   const back = t("Nazad");
-  const shown = t("Prikazano");
-  const inBase = t("riječi u bazi");
   const placeholder = t("Pretraži rječnik...");
   const noWords = t("Nema pronađenih riječi...");
 
@@ -55,14 +58,32 @@ export default function GeneralDictionaryClient({ words, categoryData = [] }: { 
     return categoryData.filter(c => c.parent_id === mainCat.id);
   }, [categoryData, catDataMap, selectedMainCat]);
 
-  // Dohvati label kategorije na trenutnom jeziku
+  const drawerSubCategories = useMemo(() => {
+    if (draftMainCat === null) return [];
+    const mainCat = catDataMap[draftMainCat];
+    if (!mainCat) return [];
+    return categoryData.filter(c => c.parent_id === mainCat.id);
+  }, [categoryData, catDataMap, draftMainCat]);
+
+  // Default pri prvom učitavanju: kategorija roditelja od 'abeceda' + podkategorija 'abeceda'
+  useEffect(() => {
+    if (defaultsApplied.current || categoryData.length === 0) return;
+    const abecedaCat = categoryData.find((c: any) => c.slug === "abeceda");
+    if (abecedaCat) {
+      const parentCat = categoryData.find((c: any) => c.id === abecedaCat.parent_id);
+      if (parentCat) setSelectedMainCat(parentCat.slug);
+      setSelectedSubCat("abeceda");
+    }
+    defaultsApplied.current = true;
+  }, [categoryData]);
+
   const getCatLabel = (slug: string): string => {
     const cat = catDataMap[slug];
     if (!cat) return slug;
     const trans = cat.translations || {};
-    if (uiMode === 'native' && trans[nativeLang]) return trans[nativeLang];
-    if (uiMode === 'eu' && trans[euLang]) return trans[euLang];
-    return cat.label || slug; // fallback na HR
+    if (uiMode === "native" && trans[nativeLang]) return trans[nativeLang];
+    if (uiMode === "eu" && trans[euLang]) return trans[euLang];
+    return cat.label || slug;
   };
 
   const getCatEmoji = (slug: string): string => {
@@ -87,138 +108,259 @@ export default function GeneralDictionaryClient({ words, categoryData = [] }: { 
     });
   }, [words, searchTerm, selectedMainCat, selectedSubCat, subCategories]);
 
+  const openDrawer = () => {
+    setDraftMainCat(selectedMainCat);
+    setDraftSubCat(selectedSubCat);
+    setDrawerOpen(true);
+  };
+
+  const applyFilter = () => {
+    setSelectedMainCat(draftMainCat);
+    setSelectedSubCat(draftSubCat);
+    setDrawerOpen(false);
+  };
+
+  const resetDraft = () => {
+    setDraftMainCat(null);
+    setDraftSubCat("sve");
+  };
+
+  const clearActiveFilter = () => {
+    setSelectedMainCat(null);
+    setSelectedSubCat("sve");
+  };
+
+  // Preview u filter baru: do 2 aktivne labele
+  const isFilterActive = selectedMainCat !== null;
+  const previewParts: string[] = [];
+  if (selectedMainCat) previewParts.push(`${getCatEmoji(selectedMainCat)} ${getCatLabel(selectedMainCat)}`);
+  if (selectedSubCat !== "sve") previewParts.push(`${getCatEmoji(selectedSubCat)} ${getCatLabel(selectedSubCat)}`);
+
+  // Badge label
+  const badgeLabel = [
+    selectedMainCat ? getCatLabel(selectedMainCat) : null,
+    selectedSubCat !== "sve" ? getCatLabel(selectedSubCat) : null,
+  ].filter(Boolean).join(" · ");
+
   if (!euLang || !nativeLang) return null;
 
-
   return (
-    <div className="w-full p-4 md:p-10 max-w-7xl mx-auto min-h-screen flex flex-col animate-in fade-in duration-500">
-
-      {/* HEADER */}
-      <div className="mb-5">
-        <Link href="/general" className="group inline-flex flex-col mb-4">
-          <div className="flex items-center gap-2 text-sm font-bold text-slate-400 group-hover:text-blue-600 transition-colors">
-            <ArrowLeft size={16} />
-            <span>{back.main}</span>
-          </div>
-          {!back.isOnlyHr && (
-            <span className="text-[10px] font-bold text-slate-300 ml-6 uppercase tracking-tighter italic">
-              {back.sub}
-            </span>
-          )}
-        </Link>
-
-        <div className="flex items-center justify-between gap-4 flex-wrap">
-          <div className="flex items-center gap-4">
-            <div className="bg-blue-600 p-3 rounded-2xl text-white shadow-lg">
-              <Globe2 size={24} className="md:hidden" />
-              <Globe2 size={28} className="hidden md:block" />
-            </div>
-            <div>
-              <h1 className="text-2xl md:text-4xl font-black text-slate-800 tracking-tight leading-none">
-                {head.main}
-              </h1>
-              {!head.isOnlyHr && (
-                <p className="text-[11px] font-black text-blue-400 uppercase mt-1 tracking-widest italic opacity-80">
-                  {head.sub}
-                </p>
-              )}
-            </div>
-          </div>
-          <div className="flex items-center gap-2 text-slate-500 text-sm font-medium">
-          </div>
-        </div>
-      </div>
-
-      {/* SEARCH */}
-      <div className="relative mb-3">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-        <input
-          type="text"
-          placeholder={placeholder.main}
-          className="w-full pl-11 pr-4 py-3 bg-white border border-slate-200 rounded-2xl font-bold focus:outline-none focus:border-blue-500 transition-all text-sm shadow-sm"
-          onChange={(e) => setSearchTerm(e.target.value)}
+    <>
+      {/* DRAWER BACKDROP */}
+      {drawerOpen && (
+        <div
+          className="fixed inset-0 bg-black/40 z-40"
+          onClick={() => setDrawerOpen(false)}
         />
+      )}
+
+      {/* DRAWER */}
+      <div
+        className={`fixed inset-x-0 bottom-0 z-50 transition-transform duration-300 ease-out ${drawerOpen ? "translate-y-0" : "translate-y-full"}`}
+        onTouchStart={(e) => { touchStartY.current = e.touches[0].clientY; }}
+        onTouchEnd={(e) => { if (e.changedTouches[0].clientY - touchStartY.current > 80) setDrawerOpen(false); }}
+      >
+        <div className="bg-white rounded-t-2xl shadow-2xl max-h-[80vh] flex flex-col">
+          {/* Drag handle */}
+          <div className="flex justify-center pt-3 pb-1 flex-shrink-0">
+            <div className="w-10 h-1 bg-slate-200 rounded-full" />
+          </div>
+          {/* Header */}
+          <div className="flex items-center justify-between px-5 py-3 border-b border-slate-100 flex-shrink-0">
+            <span className="text-sm font-black text-slate-800">⚙️ Filtriraj</span>
+            <button onClick={() => setDrawerOpen(false)} className="p-1 rounded-lg hover:bg-slate-100 transition-colors">
+              <X size={18} className="text-slate-400" />
+            </button>
+          </div>
+          {/* Sadržaj */}
+          <div className="overflow-y-auto px-5 py-4 space-y-5 flex-1">
+            {/* Kategorija */}
+            <div>
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Kategorija</p>
+              <div className="flex flex-wrap gap-2">
+                {mainCategories.map((cat: any) => {
+                  const isActive = draftMainCat === cat.slug;
+                  const cfg = CATEGORY_CONFIG[cat.slug] || { color: "text-slate-600", bg: "bg-slate-50 border-slate-200" };
+                  return (
+                    <button
+                      key={cat.slug}
+                      onClick={() => { setDraftMainCat(isActive ? null : cat.slug); setDraftSubCat("sve"); }}
+                      className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-black whitespace-nowrap transition-all border ${
+                        isActive
+                          ? `${cfg.bg} ${cfg.color} shadow-sm`
+                          : "bg-white text-slate-500 border-slate-200 hover:border-slate-300"
+                      }`}
+                    >
+                      <span>{getCatEmoji(cat.slug)}</span>
+                      <span>{getCatLabel(cat.slug)}</span>
+                      {isActive && <span className="opacity-60">×</span>}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+            {/* Podkategorija */}
+            {draftMainCat !== null && drawerSubCategories.length > 0 && (
+              <div>
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Podkategorija</p>
+                <div className="flex flex-wrap gap-2">
+                  {drawerSubCategories.map((cat: any) => {
+                    const isActive = draftSubCat === cat.slug;
+                    const cfg = CATEGORY_CONFIG[cat.slug] || { color: "text-slate-600", bg: "bg-slate-50 border-slate-200" };
+                    return (
+                      <button
+                        key={cat.slug}
+                        onClick={() => setDraftSubCat(isActive ? "sve" : cat.slug)}
+                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-black whitespace-nowrap transition-all border capitalize ${
+                          isActive
+                            ? `${cfg.bg} ${cfg.color} shadow-sm`
+                            : "bg-white text-slate-500 border-slate-200 hover:border-slate-300"
+                        }`}
+                      >
+                        <span>{getCatEmoji(cat.slug)}</span>
+                        <span>{getCatLabel(cat.slug)}</span>
+                        {isActive && <span className="opacity-60">×</span>}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+          {/* Footer */}
+          <div className="flex gap-3 px-5 py-4 border-t border-slate-100 flex-shrink-0">
+            <button
+              onClick={resetDraft}
+              className="flex-1 py-2.5 rounded-xl border border-slate-200 text-sm font-black text-slate-500 hover:bg-slate-50 transition-colors"
+            >
+              Resetiraj
+            </button>
+            <button
+              onClick={applyFilter}
+              className="flex-1 py-2.5 rounded-xl bg-blue-600 text-white text-sm font-black shadow-md hover:bg-blue-700 transition-colors"
+            >
+              Primijeni
+            </button>
+          </div>
+        </div>
       </div>
 
-      {/* FILTER NIVO 1 — Glavne kategorije (tabovi) */}
-      {mainCategories.length > 0 && (
-        <div className="flex flex-wrap gap-2 mb-2">
-          {mainCategories.map((cat: any) => {
-            const isActive = selectedMainCat === cat.slug;
-            const cfg = CATEGORY_CONFIG[cat.slug] || { emoji: "📦", color: "text-slate-600", bg: "bg-slate-50 border-slate-200" };
-            return (
-              <button
-                key={cat.slug}
-                onClick={() => { setSelectedMainCat(isActive ? null : cat.slug); setSelectedSubCat("sve"); }}
-                className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-black whitespace-nowrap transition-all border ${
-                  isActive
-                    ? `${cfg.bg} ${cfg.color} shadow-sm`
-                    : "bg-white text-slate-400 border-slate-200 hover:border-slate-300 hover:text-slate-600"
-                }`}
-              >
-                <span>{getCatEmoji(cat.slug)}</span>
-                <span>{getCatLabel(cat.slug)}</span>
-                {isActive && (
-                  <span className="ml-0.5 opacity-60 hover:opacity-100">×</span>
-                )}
-              </button>
-            );
-          })}
-        </div>
-      )}
+      {/* STRANICA */}
+      <div className="w-full p-4 md:p-10 max-w-7xl mx-auto min-h-screen flex flex-col animate-in fade-in duration-500">
 
-      {/* FILTER NIVO 2 — Podkategorije */}
-      {selectedMainCat !== null && subCategories.length > 0 && (
-        <div className="flex flex-wrap gap-2 mb-5 pl-2 border-l-2 border-slate-200">
-          {subCategories.map((cat: any) => {
-            const isActive = selectedSubCat === cat.slug;
-            const cfg = CATEGORY_CONFIG[cat.slug] || { emoji: "📦", color: "text-slate-600", bg: "bg-slate-50 border-slate-200" };
-            return (
-              <button
-                key={cat.slug}
-                onClick={() => setSelectedSubCat(isActive ? "sve" : cat.slug)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-black whitespace-nowrap transition-all border capitalize ${
-                  isActive
-                    ? `${cfg.bg} ${cfg.color} shadow-sm`
-                    : "bg-white text-slate-400 border-slate-200 hover:border-slate-300 hover:text-slate-600"
-                }`}
-              >
-                <span>{getCatEmoji(cat.slug)}</span>
-                <span>{getCatLabel(cat.slug)}</span>
-                {isActive && (
-                  <span className="ml-0.5 opacity-60 hover:opacity-100">×</span>
-                )}
-              </button>
-            );
-          })}
-        </div>
-      )}
-      <div className="mb-5" />
+        {/* HEADER */}
+        <div className="mb-5">
+          <Link href="/general" className="group inline-flex flex-col mb-4">
+            <div className="flex items-center gap-2 text-sm font-bold text-slate-400 group-hover:text-blue-600 transition-colors">
+              <ArrowLeft size={16} />
+              <span>{back.main}</span>
+            </div>
+            {!back.isOnlyHr && (
+              <span className="text-[10px] font-bold text-slate-300 ml-6 uppercase tracking-tighter italic">
+                {back.sub}
+              </span>
+            )}
+          </Link>
 
-      {/* GRID */}
-      {filteredWords.length === 0 ? (
-        <div className="flex-1 flex flex-col items-center justify-center py-20">
-          <div className="text-5xl mb-4">🔍</div>
-          <p className="text-slate-400 font-bold text-lg">{noWords.main}</p>
+          <div className="flex items-center justify-between gap-4 flex-wrap">
+            <div className="flex items-center gap-4">
+              <div className="bg-blue-600 p-3 rounded-2xl text-white shadow-lg">
+                <Globe2 size={24} className="md:hidden" />
+                <Globe2 size={28} className="hidden md:block" />
+              </div>
+              <div>
+                <h1 className="text-2xl md:text-4xl font-black text-slate-800 tracking-tight leading-none">
+                  {head.main}
+                </h1>
+                {!head.isOnlyHr && (
+                  <p className="text-[11px] font-black text-blue-400 uppercase mt-1 tracking-widest italic opacity-80">
+                    {head.sub}
+                  </p>
+                )}
+              </div>
+            </div>
+            <div className="flex items-center gap-2 text-slate-500 text-sm font-medium" />
+          </div>
         </div>
-      ) : (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-          {filteredWords.map((w) => {
-            const trans = typeof w.translations === "string" ? JSON.parse(w.translations) : w.translations || {};
-            return (
-              <FlipDictionaryCard
-                key={w.id}
-                wordHr={w.hr_word}
-                euTranslation={trans[euLang] || "—"}
-                nativeTranslation={trans[nativeLang] || "—"}
-                imageUrl={w.image_url}
-                audioUrl={w.audio_url}
-                wordType={w.word_type}
-              />
-            );
-          })}
+
+        {/* SEARCH */}
+        <div className="relative mb-3">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+          <input
+            type="text"
+            placeholder={placeholder.main}
+            className="w-full pl-11 pr-4 py-3 bg-white border border-slate-200 rounded-2xl font-bold focus:outline-none focus:border-blue-500 transition-all text-sm shadow-sm"
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
         </div>
-      )}
-    </div>
+
+        {/* FILTER BAR */}
+        <div className="flex items-center gap-2 mb-2 flex-wrap">
+          <button
+            onClick={openDrawer}
+            className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-black whitespace-nowrap transition-all border ${
+              isFilterActive
+                ? "bg-blue-600 text-white border-blue-600 shadow-md"
+                : "bg-white text-slate-600 border-slate-200 hover:border-slate-400"
+            }`}
+          >
+            <SlidersHorizontal size={13} />
+            <span>Filtriraj</span>
+          </button>
+          {previewParts.slice(0, 2).map((p, i) => (
+            <span key={i} className="text-xs font-bold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-lg whitespace-nowrap">
+              {p}
+            </span>
+          ))}
+          {previewParts.length > 2 && (
+            <span className="text-xs font-bold text-slate-400">...</span>
+          )}
+        </div>
+
+        {/* AKTIVNI FILTER BADGE */}
+        {isFilterActive && (
+          <div className="flex items-center mb-4">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-blue-50 text-blue-700 border border-blue-200">
+              🚩 {badgeLabel}
+              <button
+                onClick={clearActiveFilter}
+                className="ml-0.5 hover:text-blue-900 transition-colors"
+                aria-label="Resetiraj filter"
+              >
+                ✕
+              </button>
+            </span>
+          </div>
+        )}
+
+        <div className="mb-3" />
+
+        {/* GRID */}
+        {filteredWords.length === 0 ? (
+          <div className="flex-1 flex flex-col items-center justify-center py-20">
+            <div className="text-5xl mb-4">🔍</div>
+            <p className="text-slate-400 font-bold text-lg">{noWords.main}</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+            {filteredWords.map((w) => {
+              const trans = typeof w.translations === "string" ? JSON.parse(w.translations) : w.translations || {};
+              return (
+                <FlipDictionaryCard
+                  key={w.id}
+                  wordHr={w.hr_word}
+                  euTranslation={trans[euLang] || "—"}
+                  nativeTranslation={trans[nativeLang] || "—"}
+                  imageUrl={w.image_url}
+                  audioUrl={w.audio_url}
+                  wordType={w.word_type}
+                  category={w.category}
+                />
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </>
   );
 }

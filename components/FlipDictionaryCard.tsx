@@ -11,6 +11,7 @@ interface FlipDictionaryCardProps {
   imageUrl?: string;
   audioUrl?: string;
   wordType?: string;
+  category?: string;
 }
 
 export default function FlipDictionaryCard({
@@ -20,6 +21,7 @@ export default function FlipDictionaryCard({
   imageUrl,
   audioUrl,
   wordType,
+  category,
 }: FlipDictionaryCardProps) {
   const { t } = useLanguage();
   const [isFlipped, setIsFlipped] = useState(false);
@@ -114,7 +116,12 @@ export default function FlipDictionaryCard({
           {/* PREDNJA STRANA */}
           <div className="flip-card-front">
             <div style={{ flex: 1, background: "#f8fafc", position: "relative", overflow: "hidden" }}>
-              {wordType === 'broj' ? (
+              {category === 'abeceda' ? (
+                <div style={{ width: "100%", height: "100%", position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  {imageUrl && <img src={imageUrl} alt={wordHr} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />}
+                  <span style={{ position: "relative", fontSize: 90, fontWeight: 900, color: "white", lineHeight: 1, textShadow: "none", WebkitTextStroke: "0" }}>{wordHr}</span>
+                </div>
+              ) : wordType === 'broj' ? (
                 <div style={{ width: "100%", height: "100%", background: "linear-gradient(135deg, #6366f1, #8b5cf6)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 4 }}>
                   <span style={{ fontSize: 72, fontWeight: 900, color: "white", lineHeight: 1 }}>{wordHr.split(' ')[0]}</span>
                   <span style={{ fontSize: 13, fontWeight: 700, color: "rgba(255,255,255,0.6)", textTransform: "uppercase", letterSpacing: 2 }}>{wordHr}</span>
@@ -142,7 +149,7 @@ export default function FlipDictionaryCard({
                 </div>
               )}
 
-              {wordType && (
+              {wordType && category !== 'abeceda' && (
                 <span style={{ position: "absolute", top: 8, left: 8, background: "rgba(255,255,255,0.9)", color: "#64748b", fontSize: 9, fontWeight: 900, padding: "3px 8px", borderRadius: 8, textTransform: "uppercase", letterSpacing: 1 }}>
                   {wordType}
                 </span>
@@ -167,10 +174,13 @@ export default function FlipDictionaryCard({
           <div className="flip-card-back">
             <div style={{ flex: 1, background: "linear-gradient(135deg, #2563eb, #7c3aed)", position: "relative", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 20 }}>
               {imageUrl && (
-                <img src={imageUrl} alt={wordHr} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", opacity: 0.1 }} />
+                <img src={imageUrl} alt={wordHr} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", opacity: category === 'abeceda' ? 1 : 0.1 }} />
+              )}
+              {category === 'abeceda' && (
+                <div style={{ position: "absolute", inset: 0, background: "linear-gradient(135deg, rgba(37,99,235,0.4), rgba(124,58,237,0.4))" }} />
               )}
               <div style={{ position: "relative", textAlign: "center" }}>
-                <h3 style={{ fontSize: 24, fontWeight: 900, color: "white", lineHeight: 1.2, marginBottom: 6 }}>
+                <h3 style={{ fontSize: category === 'abeceda' ? 80 : 24, fontWeight: 900, color: "white", lineHeight: 1.2, marginBottom: 6, textShadow: category === 'abeceda' ? "0 2px 8px rgba(0,0,0,0.4)" : "none" }}>
                   {wordHr}
                 </h3>
                 <p style={{ fontSize: 13, color: "rgba(191,219,254,0.9)", fontStyle: "italic" }}>
