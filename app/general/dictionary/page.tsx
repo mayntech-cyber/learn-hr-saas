@@ -11,7 +11,7 @@ export default async function GeneralDictionaryPage() {
     .from('dictionary')
     .select('id, hr_word, translations, image_url, audio_url, word_type, category') 
     .order('hr_word', { ascending: true })
-    .limit(10000); 
+    .limit(2000); 
 
   // Dohvati kategorije s prijevodima
   const { data: categories } = await supabase

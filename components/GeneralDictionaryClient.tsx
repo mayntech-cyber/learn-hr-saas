@@ -32,6 +32,8 @@ export default function GeneralDictionaryClient({ words, categoryData = [] }: { 
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [draftMainCat, setDraftMainCat] = useState<string | null>(null);
   const [draftSubCat, setDraftSubCat] = useState("sve");
+  const [currentPage, setCurrentPage] = useState(1);
+  const PAGE_SIZE = 60;
   const defaultsApplied = useRef(false);
   const touchStartY = useRef(0);
 
@@ -92,6 +94,7 @@ export default function GeneralDictionaryClient({ words, categoryData = [] }: { 
   };
 
   const filteredWords = useMemo(() => {
+    setCurrentPage(1);
     return words.filter((w) => {
       let matchesCategory = true;
       if (selectedSubCat !== "sve") {
@@ -107,6 +110,9 @@ export default function GeneralDictionaryClient({ words, categoryData = [] }: { 
       return matchesCategory && matchesSearch;
     });
   }, [words, searchTerm, selectedMainCat, selectedSubCat, subCategories]);
+
+  const totalPages = Math.ceil(filteredWords.length / PAGE_SIZE);
+  const paginatedWords = filteredWords.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
   const openDrawer = () => {
     setDraftMainCat(selectedMainCat);
@@ -342,23 +348,54 @@ export default function GeneralDictionaryClient({ words, categoryData = [] }: { 
             <p className="text-slate-400 font-bold text-lg">{noWords.main}</p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-            {filteredWords.map((w) => {
-              const trans = typeof w.translations === "string" ? JSON.parse(w.translations) : w.translations || {};
-              return (
-                <FlipDictionaryCard
-                  key={w.id}
-                  wordHr={w.hr_word}
-                  euTranslation={trans[euLang] || "—"}
-                  nativeTranslation={trans[nativeLang] || "—"}
-                  imageUrl={w.image_url}
-                  audioUrl={w.audio_url}
-                  wordType={w.word_type}
-                  category={w.category}
-                />
-              );
-            })}
-          </div>
+          <>
+            {/* Broj rezultata */}
+            <p className="text-xs font-bold text-slate-400 mb-3">
+              {filteredWords.length} {filteredWords.length === 1 ? "riječ" : "riječi"}
+              {totalPages > 1 && ` · stranica ${currentPage} / ${totalPages}`}
+            </p>
+
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+              {paginatedWords.map((w) => {
+                const trans = typeof w.translations === "string" ? JSON.parse(w.translations) : w.translations || {};
+                return (
+                  <FlipDictionaryCard
+                    key={w.id}
+                    wordHr={w.hr_word}
+                    euTranslation={trans[euLang] || "—"}
+                    nativeTranslation={trans[nativeLang] || "—"}
+                    imageUrl={w.image_url}
+                    audioUrl={w.audio_url}
+                    wordType={w.word_type}
+                    category={w.category}
+                  />
+                );
+              })}
+            </div>
+
+            {/* PAGINACIJA */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-center gap-3 mt-10">
+                <button
+                  onClick={() => { setCurrentPage(p => Math.max(1, p - 1)); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+                  disabled={currentPage === 1}
+                  className="px-5 py-2.5 rounded-xl border border-slate-200 text-sm font-black text-slate-600 hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                >
+                  ← Prethodna
+                </button>
+                <span className="text-sm font-black text-slate-500 bg-slate-100 px-4 py-2 rounded-xl">
+                  {currentPage} / {totalPages}
+                </span>
+                <button
+                  onClick={() => { setCurrentPage(p => Math.min(totalPages, p + 1)); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+                  disabled={currentPage === totalPages}
+                  className="px-5 py-2.5 rounded-xl border border-slate-200 text-sm font-black text-slate-600 hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                >
+                  Sljedeća →
+                </button>
+              </div>
+            )}
+          </>
         )}
       </div>
     </>
