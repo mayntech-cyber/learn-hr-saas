@@ -361,6 +361,7 @@ export default function GeneralDictionaryClient({ words, categoryData = [] }: { 
                 return (
                   <FlipDictionaryCard
                     key={w.id}
+                    wordId={w.id}
                     wordHr={w.hr_word}
                     euTranslation={trans[euLang] || "—"}
                     nativeTranslation={trans[nativeLang] || "—"}

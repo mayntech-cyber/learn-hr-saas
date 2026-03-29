@@ -1,7 +1,11 @@
 {
   "permissions": {
     "allow": [
-      "Bash(grep -r \"word_type\\\\|selectedType\\\\|selectedCategory\" C:language-front/components --include=*.ts --include=*.tsx)"
+      "Bash(grep -r \"word_type\\\\|selectedType\\\\|selectedCategory\" C:language-front/components --include=*.ts --include=*.tsx)",
+      "Bash(grep -r \"user_test_results\\\\|user_progress\\\\|word_progress\\\\|completed_lessons\\\\|streak\" /c/language-front/app --include=*.tsx --include=*.ts)",
+      "Bash(xargs grep:*)",
+      "Bash(find /c/language-front -name .env* -o -name supabase.json)",
+      "Bash(find . -name *.sql -o -name migrations -o -name schema*)"
     ]
   }
 }

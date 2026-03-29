@@ -26,12 +26,17 @@ export default async function ProfilePage() {
     : "Siječanj 2024";
 
   // ---> OVDJE JE BIO KVAR: Sad vučemo pravi current_job_id iz baze! <---
+  const metaName = user.user_metadata?.full_name as string | undefined;
+  const metaAvatar = user.user_metadata?.avatar_url as string | undefined;
+
   const userData = {
-    name: profile?.full_name || "Korisnik",
+    name: profile?.full_name || metaName || user.email?.split('@')[0] || "Korisnik",
     email: user.email,
     joined: joinedDate,
-    jobId: profile?.current_job_id || 1, 
-    xp_points: profile?.xp_points || 0
+    jobId: profile?.current_job_id || 1,
+    xp_points: profile?.xp_points || 0,
+    avatarUrl: metaAvatar || null,
+    streak: profile?.streak_days || 0,
   };
 
   // 3. Dohvati stvarni posao korisnika (s prijevodima!)

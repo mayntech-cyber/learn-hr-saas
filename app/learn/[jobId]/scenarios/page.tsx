@@ -42,5 +42,9 @@ export default async function ScenariosPage({ params }: { params: Promise<{ jobI
   }
 
   // ŠALJEMO PODATKE KLIJENTU (I fraze i podatke o poslu!)
-  return <ScenarioClient scenarios={phrases} job={job} />;
+  return (
+    <div className="w-full min-h-screen">
+      <ScenarioClient scenarios={phrases} job={job} />
+    </div>
+  );
 }

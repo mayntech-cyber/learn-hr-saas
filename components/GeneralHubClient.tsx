@@ -13,8 +13,30 @@ export default function GeneralHubClient() {
   // 1. Pravilno izvlačenje varijabli iz tvog Contexta
   const { t, uiMode, euLang, nativeLang } = useLanguage(); 
   
-  // 2. State za spremanje URL-a PDF-a
+  // 2. State za spremanje URL-a PDF-a i progress podataka
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+  const [knownWords, setKnownWords] = useState<number>(0);
+  const [completedScenarios, setCompletedScenarios] = useState<number>(0);
+  const [practiceSessions, setPracticeSessions] = useState<number>(0);
+
+  useEffect(() => {
+    async function fetchProgress() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const [wordsRes, scenariosRes, sessionsRes] = await Promise.all([
+        supabase.from('word_progress').select('*', { count: 'exact', head: true }).eq('user_id', user.id).eq('status', 'known'),
+        supabase.from('scenario_progress').select('*', { count: 'exact', head: true }).eq('user_id', user.id).eq('status', 'completed'),
+        supabase.from('user_test_results').select('*', { count: 'exact', head: true }).eq('user_id', user.id),
+      ]);
+
+      setKnownWords(wordsRes.count ?? 0);
+      setCompletedScenarios(scenariosRes.count ?? 0);
+      setPracticeSessions(sessionsRes.count ?? 0);
+    }
+
+    fetchProgress();
+  }, []);
 
   useEffect(() => {
     async function fetchManual() {
@@ -102,7 +124,7 @@ export default function GeneralHubClient() {
       <div className="grid grid-cols-2 gap-3 md:gap-8">
         
         {/* RJEČNIK */}
-        <Link href="/general/dictionary" className="group bg-white p-4 md:p-8 rounded-2xl md:rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-xl transition-all flex flex-col items-center text-center h-full">
+        <Link href="/general/dictionary" className="group bg-white p-4 md:p-8 rounded-2xl md:rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-xl transition-all flex flex-col items-center text-center h-full" style={{ borderLeft: '3px solid #3b82f6' }}>
           <div className="bg-blue-50 p-3 md:p-6 rounded-full text-blue-600 mb-3 md:mb-6 group-hover:scale-110 transition-transform shadow-inner">
             <BookOpen size={28} className="md:hidden" /><BookOpen size={48} className="hidden md:block" />
           </div>
@@ -112,13 +134,22 @@ export default function GeneralHubClient() {
              <p>{dictDesc.main}</p>
              {!dictDesc.isOnlyHr && <p className="text-[10px] text-slate-400 font-bold mt-1 uppercase italic">{dictDesc.sub}</p>}
           </div>
+          <div style={{ width: '100%', marginBottom: '0.5rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+              <span style={{ fontSize: 11, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: 0.5 }}>Naučeno</span>
+              <span style={{ fontSize: 11, fontWeight: 700, color: '#3b82f6' }}>{knownWords} riječi</span>
+            </div>
+            <div style={{ height: 3, background: 'rgba(0,0,0,0.06)', borderRadius: 99 }}>
+              <div style={{ height: '100%', width: '0%', background: '#3b82f6', borderRadius: 99 }} />
+            </div>
+          </div>
           <span className="w-full bg-blue-100 text-blue-700 font-black py-2 md:py-4 rounded-xl md:rounded-2xl text-[10px] md:text-xs uppercase tracking-wider group-hover:bg-blue-600 group-hover:text-white transition-colors">
             {dictBtn.main}
           </span>
         </Link>
 
         {/* SCENARIJI */}
-        <Link href="/general/scenarios" className="group bg-white p-4 md:p-8 rounded-2xl md:rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-xl transition-all flex flex-col items-center text-center h-full">
+        <Link href="/general/scenarios" className="group bg-white p-4 md:p-8 rounded-2xl md:rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-xl transition-all flex flex-col items-center text-center h-full" style={{ borderLeft: '3px solid #10b981' }}>
           <div className="bg-emerald-50 p-3 md:p-6 rounded-full text-emerald-600 mb-3 md:mb-6 group-hover:scale-110 transition-transform shadow-inner">
             <MessageSquare size={28} className="md:hidden" /><MessageSquare size={48} className="hidden md:block" />
           </div>
@@ -128,12 +159,21 @@ export default function GeneralHubClient() {
              <p>{scenDesc.main}</p>
              {!scenDesc.isOnlyHr && <p className="text-[10px] text-slate-400 font-bold mt-1 uppercase italic">{scenDesc.sub}</p>}
           </div>
+          <div style={{ width: '100%', marginBottom: '0.5rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+              <span style={{ fontSize: 11, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: 0.5 }}>Završeno</span>
+              <span style={{ fontSize: 11, fontWeight: 700, color: '#10b981' }}>{completedScenarios} završeno</span>
+            </div>
+            <div style={{ height: 3, background: 'rgba(0,0,0,0.06)', borderRadius: 99 }}>
+              <div style={{ height: '100%', width: '0%', background: '#10b981', borderRadius: 99 }} />
+            </div>
+          </div>
           <span className="w-full bg-emerald-100 text-emerald-700 font-black py-2 md:py-4 rounded-xl md:rounded-2xl text-[10px] md:text-xs uppercase tracking-wider group-hover:bg-emerald-600 group-hover:text-white transition-colors">
             {scenBtn.main}
           </span>
         </Link>
 
-        {/* VJEŽBA */}
+        {/* VJEŽBA — tamna kartica, bez border-left */}
         <Link href="/general/practice" className="group bg-slate-900 p-4 md:p-8 rounded-2xl md:rounded-[2.5rem] border border-slate-800 shadow-lg hover:shadow-xl transition-all flex flex-col items-center text-center h-full">
           <div className="bg-white/10 p-3 md:p-6 rounded-full text-orange-400 mb-3 md:mb-6 group-hover:scale-110 transition-transform">
             <BrainCircuit size={28} className="md:hidden" /><BrainCircuit size={48} className="hidden md:block" />
@@ -144,13 +184,22 @@ export default function GeneralHubClient() {
              <p>{pracDesc.main}</p>
              {!pracDesc.isOnlyHr && <p className="text-[10px] text-slate-400 font-bold mt-1 uppercase italic">{pracDesc.sub}</p>}
           </div>
+          <div style={{ width: '100%', marginBottom: '0.5rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+              <span style={{ fontSize: 11, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: 0.5 }}>Sesije</span>
+              <span style={{ fontSize: 11, fontWeight: 700, color: '#f97316' }}>{practiceSessions}</span>
+            </div>
+            <div style={{ height: 3, background: 'rgba(255,255,255,0.1)', borderRadius: 99 }}>
+              <div style={{ height: '100%', width: '0%', background: '#f97316', borderRadius: 99 }} />
+            </div>
+          </div>
           <span className="w-full bg-orange-500 text-white font-black py-2 md:py-4 rounded-xl md:rounded-2xl shadow-md group-hover:bg-orange-600 transition-colors text-[10px] md:text-xs uppercase tracking-wider">
             {pracBtn.main}
           </span>
         </Link>
 
         {/* GRAMATIKA */}
-        <Link href="/general/grammar" className="group bg-white p-4 md:p-8 rounded-2xl md:rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-xl transition-all flex flex-col items-center text-center h-full">
+        <Link href="/general/grammar" className="group bg-white p-4 md:p-8 rounded-2xl md:rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-xl transition-all flex flex-col items-center text-center h-full" style={{ borderLeft: '3px solid #a855f7' }}>
           <div className="bg-purple-50 p-3 md:p-6 rounded-full text-purple-600 mb-3 md:mb-6 group-hover:scale-110 transition-transform shadow-inner">
             <Puzzle size={28} className="md:hidden" /><Puzzle size={48} className="hidden md:block" />
           </div>
@@ -159,6 +208,15 @@ export default function GeneralHubClient() {
           <div className="text-slate-500 font-medium mb-3 md:mb-8 flex-1 text-[10px] md:text-base line-clamp-2 md:line-clamp-none block">
              <p>{gramDesc.main}</p>
              {!gramDesc.isOnlyHr && <p className="text-[10px] text-slate-400 font-bold mt-1 uppercase italic">{gramDesc.sub}</p>}
+          </div>
+          <div style={{ width: '100%', marginBottom: '0.5rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+              <span style={{ fontSize: 11, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: 0.5 }}>Lekcije</span>
+              <span style={{ fontSize: 11, fontWeight: 700, color: '#a855f7' }}>0 / 3</span>
+            </div>
+            <div style={{ height: 3, background: 'rgba(0,0,0,0.06)', borderRadius: 99 }}>
+              <div style={{ height: '100%', width: '0%', background: '#a855f7', borderRadius: 99 }} />
+            </div>
           </div>
           <span className="w-full bg-purple-100 text-purple-700 font-black py-2 md:py-4 rounded-xl md:rounded-2xl text-[10px] md:text-xs uppercase tracking-wider group-hover:bg-purple-600 group-hover:text-white transition-colors">
             {gramBtn.main}

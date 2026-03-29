@@ -83,8 +83,9 @@ export default function DictionaryClient({ words, job }: { words: any[], job?: a
           const nativeTrans = parsedTranslations[safeNative] || "Prijevod nedostaje";
 
           return (
-            <FlipDictionaryCardJob 
+            <FlipDictionaryCardJob
               key={w.id}
+              wordId={w.id}
               wordHr={w.hr_word}
               euTranslation={euTrans}
               nativeTranslation={nativeTrans}
