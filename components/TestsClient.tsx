@@ -6,13 +6,14 @@ import { useLanguage } from "./LanguageContext";
 import FlashcardPlayer from "./FlashcardPlayer"; 
 import MatchGamePlayer from "./MatchGamePlayer";
 import QuizPlayer from "./QuizPlayer";
+import GapFillPlayer from "./GapFillPlayer";
 
 export default function TestsClient({ userId, userPlan, bgImage }: { userId?: string, userPlan?: string, bgImage?: string | null }) {
   const supabase = createClient();
   const [lessons, setLessons] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"general" | "professional">("general");
-  const [activeGame, setActiveGame] = useState<"NONE" | "FLASHCARDS" | "MATCH" | "QUIZ">("NONE");
+  const [activeGame, setActiveGame] = useState<"NONE" | "FLASHCARDS" | "MATCH" | "QUIZ" | "GAPFILL">("NONE");
   const [selectedLesson, setSelectedLesson] = useState<any>(null);
   const [lessonWords, setLessonWords] = useState<any[]>([]);
   const [loadingWords, setLoadingWords] = useState(false);
@@ -30,6 +31,7 @@ export default function TestsClient({ userId, userPlan, bgImage }: { userId?: st
   const [availableLevels, setAvailableLevels] = useState<number[]>([]);
   const [allLessonWords, setAllLessonWords] = useState<any[]>([]);
   const [activeLevel, setActiveLevel] = useState(1);
+  const [pendingGame, setPendingGame] = useState<"QUIZ" | "GAPFILL">("QUIZ");
 
   // PRIJEVODI
   const tTitle = t("Testovi i Vježbe");
@@ -120,9 +122,9 @@ export default function TestsClient({ userId, userPlan, bgImage }: { userId?: st
   }, [userId, activeGame === "NONE"]);
 
   const getHighestLevelPassed = (lessonId: string) => {
-    const passedQuizzes = userResults.filter(r => 
-      r.category_id === lessonId && 
-      r.game_type?.startsWith("ABC_QUIZ_") && 
+    const passedQuizzes = userResults.filter(r =>
+      r.category_id === lessonId &&
+      (r.game_type?.startsWith("ABC_QUIZ_") || r.game_type?.startsWith("GAP_FILL_")) &&
       r.accuracy_percentage >= 80
     );
 
@@ -132,9 +134,9 @@ export default function TestsClient({ userId, userPlan, bgImage }: { userId?: st
   };
 
   const isLevelPassed = (lessonId: string, level: number) => {
-    return userResults.some(r => 
-      r.category_id === lessonId && 
-      r.game_type === `ABC_QUIZ_${level}` && 
+    return userResults.some(r =>
+      r.category_id === lessonId &&
+      (r.game_type === `ABC_QUIZ_${level}` || r.game_type === `GAP_FILL_${level}`) &&
       r.accuracy_percentage >= 80
     );
   };
@@ -161,6 +163,7 @@ export default function TestsClient({ userId, userPlan, bgImage }: { userId?: st
     setAllLessonWords(formattedWords);
     setAvailableLevels(levels);
     setSelectedLesson(lesson);
+    setPendingGame("QUIZ");
     setShowLevelModal(true);
     setLoadingWords(false);
   };
@@ -173,29 +176,66 @@ export default function TestsClient({ userId, userPlan, bgImage }: { userId?: st
     setActiveGame("QUIZ");
   };
 
+  const startGapFillLevel = (level: number) => {
+    const filteredWords = allLessonWords.filter(w => w.level === level);
+    setLessonWords(filteredWords);
+    setActiveLevel(level);
+    setShowLevelModal(false);
+    setActiveGame("GAPFILL");
+  };
+
   const openFlashcards = async (lesson: any) => {
     setLoadingWords(true);
     setSelectedLesson(lesson);
-    setActiveGame("FLASHCARDS");
-    
+
     const { data, error } = await supabase
       .from("edu_vocabulary")
-      .select("id, hr_word, translations") 
-      .eq("lesson_id", lesson.id)
-      .eq("difficulty_level", 1)
-      .order("difficulty_level", { ascending: true });
+      .select("id, hr_word, translations")
+      .eq("lesson_id", lesson.id);
 
     if (error) console.error("Greška pri povlačenju riječi:", error);
-      
-    const formattedWords = (data || []).map((w: any) => ({
+
+    const formattedWords = [...(data || [])]
+      .sort(() => Math.random() - 0.5)
+      .slice(0, 20)
+      .map((w: any) => ({
+        id: w.id,
+        word_hr: w.hr_word,
+        translations: w.translations,
+        image_url: "",
+        audio_url: "",
+      }));
+
+    setLessonWords(formattedWords);
+    setActiveGame("FLASHCARDS");
+    setLoadingWords(false);
+  };
+
+  const openGapFill = async (lesson: any) => {
+    setLoadingWords(true);
+    const { data, error } = await supabase
+      .from("edu_vocabulary")
+      .select("id, hr_word, translations, difficulty_level, context_sentence")
+      .eq("lesson_id", lesson.id);
+
+    if (error) console.error(error);
+
+    const words = data || [];
+    const levels = Array.from(new Set(words.map(w => w.difficulty_level || 1))).sort();
+
+    const formattedWords = words.map((w: any) => ({
       id: w.id,
       word_hr: w.hr_word,
       translations: w.translations,
-      image_url: "", 
-      audio_url: ""  
+      context_sentence: w.context_sentence,
+      level: w.difficulty_level || 1,
     }));
 
-    setLessonWords(formattedWords);
+    setAllLessonWords(formattedWords);
+    setAvailableLevels(levels);
+    setSelectedLesson(lesson);
+    setPendingGame("GAPFILL");
+    setShowLevelModal(true);
     setLoadingWords(false);
   };
 
@@ -232,11 +272,12 @@ export default function TestsClient({ userId, userPlan, bgImage }: { userId?: st
       </div>
     );
     return (
-      <div className="min-h-screen">
+      <div className="min-h-screen pt-6 pb-8 px-4">
         <FlashcardPlayer
-          words={lessonWords} 
+          words={lessonWords}
           job={{ id: selectedLesson.id, name_hr: selectedLesson.name }}
-          isGeneral={true} 
+          isGeneral={true}
+          onClose={() => setActiveGame("NONE")}
         />
       </div>
     );
@@ -250,15 +291,7 @@ export default function TestsClient({ userId, userPlan, bgImage }: { userId?: st
       </div>
     );
     return (
-      <div
-        className="min-h-screen pt-4 md:pt-10"
-        style={bgImage ? {
-          backgroundImage: `linear-gradient(rgba(255,255,255,0.65), rgba(255,255,255,0.65)), url(${bgImage})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          paddingBottom: '2rem',
-        } : { background: '#f8fafc', paddingBottom: '2rem' }}
-      >
+      <div className="min-h-screen pt-6 pb-8 px-4">
         <MatchGamePlayer lesson={selectedLesson} words={lessonWords} onClose={() => setActiveGame("NONE")} />
       </div>
     );
@@ -267,7 +300,7 @@ export default function TestsClient({ userId, userPlan, bgImage }: { userId?: st
   if (activeGame === "QUIZ" && selectedLesson) {
     if (loadingWords) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="animate-spin" /></div>;
     return (
-      <div className="min-h-screen pt-10" style={{ paddingBottom: '2rem' }}>
+      <div className="min-h-screen pt-6 pb-8 px-4">
         <QuizPlayer 
           lesson={selectedLesson} 
           words={lessonWords} 
@@ -275,6 +308,20 @@ export default function TestsClient({ userId, userPlan, bgImage }: { userId?: st
           isProfessional={activeTab === "professional"}
           userId={userId} 
           activeLevel={activeLevel} 
+        />
+      </div>
+    );
+  }
+
+  if (activeGame === "GAPFILL" && selectedLesson) {
+    if (loadingWords) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="animate-spin" /></div>;
+    return (
+      <div className="min-h-screen pt-6 pb-8 px-4">
+        <GapFillPlayer
+          lesson={selectedLesson}
+          words={lessonWords}
+          onClose={() => setActiveGame("NONE")}
+          activeLevel={activeLevel}
         />
       </div>
     );
@@ -305,7 +352,7 @@ export default function TestsClient({ userId, userPlan, bgImage }: { userId?: st
                   <button 
                     key={lvl}
                     disabled={!isUnlocked}
-                    onClick={() => startQuizLevel(lvl)}
+                    onClick={() => pendingGame === "GAPFILL" ? startGapFillLevel(lvl) : startQuizLevel(lvl)}
                     className={`w-full flex items-center justify-between p-4 rounded-2xl border-2 font-bold transition-all ${
                       isUnlocked 
                         ? hasPassedThis 
@@ -331,7 +378,7 @@ export default function TestsClient({ userId, userPlan, bgImage }: { userId?: st
         </div>
       )}
 
-      <div className="flex flex-row justify-between items-start mb-8 gap-4">
+      <div className="flex flex-row justify-between items-start mb-8 gap-4" style={{ background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(12px)', borderRadius: 16, padding: '1.5rem', marginBottom: '1.5rem' }}>
         <div>
           <h1 className="text-xl md:text-4xl font-black text-slate-800 flex items-center gap-3 whitespace-nowrap">
             <Gamepad2 className="text-blue-600" size={32} />
@@ -486,14 +533,17 @@ export default function TestsClient({ userId, userPlan, bgImage }: { userId?: st
                     <span className="text-[11px] font-black text-blue-600 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-full">+30 XP</span>
                   </button>
 
-                  {/* Rupa u rečenici — nije implementirano */}
-                  <div className="flex items-center justify-between px-4 py-3 opacity-40 cursor-not-allowed select-none">
+                  {/* Rupa u rečenici */}
+                  <button
+                    onClick={() => openGapFill(lesson)}
+                    className="flex items-center justify-between px-4 py-3 hover:bg-yellow-50 transition-colors group text-left"
+                  >
                     <div className="flex items-center gap-3">
                       <span className="w-8 h-8 rounded-lg bg-yellow-100 flex items-center justify-center text-base">✏️</span>
-                      <span className="font-bold text-slate-700 text-sm">{tGapFill.main}</span>
+                      <span className="font-bold text-slate-700 text-sm group-hover:text-yellow-700 transition-colors">{tGapFill.main}</span>
                     </div>
                     <span className="text-[11px] font-black text-yellow-600 bg-yellow-50 border border-yellow-200 px-2 py-0.5 rounded-full">+40 XP</span>
-                  </div>
+                  </button>
 
                   {/* Glavni kviz */}
                   <button

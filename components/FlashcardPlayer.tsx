@@ -13,10 +13,12 @@ interface Word {
   audio_url: string;
 }
 
-export default function FlashcardPlayer({ words, job, isGeneral }: { words: Word[], job?: any, isGeneral?: boolean }) {
+export default function FlashcardPlayer({ words, job, isGeneral, onClose }: { words: Word[], job?: any, isGeneral?: boolean, onClose?: () => void }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showTranslation, setShowTranslation] = useState(false);
   const [seenCards, setSeenCards] = useState<Set<number>>(new Set());
+  const [knownCards, setKnownCards] = useState<Set<string>>(new Set());
+  const [isFinished, setIsFinished] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   
   const { euLang, nativeLang, t, uiMode } = useLanguage();
@@ -96,6 +98,17 @@ export default function FlashcardPlayer({ words, job, isGeneral }: { words: Word
     if (currentIndex < words.length - 1) setCurrentIndex(currentIndex + 1);
   };
 
+  const handleKnown = () => {
+    const newKnown = new Set(knownCards).add(currentWord.id);
+    setKnownCards(newKnown);
+    if (currentIndex === words.length - 1) {
+      setIsFinished(true);
+    } else {
+      setShowTranslation(false);
+      setCurrentIndex(i => i + 1);
+    }
+  };
+
   const progress = ((currentIndex + 1) / words.length) * 100;
 
   // Parsiranje prijevoda riječi
@@ -109,24 +122,78 @@ export default function FlashcardPlayer({ words, job, isGeneral }: { words: Word
   const euTranslation = parsedTranslations[euLang] || "—";
   const nativeTranslation = parsedTranslations[nativeLang] || "—";
 
-  const earnedXP = seenCards.size * 5;
+  const earnedXP = knownCards.size * 5;
+  const knownRatio = words.length > 0 ? knownCards.size / words.length : 0;
+  const xpBadgeGradient = knownRatio >= 0.7
+    ? 'linear-gradient(135deg, #10b981, #059669)'
+    : knownRatio >= 0.4
+      ? 'linear-gradient(135deg, #f59e0b, #d97706)'
+      : 'linear-gradient(135deg, #f97316, #ea580c)';
+
+  if (isFinished) {
+    const xp = knownCards.size * 5;
+    return (
+      <div className="p-4 md:p-10 flex flex-col animate-in fade-in duration-500 max-w-4xl mx-auto w-full items-center justify-center min-h-[60vh]">
+        <div className="bg-white rounded-[3rem] shadow-xl border border-slate-100 p-10 text-center max-w-md w-full">
+          <div className="w-24 h-24 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-6">
+            <span style={{ fontSize: 48 }}>🎉</span>
+          </div>
+          <h2 className="text-4xl font-black text-slate-800 mb-2">Gotovo!</h2>
+          <p className="text-slate-500 font-bold mb-6 italic">
+            Znaš {knownCards.size} od {words.length} riječi.
+          </p>
+          <div className="mb-8 p-4 rounded-2xl bg-emerald-50 border-2 border-emerald-100">
+            <p className="text-emerald-600 font-black text-2xl">+{xp} XP</p>
+          </div>
+          <div className="space-y-3">
+            <button
+              onClick={() => { setCurrentIndex(0); setKnownCards(new Set()); setSeenCards(new Set()); setIsFinished(false); setShowTranslation(false); }}
+              className="w-full bg-orange-500 text-white py-4 rounded-2xl font-black hover:scale-105 transition-transform"
+            >
+              Pokušaj ponovno
+            </button>
+            {onClose && (
+              <button onClick={onClose} className="w-full bg-slate-100 text-slate-600 py-4 rounded-2xl font-black hover:bg-slate-200 transition-colors">
+                Završi
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="p-4 md:p-10 min-h-screen flex flex-col animate-in fade-in duration-500 max-w-4xl mx-auto w-full">
+    <div className="p-4 md:p-10 flex flex-col animate-in fade-in duration-500 max-w-4xl mx-auto w-full">
 
       {/* --- HEADER (isti layout kao ScenarioClient) --- */}
-      <div className="mb-8">
-        <Link href={isGeneral ? '/quizzes' : backUrl} className="group inline-flex flex-col mb-6">
-          <div className="flex items-center gap-2 text-sm font-bold text-slate-400 group-hover:text-orange-500 transition-colors">
-            <ArrowLeft size={16} />
-            <span>{backBtn.main}</span>
-          </div>
-          {!backBtn.isOnlyHr && (
-            <span className="text-[10px] font-bold text-slate-300 ml-6 uppercase tracking-tighter italic">
-              {backBtn.sub}
-            </span>
-          )}
-        </Link>
+      <div style={{ background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(12px)', borderRadius: 16, padding: '1rem 1.25rem', marginBottom: '1.5rem' }}>
+      <div className="mb-8" style={{ marginBottom: 0 }}>
+        {isGeneral && onClose ? (
+          <button onClick={onClose} className="group inline-flex flex-col mb-6 text-left">
+            <div className="flex items-center gap-2 text-sm font-bold text-slate-400 group-hover:text-orange-500 transition-colors">
+              <ArrowLeft size={16} />
+              <span>{backBtn.main}</span>
+            </div>
+            {!backBtn.isOnlyHr && (
+              <span className="text-[10px] font-bold text-slate-300 ml-6 uppercase tracking-tighter italic">
+                {backBtn.sub}
+              </span>
+            )}
+          </button>
+        ) : (
+          <Link href={isGeneral ? '/quizzes' : backUrl} className="group inline-flex flex-col mb-6">
+            <div className="flex items-center gap-2 text-sm font-bold text-slate-400 group-hover:text-orange-500 transition-colors">
+              <ArrowLeft size={16} />
+              <span>{backBtn.main}</span>
+            </div>
+            {!backBtn.isOnlyHr && (
+              <span className="text-[10px] font-bold text-slate-300 ml-6 uppercase tracking-tighter italic">
+                {backBtn.sub}
+              </span>
+            )}
+          </Link>
+        )}
 
         <div className="flex items-center gap-4">
           <div className="bg-orange-500 p-3 rounded-2xl text-white shadow-md">
@@ -144,6 +211,7 @@ export default function FlashcardPlayer({ words, job, isGeneral }: { words: Word
             )}
           </div>
         </div>
+      </div>
       </div>
 
       {/* --- KARTICA (iste CSS klase i dimenzije kao ScenarioClient) --- */}
@@ -167,7 +235,7 @@ export default function FlashcardPlayer({ words, job, isGeneral }: { words: Word
 
       {/* Navigacijski red iznad kartice */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
-        <span style={{ background: 'linear-gradient(135deg, #f97316, #ea580c)', color: 'white', fontSize: '0.7rem', fontWeight: 800, padding: '4px 10px', borderRadius: 8 }}>
+        <span style={{ background: xpBadgeGradient, color: 'white', fontSize: '0.7rem', fontWeight: 800, padding: '4px 10px', borderRadius: 8, transition: 'background 0.5s' }}>
           +{earnedXP} XP
         </span>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -205,14 +273,6 @@ export default function FlashcardPlayer({ words, job, isGeneral }: { words: Word
             </>}
             <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.80) 0%, rgba(0,0,0,0.20) 50%, transparent 100%)' }} />
 
-            {/* Audio */}
-            <button
-              onClick={e => { e.stopPropagation(); playAudio(); }}
-              style={{ position: 'absolute', bottom: 14, right: 16, background: '#f97316', color: 'white', border: 'none', borderRadius: '50%', width: 44, height: 44, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: '0 4px 14px rgba(249,115,22,0.5)' }}
-            >
-              <Volume2 size={18} />
-            </button>
-
             {/* Riječ u sredini */}
             <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '4rem 1.75rem 5rem' }}>
               <p style={{ fontSize: 'clamp(1.35rem, 4vw, 1.9rem)', fontWeight: 900, color: 'white', lineHeight: 1.35, textAlign: 'center', textShadow: '0 2px 8px rgba(0,0,0,0.5)' }}>
@@ -238,14 +298,6 @@ export default function FlashcardPlayer({ words, job, isGeneral }: { words: Word
             )}
             <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.75)' }} />
 
-            {/* Audio */}
-            <button
-              onClick={e => { e.stopPropagation(); playAudio(); }}
-              style={{ position: 'absolute', bottom: 14, right: 16, background: 'rgba(249,115,22,0.85)', color: 'white', border: 'none', borderRadius: '50%', width: 44, height: 44, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: '0 4px 14px rgba(249,115,22,0.4)' }}
-            >
-              <Volume2 size={18} />
-            </button>
-
             {/* Prijevodi u sredini */}
             <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '4rem 1.75rem 5rem', gap: '1rem', textAlign: 'center' }}>
               {nativeTranslation && nativeTranslation !== '—' && (
@@ -269,25 +321,48 @@ export default function FlashcardPlayer({ words, job, isGeneral }: { words: Word
           </div>
 
         </div>
+        <button
+          onClick={e => { e.stopPropagation(); playAudio(); }}
+          style={{ position: 'absolute', bottom: 14, right: 16, zIndex: 20, background: '#f97316', color: 'white', border: 'none', borderRadius: '50%', width: 44, height: 44, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: '0 4px 14px rgba(249,115,22,0.5)' }}
+        >
+          <Volume2 size={18} />
+        </button>
       </div>
 
       {/* GUMBI ISPOD */}
-      <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1rem' }}>
-        <button
-          onClick={() => { setShowTranslation(false); if (currentIndex > 0) setCurrentIndex(i => i - 1); }}
-          disabled={currentIndex === 0}
-          style={{ flex: 1, height: 52, borderRadius: 16, fontSize: '1rem', fontWeight: 900, border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, background: '#f1f5f9', color: '#475569', opacity: currentIndex === 0 ? 0.4 : 1, transition: 'opacity 0.15s' }}
-        >
-          <ArrowLeft size={18} /> {btnBack.main}
-        </button>
-        <button
-          onClick={nextCard}
-          disabled={currentIndex === words.length - 1}
-          style={{ flex: 1, height: 52, borderRadius: 16, fontSize: '1rem', fontWeight: 900, border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, background: currentIndex === words.length - 1 ? '#94a3b8' : '#f97316', color: 'white', transition: 'background 0.15s' }}
-        >
-          {btnNext.main} <ArrowRight size={18} />
-        </button>
-      </div>
+      {showTranslation ? (
+        <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1rem' }}>
+          <button
+            onClick={() => setShowTranslation(false)}
+            style={{ flex: 1, height: 52, borderRadius: 16, fontSize: '1rem', fontWeight: 900, border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, background: '#fee2e2', color: '#dc2626' }}
+          >
+            <ArrowLeft size={18} /> Učim
+          </button>
+          <button
+            onClick={handleKnown}
+            style={{ flex: 1, height: 52, borderRadius: 16, fontSize: '1rem', fontWeight: 900, border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, background: '#10b981', color: 'white' }}
+          >
+            Znam! ✓
+          </button>
+        </div>
+      ) : (
+        <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1rem' }}>
+          <button
+            onClick={() => { setShowTranslation(false); if (currentIndex > 0) setCurrentIndex(i => i - 1); }}
+            disabled={currentIndex === 0}
+            style={{ flex: 1, height: 52, borderRadius: 16, fontSize: '1rem', fontWeight: 900, border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, background: '#f1f5f9', color: '#475569', opacity: currentIndex === 0 ? 0.4 : 1, transition: 'opacity 0.15s' }}
+          >
+            <ArrowLeft size={18} /> {btnBack.main}
+          </button>
+          <button
+            onClick={nextCard}
+            disabled={currentIndex === words.length - 1}
+            style={{ flex: 1, height: 52, borderRadius: 16, fontSize: '1rem', fontWeight: 900, border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, background: currentIndex === words.length - 1 ? '#94a3b8' : '#f97316', color: 'white', transition: 'background 0.15s' }}
+          >
+            {btnNext.main} <ArrowRight size={18} />
+          </button>
+        </div>
+      )}
 
     </div>
   );
