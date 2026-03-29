@@ -52,5 +52,9 @@ export default async function ProfilePage() {
     .select('id, name_hr, name_en, translations')
     .order('name_hr');
 
-  return <ProfileClient user={userData} job={job} allJobs={allJobs || []} />;
+  return (
+    <div className="w-full min-h-screen">
+      <ProfileClient user={userData} job={job} allJobs={allJobs || []} />
+    </div>
+  );
 }

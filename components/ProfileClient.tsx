@@ -65,7 +65,7 @@ export default function ProfileClient({ user, job, allJobs }: { user: any, job: 
   };
 
   return (
-    <div className="p-3 md:p-10 max-w-xl mx-auto space-y-3 md:space-y-6 animate-in fade-in duration-500">
+    <div className="p-3 md:p-10 max-w-2xl mx-auto space-y-3 md:space-y-6 animate-in fade-in duration-500">
 
       {/* HEADER KARTICA */}
       <div className="bg-white rounded-2xl md:rounded-[2.5rem] p-4 md:p-8 shadow-sm border border-slate-100 flex flex-row items-center gap-4 md:gap-8 relative overflow-hidden">
