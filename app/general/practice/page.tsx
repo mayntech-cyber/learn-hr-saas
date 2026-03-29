@@ -30,5 +30,9 @@ export default async function GeneralPracticePage() {
   })) : [];
 
   // ZAPAZI: Ovdje NE šaljemo 'job' prop! Tako će FlashcardPlayer znati da je ovo Opća vježba.
-  return <FlashcardPlayer words={formattedWords} />;
+  return (
+    <div className="w-full min-h-screen">
+      <FlashcardPlayer words={formattedWords} />
+    </div>
+  );
 }

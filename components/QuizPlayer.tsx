@@ -217,71 +217,130 @@ export default function QuizPlayer({
   const progress = ((currentIndex + 1) / words.length) * 100;
 
   return (
-    <div className="max-w-2xl mx-auto p-4 md:p-8 animate-in fade-in">
-      <div className="flex items-center justify-between mb-8">
-        <button onClick={onClose} className="p-3 bg-white rounded-xl shadow-sm border border-slate-100 text-slate-400 hover:text-slate-800 transition-colors">
-          <ArrowLeft size={20} />
+    <div
+      className="max-w-2xl mx-auto animate-in fade-in"
+      style={{ background: 'rgba(10,30,60,0.65)', borderRadius: 20, width: '100%' }}
+    >
+      {/* HEADER */}
+      <div style={{ padding: '16px 24px', borderBottom: '1px solid rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <button
+          onClick={onClose}
+          style={{ background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.18)', borderRadius: 12, padding: '8px 12px', color: 'rgba(255,255,255,0.8)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+        >
+          <ArrowLeft size={18} />
         </button>
-        <div className="text-center">
-           <h2 className="text-xl font-black text-slate-800 flex items-center gap-2">
-             <HelpCircle className={`${theme.text}`} /> {t("Kviz").main} ({tLevel.main} {activeLevel})
-           </h2>
-           <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{lesson.name}</p>
+        <div style={{ textAlign: 'center' }}>
+          <h2 style={{ fontSize: '1.1rem', fontWeight: 900, color: 'white', display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'center' }}>
+            <HelpCircle size={18} style={{ color: isProfessional ? '#f97316' : '#60a5fa' }} />
+            {t("Kviz").main} ({tLevel.main} {activeLevel})
+          </h2>
+          <p style={{ fontSize: '0.65rem', fontWeight: 800, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.12em', marginTop: 2 }}>{lesson.name}</p>
         </div>
-        <div className="w-10"></div>
+        <div style={{ width: 42 }} />
       </div>
 
-      <div className="mb-8">
-        <div className="flex justify-between text-[10px] font-black text-slate-400 uppercase mb-2">
-          <span>{tQuestion.main} {currentIndex + 1} {tOf.main} {words.length}</span>
-          <span>{Math.round(progress)}%</span>
+      {/* PROGRESS BAR */}
+      <div style={{ padding: '16px 24px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+          <span style={{ fontSize: '0.65rem', fontWeight: 800, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+            {tQuestion.main} {currentIndex + 1} {tOf.main} {words.length}
+          </span>
+          <span style={{ fontSize: '0.65rem', fontWeight: 800, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase' }}>
+            {Math.round(progress)}%
+          </span>
         </div>
-        <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
-          <div className={`h-full ${theme.bg} transition-all duration-500`} style={{ width: `${progress}%` }}></div>
+        <div style={{ height: 8, background: 'rgba(255,255,255,0.15)', borderRadius: 99, overflow: 'hidden' }}>
+          <div
+            style={{
+              height: '100%',
+              width: `${progress}%`,
+              background: isProfessional ? 'linear-gradient(90deg, #f97316, #ea580c)' : 'linear-gradient(90deg, #3b82f6, #2563eb)',
+              borderRadius: 99,
+              transition: 'width 0.5s ease',
+            }}
+          />
         </div>
       </div>
 
-      <div className="bg-white rounded-[2.5rem] p-8 md:p-12 shadow-xl border border-slate-50 text-center mb-8">
-        <span className={`text-[10px] font-black ${theme.textLight} uppercase tracking-[0.2em] mb-4 block`}>{tHowToSay.main}</span>
-        <h3 className="text-4xl md:text-5xl font-black text-slate-800 tracking-tight mb-2 italic">
+      {/* QUESTION CARD */}
+      <div style={{ margin: '0 24px 16px', background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 20, padding: '32px 24px', textAlign: 'center' }}>
+        <span style={{ fontSize: '0.65rem', fontWeight: 800, color: isProfessional ? '#fb923c' : '#93c5fd', textTransform: 'uppercase', letterSpacing: '0.2em', display: 'block', marginBottom: 16 }}>
+          {tHowToSay.main}
+        </span>
+        <h3 style={{ fontSize: 'clamp(1.75rem, 5vw, 2.5rem)', fontWeight: 900, color: 'white', fontStyle: 'italic', lineHeight: 1.2 }}>
           "{currentWord?.word_hr}"
         </h3>
       </div>
 
-      <div className="grid grid-cols-1 gap-3">
+      {/* OPTIONS */}
+      <div style={{ margin: '0 24px', display: 'grid', gap: 10 }}>
         {shuffledOptions.map((option) => {
           const isSelected = selectedOption === option.id;
           const showCorrect = isAnswered && option.isCorrect;
           const showWrong = isSelected && isAnswered && !option.isCorrect;
 
+          let optionStyle: React.CSSProperties = {
+            width: '100%',
+            padding: '16px 20px',
+            borderRadius: 16,
+            border: '2px solid rgba(255,255,255,0.2)',
+            background: 'rgba(255,255,255,0.1)',
+            color: 'white',
+            fontWeight: 800,
+            fontSize: '1rem',
+            textAlign: 'left',
+            cursor: isAnswered ? 'default' : 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            transition: 'border-color 0.15s, background 0.15s',
+            backdropFilter: 'blur(4px)',
+          };
+
+          if (showCorrect) {
+            optionStyle = { ...optionStyle, background: 'rgba(16,185,129,0.25)', border: '2px solid #10b981', color: '#6ee7b7' };
+          } else if (showWrong) {
+            optionStyle = { ...optionStyle, background: 'rgba(239,68,68,0.25)', border: '2px solid #ef4444', color: '#fca5a5' };
+          }
+
           return (
-            <button
-              key={option.id}
-              onClick={() => handleAnswer(option)}
-              disabled={isAnswered}
-              className={`p-5 rounded-2xl border-2 font-black text-lg transition-all flex items-center justify-between
-                ${showCorrect ? "bg-emerald-50 border-emerald-500 text-emerald-700 shadow-lg shadow-emerald-500/10" : 
-                  showWrong ? "bg-red-50 border-red-500 text-red-700 animate-shake" : 
-                  isSelected ? "border-slate-800 bg-slate-800 text-white" : 
-                  "bg-white border-slate-100 text-slate-600 hover:border-slate-300 shadow-sm active:scale-95"}
-              `}
-            >
+            <button key={option.id} onClick={() => handleAnswer(option)} disabled={isAnswered} style={optionStyle}>
               <span>{option.text}</span>
-              {showCorrect && <div className="bg-emerald-500 text-white p-1 rounded-full"><Check size={16} /></div>}
-              {showWrong && <div className="bg-red-500 text-white p-1 rounded-full"><X size={16} /></div>}
+              {showCorrect && <div style={{ background: '#10b981', color: 'white', borderRadius: '50%', padding: 4, display: 'flex' }}><Check size={14} /></div>}
+              {showWrong && <div style={{ background: '#ef4444', color: 'white', borderRadius: '50%', padding: 4, display: 'flex' }}><X size={14} /></div>}
             </button>
           );
         })}
       </div>
 
+      <div style={{ height: '24px' }} />
+
+      {/* NEXT BUTTON */}
       {isAnswered && (
-        <button 
-          onClick={nextQuestion}
-          className={`w-full mt-8 bg-slate-900 text-white py-5 rounded-2xl font-black flex items-center justify-center gap-2 shadow-xl active:scale-95 transition-all`}
-        >
-          {currentIndex === words.length - 1 ? t("Završi kviz").main : t("Sljedeće pitanje").main} 
-          <ArrowRight size={20} />
-        </button>
+        <div style={{ padding: '16px 24px 24px' }}>
+          <button
+            onClick={nextQuestion}
+            style={{
+              width: '100%',
+              padding: '16px',
+              borderRadius: 16,
+              border: 'none',
+              background: isProfessional ? 'linear-gradient(135deg, #f97316, #ea580c)' : 'linear-gradient(135deg, #3b82f6, #2563eb)',
+              color: 'white',
+              fontWeight: 900,
+              fontSize: '1rem',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 8,
+              boxShadow: isProfessional ? '0 4px 16px rgba(249,115,22,0.35)' : '0 4px 16px rgba(59,130,246,0.35)',
+            }}
+          >
+            {currentIndex === words.length - 1 ? t("Završi kviz").main : t("Sljedeće pitanje").main}
+            <ArrowRight size={18} />
+          </button>
+        </div>
       )}
     </div>
   );

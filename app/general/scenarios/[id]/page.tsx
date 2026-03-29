@@ -18,7 +18,7 @@ export default async function GeneralScenarioDetailPage({
 
   const { data: scenario } = await supabase
     .from('scenarios')
-    .select('name_hr')
+    .select('name_hr, translations')
     .eq('id', scenarioId)
     .single();
 
@@ -35,7 +35,7 @@ export default async function GeneralScenarioDetailPage({
 
   return (
     <div className="w-full min-h-screen">
-      <ScenarioClient scenarios={phrases || []} />
+      <ScenarioClient scenarios={phrases || []} category={scenario} />
     </div>
   );
 }

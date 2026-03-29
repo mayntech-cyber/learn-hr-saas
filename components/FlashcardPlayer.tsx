@@ -16,6 +16,7 @@ interface Word {
 export default function FlashcardPlayer({ words, job, isGeneral }: { words: Word[], job?: any, isGeneral?: boolean }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showTranslation, setShowTranslation] = useState(false);
+  const [seenCards, setSeenCards] = useState<Set<number>>(new Set());
   const audioRef = useRef<HTMLAudioElement | null>(null);
   
   const { euLang, nativeLang, t, uiMode } = useLanguage();
@@ -34,6 +35,7 @@ export default function FlashcardPlayer({ words, job, isGeneral }: { words: Word
   const btnShow = t("Prikaži prijevod");
   const btnBack = t("Nazad");
   const btnNext = t("Dalje");
+  const tTapHint = t("Tap za prijevod");
 
   // URL za povratak (Koristi se samo kad NIJE isGeneral)
   const backUrl = job ? `/learn/${job.id}` : '/general';
@@ -107,129 +109,186 @@ export default function FlashcardPlayer({ words, job, isGeneral }: { words: Word
   const euTranslation = parsedTranslations[euLang] || "—";
   const nativeTranslation = parsedTranslations[nativeLang] || "—";
 
+  const earnedXP = seenCards.size * 5;
+
   return (
-    <div className="p-4 md:p-10 max-w-4xl mx-auto min-h-screen flex flex-col animate-in fade-in duration-500 text-slate-800">
-      
-      {/* --- HEADER SEKCIJA --- */}
-      <div className="mb-8 w-full max-w-md mx-auto md:max-w-none md:mx-0">
-        
-        {/* PAMETNI BACK LINK: Prikazuje se samo ako NISMO u Testovima */}
-        {!isGeneral && (
-          <Link href={backUrl} className="group inline-flex flex-col mb-6">
-            <div className="flex items-center gap-2 text-sm font-bold text-slate-400 group-hover:text-orange-500 transition-colors">
-              <ArrowLeft size={16} /> 
-              <span>{backBtn.main}</span>
-            </div>
-            {!backBtn.isOnlyHr && (
-              <span className="text-[10px] font-bold text-slate-300 ml-6 uppercase tracking-tighter italic">
-                {backBtn.sub}
-              </span>
-            )}
-          </Link>
-        )}
-        
+    <div className="p-4 md:p-10 min-h-screen flex flex-col animate-in fade-in duration-500 max-w-4xl mx-auto w-full">
+
+      {/* --- HEADER (isti layout kao ScenarioClient) --- */}
+      <div className="mb-8">
+        <Link href={isGeneral ? '/quizzes' : backUrl} className="group inline-flex flex-col mb-6">
+          <div className="flex items-center gap-2 text-sm font-bold text-slate-400 group-hover:text-orange-500 transition-colors">
+            <ArrowLeft size={16} />
+            <span>{backBtn.main}</span>
+          </div>
+          {!backBtn.isOnlyHr && (
+            <span className="text-[10px] font-bold text-slate-300 ml-6 uppercase tracking-tighter italic">
+              {backBtn.sub}
+            </span>
+          )}
+        </Link>
+
         <div className="flex items-center gap-4">
           <div className="bg-orange-500 p-3 rounded-2xl text-white shadow-md">
             <BrainCircuit size={28} />
           </div>
           <div>
             <h1 className="text-2xl md:text-4xl font-black text-slate-800 tracking-tight leading-none flex items-center gap-2 flex-wrap">
-              <span>{titleText.main}</span> 
-              {/* U testovima ne stavljamo dvotočku i narančastu boju da ne zbunimo korisnika */}
-              {job && !isGeneral && <span className="text-orange-500">: {jobName}</span>}
+              <span>{titleText.main}{job && !isGeneral ? ':' : ''}</span>
+              {job && !isGeneral && <span className="text-orange-500">{jobName}</span>}
             </h1>
             {!titleText.isOnlyHr && (
               <p className="text-[11px] font-black text-orange-400 uppercase mt-1 tracking-widest italic opacity-80">
-                {titleText.sub}{job && !isGeneral ? `: ${jobName}` : ""}
+                {titleText.sub}{job && !isGeneral ? `: ${job.name_hr}` : ''}
               </p>
             )}
-            
-            <div className="text-slate-500 font-medium mt-3 leading-tight">
-               <p>{pracSubtitle.main}</p>
-               {!pracSubtitle.isOnlyHr && (
-                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
-                   {pracSubtitle.sub}
-                 </p>
-               )}
+          </div>
+        </div>
+      </div>
+
+      {/* --- KARTICA (iste CSS klase i dimenzije kao ScenarioClient) --- */}
+      <style>{`
+        .fc-flip { perspective: 1200px; cursor: pointer; position: relative; width: 100%; }
+        .fc-flip-inner {
+          position: relative; width: 100%;
+          height: 340px;
+          transition: transform 0.5s cubic-bezier(0.4,0,0.2,1);
+          transform-style: preserve-3d;
+        }
+        @media (min-width: 768px) { .fc-flip-inner { height: 420px; } }
+        .fc-flip.flipped .fc-flip-inner { transform: rotateY(180deg); }
+        .fc-front, .fc-back-face {
+          position: absolute; inset: 0;
+          backface-visibility: hidden; -webkit-backface-visibility: hidden;
+          border-radius: 1.75rem; overflow: hidden;
+        }
+        .fc-back-face { transform: rotateY(180deg); }
+      `}</style>
+
+      {/* Navigacijski red iznad kartice */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
+        <span style={{ background: 'linear-gradient(135deg, #f97316, #ea580c)', color: 'white', fontSize: '0.7rem', fontWeight: 800, padding: '4px 10px', borderRadius: 8 }}>
+          +{earnedXP} XP
+        </span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          {currentIndex > 0 && (
+            <button
+              onClick={() => { setShowTranslation(false); setCurrentIndex(i => i - 1); }}
+              style={{ background: '#f1f5f9', color: '#475569', border: 'none', borderRadius: 8, padding: '5px 12px', fontSize: '0.9rem', fontWeight: 800, cursor: 'pointer', lineHeight: 1 }}
+            >
+              ←
+            </button>
+          )}
+          <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#64748b' }}>
+            {currentIndex + 1} / {words.length}
+          </span>
+        </div>
+      </div>
+
+      {/* Flip kartica */}
+      <div
+        key={currentIndex}
+        className={`fc-flip${showTranslation ? ' flipped' : ''}`}
+        style={{ borderRadius: '1.75rem', isolation: 'isolate', willChange: 'transform' }}
+        onClick={() => { setShowTranslation(f => !f); setSeenCards(s => new Set(s).add(currentIndex)); }}
+      >
+        <div className="fc-flip-inner">
+
+          {/* PREDNJA STRANA */}
+          <div className="fc-front" style={{ background: currentWord.image_url ? undefined : 'linear-gradient(135deg, #0f172a 0%, #1e3a5f 60%, #0f4c75 100%)' }}>
+            {currentWord.image_url && (
+              <img src={currentWord.image_url} alt={currentWord.word_hr} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top' }} />
+            )}
+            {!currentWord.image_url && <>
+              <div style={{ position: 'absolute', top: -60, right: -60, width: 220, height: 220, borderRadius: '50%', background: 'rgba(255,255,255,0.04)' }} />
+              <div style={{ position: 'absolute', bottom: -40, left: -40, width: 160, height: 160, borderRadius: '50%', background: 'rgba(255,255,255,0.04)' }} />
+            </>}
+            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.80) 0%, rgba(0,0,0,0.20) 50%, transparent 100%)' }} />
+
+            {/* Audio */}
+            <button
+              onClick={e => { e.stopPropagation(); playAudio(); }}
+              style={{ position: 'absolute', bottom: 14, right: 16, background: '#f97316', color: 'white', border: 'none', borderRadius: '50%', width: 44, height: 44, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: '0 4px 14px rgba(249,115,22,0.5)' }}
+            >
+              <Volume2 size={18} />
+            </button>
+
+            {/* Riječ u sredini */}
+            <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '4rem 1.75rem 5rem' }}>
+              <p style={{ fontSize: 'clamp(1.35rem, 4vw, 1.9rem)', fontWeight: 900, color: 'white', lineHeight: 1.35, textAlign: 'center', textShadow: '0 2px 8px rgba(0,0,0,0.5)' }}>
+                {currentWord.word_hr}
+              </p>
+            </div>
+
+            {/* Progress + hint dolje */}
+            <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '0 16px 16px' }}>
+              <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 2, textAlign: 'center', marginBottom: 10 }}>
+                👆 {tTapHint.main}
+              </p>
+              <div style={{ height: 4, background: 'rgba(255,255,255,0.2)', borderRadius: 99, overflow: 'hidden' }}>
+                <div style={{ height: '100%', width: `${progress}%`, background: '#f97316', borderRadius: 99, transition: 'width 0.35s ease' }} />
+              </div>
             </div>
           </div>
-        </div>
-      </div>
 
-      {/* --- KARTICA I KONTROLE --- */}
-      <div className="flex-1 flex items-center justify-center w-full">
-        <div className="w-full max-w-md mx-auto space-y-6">
-          
-          <div className="flex items-center justify-between text-sm font-bold text-slate-400 mb-2">
-            <span>{currentIndex + 1} / {words.length}</span>
-            <span>{Math.round(progress)}%</span>
-          </div>
-          <div className="w-full bg-slate-200 rounded-full h-2.5">
-            <div className="bg-orange-500 h-2.5 rounded-full transition-all duration-300 shadow-sm shadow-orange-500/20" style={{ width: `${progress}%` }}></div>
-          </div>
-
-          <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-xl overflow-hidden flex flex-col relative min-h-[420px]">
-            {currentWord.image_url ? (
-              <>
-                <div className="h-60 md:h-64 w-full bg-slate-100 relative">
-                  <img src={currentWord.image_url} alt={currentWord.word_hr} className="w-full h-full object-cover" />
-                  <button onClick={playAudio} className="absolute bottom-4 right-4 bg-orange-500 hover:bg-orange-600 text-white p-4 rounded-full shadow-lg transition-transform hover:scale-110 active:scale-95 flex items-center justify-center z-10">
-                    <Volume2 size={24} />
-                  </button>
-                </div>
-                <div className="p-8 text-center flex flex-col items-center justify-center flex-1">
-                  <h2 className="text-3xl font-black text-slate-800 tracking-tight mb-3">{currentWord.word_hr}</h2>
-                  {showTranslation ? (
-                    <div className="space-y-2 animate-in fade-in w-full">
-                      <p className="text-lg font-medium text-slate-500 italic">{euTranslation}</p>
-                      <p className="text-2xl font-bold text-blue-600">{nativeTranslation}</p>
-                    </div>
-                  ) : (
-                    <button onClick={() => setShowTranslation(true)} className="mt-2 flex items-center gap-2 text-sm font-bold text-slate-400 hover:text-slate-600 bg-slate-50 px-5 py-2.5 rounded-xl transition-colors mx-auto border border-slate-100">
-                      <Eye size={16} /> <span>{btnShow.main}</span>
-                    </button>
-                  )}
-                </div>
-              </>
-            ) : (
-              <div className="p-8 md:p-12 text-center flex flex-col items-center justify-center flex-1 h-full relative">
-                <button onClick={playAudio} className="mb-8 bg-orange-50 text-orange-500 hover:bg-orange-500 hover:text-white p-6 rounded-full shadow-sm transition-all hover:scale-110 active:scale-95 flex items-center justify-center border border-orange-100">
-                  <Volume2 size={36} />
-                </button>
-                <h2 className="text-4xl md:text-5xl font-black text-slate-800 tracking-tight mb-6 leading-tight">{currentWord.word_hr}</h2>
-                {showTranslation ? (
-                  <div className="space-y-3 animate-in fade-in w-full mt-2">
-                    <p className="text-xl font-medium text-slate-500 italic">{euTranslation}</p>
-                    <p className="text-3xl font-bold text-blue-600">{nativeTranslation}</p>
-                  </div>
-                ) : (
-                  <button onClick={() => setShowTranslation(true)} className="mt-4 flex items-center gap-2 text-sm font-bold text-slate-400 hover:text-slate-600 bg-slate-50 px-6 py-3 rounded-xl transition-colors mx-auto border border-slate-100 shadow-sm">
-                    <Eye size={18} /> <span>{btnShow.main}</span>
-                  </button>
-                )}
-              </div>
+          {/* POLEĐINA */}
+          <div className="fc-back-face" style={{ background: currentWord.image_url ? undefined : 'linear-gradient(135deg, #0f172a 0%, #1e3a5f 60%, #0f4c75 100%)' }}>
+            {currentWord.image_url && (
+              <img src={currentWord.image_url} alt={currentWord.word_hr} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top' }} />
             )}
-          </div>
+            <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.75)' }} />
 
-          <div className="flex items-center justify-between gap-4 pt-4">
-            <button 
-                onClick={() => { setShowTranslation(false); if (currentIndex > 0) setCurrentIndex(currentIndex - 1); }} 
-                disabled={currentIndex === 0}
-                className="flex-1 bg-white border border-slate-200 text-slate-700 py-4 rounded-2xl font-bold flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-50 transition-all active:scale-95 shadow-sm"
+            {/* Audio */}
+            <button
+              onClick={e => { e.stopPropagation(); playAudio(); }}
+              style={{ position: 'absolute', bottom: 14, right: 16, background: 'rgba(249,115,22,0.85)', color: 'white', border: 'none', borderRadius: '50%', width: 44, height: 44, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: '0 4px 14px rgba(249,115,22,0.4)' }}
             >
-              <ArrowLeft size={20} /> <span>{btnBack.main}</span>
+              <Volume2 size={18} />
             </button>
-            <button 
-                onClick={nextCard} 
-                disabled={currentIndex === words.length - 1}
-                className="flex-1 bg-orange-500 text-white py-4 rounded-2xl font-black flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-orange-600 transition-all active:scale-95 shadow-lg shadow-orange-500/20"
-            >
-              <span>{btnNext.main}</span> <ArrowRight size={20} />
-            </button>
+
+            {/* Prijevodi u sredini */}
+            <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '4rem 1.75rem 5rem', gap: '1rem', textAlign: 'center' }}>
+              {nativeTranslation && nativeTranslation !== '—' && (
+                <p style={{ fontSize: 'clamp(1.5rem, 4.5vw, 2.1rem)', fontWeight: 900, color: 'white', lineHeight: 1.3, textShadow: '0 2px 8px rgba(0,0,0,0.5)' }}>
+                  {nativeTranslation}
+                </p>
+              )}
+              {euTranslation && euTranslation !== '—' && (
+                <p style={{ fontSize: '1rem', fontStyle: 'italic', fontWeight: 500, color: 'rgba(200,210,220,0.85)' }}>
+                  {euTranslation}
+                </p>
+              )}
+            </div>
+
+            {/* Progress dolje */}
+            <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '0 16px 16px' }}>
+              <div style={{ height: 4, background: 'rgba(255,255,255,0.2)', borderRadius: 99, overflow: 'hidden' }}>
+                <div style={{ height: '100%', width: `${progress}%`, background: '#f97316', borderRadius: 99, transition: 'width 0.35s ease' }} />
+              </div>
+            </div>
           </div>
 
         </div>
       </div>
+
+      {/* GUMBI ISPOD */}
+      <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1rem' }}>
+        <button
+          onClick={() => { setShowTranslation(false); if (currentIndex > 0) setCurrentIndex(i => i - 1); }}
+          disabled={currentIndex === 0}
+          style={{ flex: 1, height: 52, borderRadius: 16, fontSize: '1rem', fontWeight: 900, border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, background: '#f1f5f9', color: '#475569', opacity: currentIndex === 0 ? 0.4 : 1, transition: 'opacity 0.15s' }}
+        >
+          <ArrowLeft size={18} /> {btnBack.main}
+        </button>
+        <button
+          onClick={nextCard}
+          disabled={currentIndex === words.length - 1}
+          style={{ flex: 1, height: 52, borderRadius: 16, fontSize: '1rem', fontWeight: 900, border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, background: currentIndex === words.length - 1 ? '#94a3b8' : '#f97316', color: 'white', transition: 'background 0.15s' }}
+        >
+          {btnNext.main} <ArrowRight size={18} />
+        </button>
+      </div>
+
     </div>
   );
 }

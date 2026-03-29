@@ -29,6 +29,15 @@ export default async function QuizzesPage() {
   const featureKeys = features?.map(f => f.feature_key) ?? [];
   const hasBasicTests = featureKeys.includes("basic_tests");
 
+  const { data: bgData } = await supabase
+    .from("dictionary")
+    .select("image_url")
+    .not("image_url", "is", null)
+    .limit(1)
+    .single();
+
+  const bgImage = bgData?.image_url ?? null;
+
   if (!hasBasicTests) {
     return (
       <div className="p-6 md:p-10 max-w-4xl mx-auto">
@@ -41,8 +50,16 @@ export default async function QuizzesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <TestsClient userId={user.id} />
+    <div
+      className="w-full min-h-screen"
+      style={bgImage ? {
+        backgroundImage: `linear-gradient(rgba(255,255,255,0.65), rgba(255,255,255,0.65)), url(${bgImage})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundAttachment: 'scroll',
+      } : undefined}
+    >
+      <TestsClient userId={user.id} userPlan={planId} bgImage={bgImage} />
     </div>
   );
 }

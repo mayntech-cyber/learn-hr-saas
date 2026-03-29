@@ -7,7 +7,7 @@ import FlashcardPlayer from "./FlashcardPlayer";
 import MatchGamePlayer from "./MatchGamePlayer";
 import QuizPlayer from "./QuizPlayer";
 
-export default function TestsClient({ userId }: { userId?: string }) {
+export default function TestsClient({ userId, userPlan, bgImage }: { userId?: string, userPlan?: string, bgImage?: string | null }) {
   const supabase = createClient();
   const [lessons, setLessons] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -18,9 +18,12 @@ export default function TestsClient({ userId }: { userId?: string }) {
   const [loadingWords, setLoadingWords] = useState(false);
   const { t } = useLanguage();
   
+
   // LOGIKA ZA LEVELE I BODOVE
   const [userResults, setUserResults] = useState<any[]>([]);
   const [totalXP, setTotalXP] = useState(0);
+
+  const [showRankPopup, setShowRankPopup] = useState(false);
 
   // MODAL ZA ODABIR LEVELA
   const [showLevelModal, setShowLevelModal] = useState(false);
@@ -51,6 +54,16 @@ export default function TestsClient({ userId }: { userId?: string }) {
   const tLoadingCards = t("Učitavam kartice...");
   const tBackToTests = t("Nazad na Testove");
   const tPreparingGame = t("Pripremam igru...");
+  // PRIJEVODI ZA NOVI DIZAJN KARTICA
+  const tOpci = t("Opći");
+  const tStrucni = t("Stručni");
+  const tPolozhen = t("Položen");
+  const tNovo = t("Novo");
+  const tProgress = t("Napredak");
+  const tMatchPairs = t("Spoji parove");
+  const tGapFill = t("Rupa u rečenici");
+  const tNadogradi = t("Nadogradi");
+
 
   // Dohvaćanje lekcija
   useEffect(() => {
@@ -219,13 +232,8 @@ export default function TestsClient({ userId }: { userId?: string }) {
       </div>
     );
     return (
-      <div className="min-h-screen bg-slate-50 pt-4 md:pt-10">
-        <div className="max-w-4xl mx-auto px-4 md:px-10 mb-[-2rem] relative z-10">
-           <button onClick={() => setActiveGame("NONE")} className="flex items-center gap-2 text-sm font-bold text-slate-400 hover:text-orange-500 transition-colors bg-white px-4 py-2 rounded-xl shadow-sm border border-slate-100">
-             <ArrowLeft size={16} /> {tBackToTests.main}
-           </button>
-        </div>
-        <FlashcardPlayer 
+      <div className="min-h-screen">
+        <FlashcardPlayer
           words={lessonWords} 
           job={{ id: selectedLesson.id, name_hr: selectedLesson.name }}
           isGeneral={true} 
@@ -242,7 +250,15 @@ export default function TestsClient({ userId }: { userId?: string }) {
       </div>
     );
     return (
-      <div className="min-h-screen bg-slate-50 pt-4 md:pt-10">
+      <div
+        className="min-h-screen pt-4 md:pt-10"
+        style={bgImage ? {
+          backgroundImage: `linear-gradient(rgba(255,255,255,0.65), rgba(255,255,255,0.65)), url(${bgImage})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          paddingBottom: '2rem',
+        } : { background: '#f8fafc', paddingBottom: '2rem' }}
+      >
         <MatchGamePlayer lesson={selectedLesson} words={lessonWords} onClose={() => setActiveGame("NONE")} />
       </div>
     );
@@ -251,7 +267,7 @@ export default function TestsClient({ userId }: { userId?: string }) {
   if (activeGame === "QUIZ" && selectedLesson) {
     if (loadingWords) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="animate-spin" /></div>;
     return (
-      <div className="min-h-screen bg-slate-50 pt-10">
+      <div className="min-h-screen pt-10" style={{ paddingBottom: '2rem' }}>
         <QuizPlayer 
           lesson={selectedLesson} 
           words={lessonWords} 
@@ -266,7 +282,12 @@ export default function TestsClient({ userId }: { userId?: string }) {
 
   // --- GLAVNI UI ---
   return (
-    <div className="w-full max-w-5xl p-4 md:p-6 lg:p-10 pt-10 relative animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="w-full max-w-5xl mx-auto p-4 md:p-6 lg:p-10 pt-10 relative animate-in fade-in slide-in-from-bottom-4 duration-500" style={bgImage ? {
+      backgroundImage: `linear-gradient(rgba(255,255,255,0.65), rgba(255,255,255,0.65)), url(${bgImage})`,
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      minHeight: '100vh'
+    } : { minHeight: '100vh' }}>
       
       {/* MODAL ZA ODABIR LEVELA */}
       {showLevelModal && selectedLesson && (
@@ -310,44 +331,71 @@ export default function TestsClient({ userId }: { userId?: string }) {
         </div>
       )}
 
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+      <div className="flex flex-row justify-between items-start mb-8 gap-4">
         <div>
-          <h1 className="text-3xl md:text-4xl font-black text-slate-800 flex items-center gap-3">
-            <Gamepad2 className="text-blue-600" size={32} /> 
+          <h1 className="text-xl md:text-4xl font-black text-slate-800 flex items-center gap-3 whitespace-nowrap">
+            <Gamepad2 className="text-blue-600" size={32} />
             {tTitle.main}
           </h1>
-          <p className="text-slate-500 font-medium mt-3 text-sm md:text-base">{tSubTitle.main}</p>
+          <p className="hidden md:block text-slate-500 font-medium mt-3 text-sm md:text-base">{tSubTitle.main}</p>
         </div>
-        
-        <div className="bg-amber-50 border border-amber-200 px-5 py-3 rounded-2xl flex items-center gap-4 shadow-sm w-full md:w-auto">
+
+        {/* Desktop badge */}
+        <div className="hidden md:flex bg-amber-50 border border-amber-200 px-5 py-3 rounded-2xl items-center gap-4 shadow-sm flex-shrink-0">
           <div className="bg-amber-500 p-2 rounded-full text-white"><Trophy size={20} /></div>
           <div>
             <div className="text-[10px] font-black text-amber-600 uppercase tracking-widest">{tRank.main}</div>
             <div className="font-black text-slate-800">{tBeginner.main} ({totalXP} XP)</div>
           </div>
         </div>
+
+        {/* Mobile compact button + dropdown */}
+        <div className="relative md:hidden flex-shrink-0">
+          <button
+            onClick={() => setShowRankPopup(v => !v)}
+            className="flex items-center gap-1.5 bg-amber-50 border border-amber-200 px-2.5 py-1.5 rounded-xl shadow-sm"
+          >
+            <Trophy size={14} className="text-amber-500" />
+            <span className="text-xs font-black text-slate-800">{totalXP} XP</span>
+          </button>
+          {showRankPopup && (
+            <div className="absolute right-0 top-full mt-3 whitespace-nowrap z-10" style={{ filter: 'drop-shadow(0 4px 20px rgba(0,0,0,0.2))' }}>
+              {/* Trokutić */}
+              <div className="absolute right-3 -top-1.5 w-0 h-0" style={{ borderLeft: '7px solid transparent', borderRight: '7px solid transparent', borderBottom: '8px solid #1D9E75' }} />
+              <div style={{ background: 'linear-gradient(135deg, #1D9E75, #0f6e56)', borderRadius: 14, padding: '10px 16px' }}>
+                <div className="flex items-center gap-2">
+                  <span className="text-base">🏆</span>
+                  <div>
+                    <div style={{ color: 'white', fontSize: 13, fontWeight: 700 }}>{tBeginner.main}</div>
+                    <div style={{ color: 'rgba(255,255,255,0.75)', fontSize: 11, fontWeight: 600 }}>{totalXP} XP</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="flex bg-slate-100 p-1.5 rounded-[1.8rem] mb-10 w-full max-w-md mx-auto shadow-inner border border-slate-200/50">
         <button
           onClick={() => setActiveTab("general")}
-          className={`flex-1 flex items-center justify-center gap-2 py-3.5 rounded-[1.5rem] font-black transition-all ${
-            activeTab === "general" 
-            ? "bg-white text-blue-600 shadow-lg scale-100 border border-blue-50" 
+          className={`flex-1 flex items-center justify-center gap-1.5 md:gap-2 px-4 py-2 md:py-3.5 rounded-[1.5rem] font-black text-sm md:text-base transition-all ${
+            activeTab === "general"
+            ? "bg-white text-blue-600 shadow-lg scale-100 border border-blue-50"
             : "text-slate-400 hover:text-slate-600"
           }`}
         >
-          <Globe size={18} /> {tGeneral.main}
+          <Globe size={14} className="md:hidden" /><Globe size={18} className="hidden md:block" /> {tGeneral.main}
         </button>
         <button
           onClick={() => setActiveTab("professional")}
-          className={`flex-1 flex items-center justify-center gap-2 py-3.5 rounded-[1.5rem] font-black transition-all ${
-            activeTab === "professional" 
-            ? "bg-white text-orange-600 shadow-lg scale-100 border border-orange-50" 
+          className={`flex-1 flex items-center justify-center gap-1.5 md:gap-2 px-4 py-2 md:py-3.5 rounded-[1.5rem] font-black text-sm md:text-base transition-all ${
+            activeTab === "professional"
+            ? "bg-white text-orange-600 shadow-lg scale-100 border border-orange-50"
             : "text-slate-400 hover:text-slate-600"
           }`}
         >
-          <HardHat size={18} /> {tProfessional.main}
+          <HardHat size={14} className="md:hidden" /><HardHat size={18} className="hidden md:block" /> {tProfessional.main}
         </button>
       </div>
 
@@ -361,91 +409,141 @@ export default function TestsClient({ userId }: { userId?: string }) {
           {lessons.map((lesson) => {
             const highestLevel = getHighestLevelPassed(lesson.id);
             const hasStarted = highestLevel > 0;
+            const isGeneralTab = activeTab === "general";
+            const isProfessionalLocked = activeTab === "professional" && userPlan === "ind_free";
+
+            const hasFlashcards = userResults.some(r => r.category_id === lesson.id && (r.game_type === "FLASHCARDS" || r.game_type === "FLASHCARD"));
+            const hasMatch = userResults.some(r => r.category_id === lesson.id && (r.game_type === "MATCH" || r.game_type === "MATCH_GAME"));
+            const completedCount = [hasFlashcards, hasMatch, hasStarted].filter(Boolean).length;
+
+            const headerGradient = isGeneralTab
+              ? "linear-gradient(135deg, #1e3a5f 0%, #0f172a 100%)"
+              : "linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)";
 
             return (
-              <div key={lesson.id} 
-                   className={`group relative bg-white rounded-[2rem] p-6 border-2 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col ${
-                     hasStarted 
-                       ? 'border-emerald-500/50' 
-                       : activeTab === 'professional' ? 'border-orange-50/50' : 'border-blue-50/50'
-                   }`}
-              >
-                
-                {lesson.image_url ? ( 
-                  <div className="relative w-full h-32 mb-4 rounded-xl overflow-hidden shadow-sm">
-                    <img 
-                      src={lesson.image_url} 
-                      alt={lesson.name} 
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-                    <div className="absolute top-2 right-2">
-                      <div className={`px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider flex items-center gap-1 shadow-md backdrop-blur-md ${
-                        hasStarted 
-                          ? 'bg-emerald-500/90 text-white border border-emerald-400' 
-                          : 'bg-white/90 text-slate-700 border border-slate-100'
-                      }`}>
-                        {hasStarted ? <>🌟 {tPassedLevel.main} {highestLevel}</> : <>{tNewQuiz.main}</>}
-                      </div>
-                    </div>
+              <div key={lesson.id} className="relative bg-white rounded-[1.75rem] overflow-hidden shadow-sm border border-slate-100 flex flex-col hover:shadow-lg transition-shadow duration-300">
+
+                {/* HEADER */}
+                <div className="relative flex-shrink-0" style={{ height: 180, background: lesson.image_url ? undefined : headerGradient }}>
+                  {lesson.image_url && (
+                    <img src={lesson.image_url} alt={lesson.name} className="absolute inset-0 w-full h-full object-cover object-top" />
+                  )}
+                  <div className="absolute inset-0 bg-gradient-to-b from-black/10 to-black/35" />
+
+                  {/* Badge: OPĆI / STRUČNI */}
+                  <div className="absolute top-3 left-3">
+                    <span
+                      className="text-white text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full"
+                      style={{ background: isGeneralTab ? '#1D9E75' : '#f97316' }}
+                    >
+                      {isGeneralTab ? tOpci.main : tStrucni.main}
+                    </span>
                   </div>
 
-                ) : (
-                  <div className="flex items-start justify-between mb-4">
-                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-colors shadow-sm ${
-                      hasStarted 
-                        ? 'bg-emerald-50 text-emerald-600' 
-                        : activeTab === 'professional' ? 'bg-orange-50 text-orange-600' : 'bg-blue-50 text-blue-600'
-                    }`}>
-                      <BookOpen size={24} />
-                    </div>
-                    
-                    <div className={`px-3 py-1.5 rounded-full border text-[10px] font-black uppercase tracking-wider flex items-center gap-1 shadow-sm transition-all ${
-                      hasStarted 
-                        ? 'bg-emerald-50 border-emerald-200 text-emerald-700' 
-                        : 'bg-slate-50 border-slate-200 text-slate-400'
-                    }`}>
-                      {hasStarted ? <>🌟 {tPassedLevel.main} {highestLevel}</> : <>{tNewQuiz.main}</>}
-                    </div>
+                  {/* Status: ⭐ Položen / Novo */}
+                  <div className="absolute top-3 right-3">
+                    {hasStarted ? (
+                      <span className="bg-yellow-400 text-yellow-900 text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full">
+                        ⭐ {tPolozhen.main}
+                      </span>
+                    ) : (
+                      <span className="bg-white/20 text-white/80 text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full backdrop-blur-sm">
+                        {tNovo.main}
+                      </span>
+                    )}
                   </div>
 
-                )}
-                
-                <h3 className="text-xl font-black text-slate-800 mb-2 leading-tight">{lesson.name}</h3>
-                <p className="text-sm text-slate-500 font-medium mb-6 flex-1">{tUnlock.main}</p>
-                <div className="grid grid-cols-2 gap-2 mt-auto">
-                  <button 
+                  {/* Naziv lekcije */}
+                  <div className="absolute bottom-3 left-3 right-3">
+                    <h3 className="text-white font-black text-[15px] leading-tight drop-shadow-sm">{lesson.name}</h3>
+                  </div>
+                </div>
+
+                {/* BODY — igrice */}
+                <div className="flex flex-col divide-y divide-slate-50 flex-1">
+
+                  {/* Kartice */}
+                  <button
                     onClick={() => openFlashcards(lesson)}
-                    className="flex flex-col items-center justify-center gap-1 py-3 bg-slate-50 hover:bg-purple-50 hover:text-purple-600 text-slate-600 rounded-xl font-bold transition-colors border border-slate-100"
+                    className="flex items-center justify-between px-4 py-3 hover:bg-emerald-50 transition-colors group text-left"
                   >
-                    <Layers size={20} /> <span className="text-xs">{tCards.main} (L1)</span>
+                    <div className="flex items-center gap-3">
+                      <span className="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center text-base">🃏</span>
+                      <span className="font-bold text-slate-700 text-sm group-hover:text-emerald-700 transition-colors">{tCards.main}</span>
+                    </div>
+                    <span className="text-[11px] font-black text-emerald-600 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">+20 XP</span>
                   </button>
-                  <button 
+
+                  {/* Spoji parove */}
+                  <button
                     onClick={() => openMatchGame(lesson)}
-                    className="flex flex-col items-center justify-center gap-1 py-3 bg-slate-50 hover:bg-emerald-50 hover:text-emerald-600 text-slate-600 rounded-xl font-bold transition-colors border border-slate-100"
+                    className="flex items-center justify-between px-4 py-3 hover:bg-blue-50 transition-colors group text-left"
                   >
-                    <Link2 size={20} /> <span className="text-xs">{tMatch.main} (L1)</span>
+                    <div className="flex items-center gap-3">
+                      <span className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center text-base">🔗</span>
+                      <span className="font-bold text-slate-700 text-sm group-hover:text-blue-700 transition-colors">{tMatchPairs.main}</span>
+                    </div>
+                    <span className="text-[11px] font-black text-blue-600 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-full">+30 XP</span>
+                  </button>
+
+                  {/* Rupa u rečenici — nije implementirano */}
+                  <div className="flex items-center justify-between px-4 py-3 opacity-40 cursor-not-allowed select-none">
+                    <div className="flex items-center gap-3">
+                      <span className="w-8 h-8 rounded-lg bg-yellow-100 flex items-center justify-center text-base">✏️</span>
+                      <span className="font-bold text-slate-700 text-sm">{tGapFill.main}</span>
+                    </div>
+                    <span className="text-[11px] font-black text-yellow-600 bg-yellow-50 border border-yellow-200 px-2 py-0.5 rounded-full">+40 XP</span>
+                  </div>
+
+                  {/* Glavni kviz */}
+                  <button
+                    onClick={() => openQuizMenu(lesson)}
+                    className="flex items-center justify-between px-4 py-3 bg-slate-800 hover:bg-slate-700 transition-colors group text-left"
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center text-base">🎯</span>
+                      <span className="font-bold text-white text-sm">{tMainQuiz.main}</span>
+                    </div>
+                    <span className="text-[11px] font-black text-slate-300 bg-white/10 px-2 py-0.5 rounded-full">+100 XP</span>
                   </button>
                 </div>
 
-                <button 
-                  onClick={() => openQuizMenu(lesson)} 
-                  className={`w-full mt-3 text-white py-3.5 rounded-xl font-black flex items-center justify-center gap-2 shadow-md transition-all ${
-                    hasStarted 
-                      ? 'bg-emerald-500 hover:bg-emerald-600 shadow-emerald-500/20' 
-                      : activeTab === 'professional' 
-                        ? 'bg-orange-500 hover:bg-orange-600 shadow-orange-500/20' 
-                        : 'bg-blue-600 hover:bg-blue-700 shadow-blue-600/20'
-                  }`}
-                >
-                  {tMainQuiz.main} <ArrowRight size={18} /> 
-                </button>
+                {/* PROGRESS BAR */}
+                <div className="px-4 py-3 border-t border-slate-100">
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest">
+                      {tProgress.main} {completedCount}/4
+                    </span>
+                  </div>
+                  <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-emerald-500 rounded-full transition-all duration-500"
+                      style={{ width: `${(completedCount / 4) * 100}%` }}
+                    />
+                  </div>
+                </div>
+
+                {/* PRO LOCK OVERLAY */}
+                {isProfessionalLocked && (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center rounded-[1.75rem]" style={{ backdropFilter: 'blur(6px)', background: 'rgba(255,255,255,0.75)' }}>
+                    <span className="text-4xl mb-2">🔒</span>
+                    <span className="font-black text-slate-800 text-sm mb-3">Pro plan</span>
+                    <a
+                      href="/pricing"
+                      className="text-white text-sm font-black px-5 py-2.5 rounded-xl transition-colors"
+                      style={{ background: '#f97316' }}
+                    >
+                      {tNadogradi.main} →
+                    </a>
+                  </div>
+                )}
               </div>
             );
           })}
-          
+
           {lessons.length === 0 && (
             <div className="col-span-full py-20 text-center bg-slate-50 rounded-[2rem] border-2 border-dashed border-slate-200">
-               <p className="font-bold text-slate-400 uppercase tracking-widest text-sm">{tNoTests.main}</p>
+              <p className="font-bold text-slate-400 uppercase tracking-widest text-sm">{tNoTests.main}</p>
             </div>
           )}
         </div>

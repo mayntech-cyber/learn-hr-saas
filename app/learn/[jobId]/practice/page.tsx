@@ -36,5 +36,9 @@ export default async function PracticePage({ params }: { params: Promise<{ jobId
   })) : [];
 
   // Šaljemo formatirane riječi i podatke o poslu klijentu
-  return <FlashcardPlayer words={formattedWords} job={job} />;
+  return (
+    <div className="w-full min-h-screen">
+      <FlashcardPlayer words={formattedWords} job={job} />
+    </div>
+  );
 }

@@ -5,8 +5,7 @@ import { ArrowLeft, MessageSquare, Volume2, XCircle, CheckCircle2, RefreshCcw } 
 import Link from "next/link";
 import { useLanguage } from "./LanguageContext";
 
-// DODAN 'job' U PROPS!
-export default function ScenarioClient({ scenarios, job }: { scenarios: any[], job?: any }) {
+export default function ScenarioClient({ scenarios, job, category }: { scenarios: any[], job?: any, category?: any }) {
   const { euLang, nativeLang, t, uiMode } = useLanguage();
 
   // Flip kartica state
@@ -17,11 +16,11 @@ export default function ScenarioClient({ scenarios, job }: { scenarios: any[], j
   const [finished, setFinished] = useState(false);
 
   // 1. STATIČNI PRIJEVODI
-  const back = t("Nazad na izbornik zanimanja");
+  const back = job ? t("Nazad na izbornik zanimanja") : t("Nazad na scenarije");
   const scenTitle = t("Scenariji");
   const emptyMsg = t("U pripremi... rečenice stižu uskoro!");
 
-  // 2. DINAMIČNI NAZIV ZANIMANJA
+  // 2. DINAMIČNI NAZIV ZANIMANJA / KATEGORIJE
   const getJobName = () => {
     if (!job) return "";
     if (uiMode === 'hr') return job.name_hr;
@@ -31,7 +30,17 @@ export default function ScenarioClient({ scenarios, job }: { scenarios: any[], j
     return job.name_hr;
   };
 
+  const getCategoryName = () => {
+    if (!category) return "";
+    if (uiMode === 'hr') return category.name_hr;
+    const trans = category.translations || {};
+    if (uiMode === 'native' && trans[nativeLang]) return trans[nativeLang];
+    if (uiMode === 'eu' && trans[euLang]) return trans[euLang];
+    return category.name_hr;
+  };
+
   const jobName = getJobName();
+  const categoryName = getCategoryName();
 
   // 3. AUDIO FUNKCIJA
   const playAudio = (text: string, audioUrl?: string) => {
@@ -48,11 +57,11 @@ export default function ScenarioClient({ scenarios, job }: { scenarios: any[], j
   const bgImage = scenarios[0]?.image_url || scenarios[0]?.icon_name || null;
 
   return (
-    <div className="p-4 md:p-10 max-w-5xl mx-auto min-h-screen flex flex-col animate-in fade-in duration-500">
+    <div className="p-4 md:p-10 min-h-screen flex flex-col animate-in fade-in duration-500">
 
       {/* --- DVOJEZIČNI HEADER --- */}
       <div className="mb-8">
-        <Link href={`/learn/${job?.id || ''}`} className="group inline-flex flex-col mb-6">
+        <Link href={job?.id ? `/learn/${job.id}` : '/general/scenarios'} className="group inline-flex flex-col mb-6">
           <div className="flex items-center gap-2 text-sm font-bold text-slate-400 group-hover:text-emerald-600 transition-colors">
             <ArrowLeft size={16} />
             <span>{back.main}</span>
@@ -71,11 +80,11 @@ export default function ScenarioClient({ scenarios, job }: { scenarios: any[], j
           <div>
             <h1 className="text-2xl md:text-4xl font-black text-slate-800 tracking-tight leading-none flex items-center gap-2 flex-wrap">
               <span>{scenTitle.main}:</span>
-              <span className="text-emerald-600">{jobName}</span>
+              <span className="text-emerald-600">{job ? jobName : categoryName}</span>
             </h1>
             {!scenTitle.isOnlyHr && (
               <p className="text-[11px] font-black text-emerald-500 uppercase mt-1 tracking-widest italic opacity-80">
-                {scenTitle.sub}: {job?.name_hr}
+                {scenTitle.sub}: {job ? job.name_hr : category?.name_hr}
               </p>
             )}
           </div>
@@ -175,7 +184,7 @@ export default function ScenarioClient({ scenarios, job }: { scenarios: any[], j
               .sc-back { transform: rotateY(180deg); }
             `}</style>
 
-            <div style={{ maxWidth: 580, margin: '0 auto', width: '100%' }}>
+            <div style={{ maxWidth: '100%', margin: '0 auto', width: '100%' }}>
 
               {/* NAVIGACIJSKI RED — izvan flip kartice, nema event konflikta */}
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
