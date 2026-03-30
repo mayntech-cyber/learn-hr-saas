@@ -273,11 +273,6 @@ export default function TestsClient({ userId, userPlan }: { userId?: string, use
     );
     return (
       <div className="min-h-screen pt-4 pb-8 px-4">
-        <div className="max-w-4xl mx-auto mb-4">
-          <button onClick={() => setActiveGame("NONE")} className="flex items-center gap-2 text-sm font-black text-white px-4 py-2 rounded-xl" style={{ background: 'rgba(255,255,255,0.18)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.3)' }}>
-            <ArrowLeft size={16} /> {tBackToTests.main}
-          </button>
-        </div>
         <FlashcardPlayer
           words={lessonWords}
           job={{ id: selectedLesson.id, name_hr: selectedLesson.name }}
@@ -393,21 +388,21 @@ export default function TestsClient({ userId, userPlan }: { userId?: string, use
         </div>
       )}
 
-      <div className="flex flex-row justify-between items-start mb-8 gap-4" style={{ background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(12px)', borderRadius: 16, padding: '1.5rem', marginBottom: '1.5rem' }}>
+      <div className="flex flex-row justify-between items-start mb-8 gap-4" style={{ background: 'rgba(10,30,60,0.65)', borderRadius: 16, overflow: 'hidden', padding: '1.5rem', marginBottom: '1.5rem', color: 'white' }}>
         <div>
-          <h1 className="text-xl md:text-4xl font-black text-slate-800 flex items-center gap-3 whitespace-nowrap">
-            <Gamepad2 className="text-blue-600" size={32} />
+          <h1 className="text-xl md:text-4xl font-black flex items-center gap-3 whitespace-nowrap" style={{ color: 'white' }}>
+            <Gamepad2 className="text-blue-400" size={32} />
             {tTitle.main}
           </h1>
-          <p className="hidden md:block text-slate-500 font-medium mt-3 text-sm md:text-base">{tSubTitle.main}</p>
+          <p className="hidden md:block font-medium mt-3 text-sm md:text-base" style={{ color: 'rgba(255,255,255,0.7)' }}>{tSubTitle.main}</p>
         </div>
 
         {/* Desktop badge */}
-        <div className="hidden md:flex bg-amber-50 border border-amber-200 px-5 py-3 rounded-2xl items-center gap-4 shadow-sm flex-shrink-0">
+        <div className="hidden md:flex px-5 py-3 rounded-2xl items-center gap-4 flex-shrink-0" style={{ background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.18)' }}>
           <div className="bg-amber-500 p-2 rounded-full text-white"><Trophy size={20} /></div>
           <div>
-            <div className="text-[10px] font-black text-amber-600 uppercase tracking-widest">{tRank.main}</div>
-            <div className="font-black text-slate-800">{tBeginner.main} ({totalXP} XP)</div>
+            <div className="text-[10px] font-black uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.6)' }}>{tRank.main}</div>
+            <div className="font-black" style={{ color: 'white' }}>{tBeginner.main} ({totalXP} XP)</div>
           </div>
         </div>
 
@@ -415,10 +410,11 @@ export default function TestsClient({ userId, userPlan }: { userId?: string, use
         <div className="relative md:hidden flex-shrink-0">
           <button
             onClick={() => setShowRankPopup(v => !v)}
-            className="flex items-center gap-1.5 bg-amber-50 border border-amber-200 px-2.5 py-1.5 rounded-xl shadow-sm"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl"
+            style={{ background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.18)' }}
           >
-            <Trophy size={14} className="text-amber-500" />
-            <span className="text-xs font-black text-slate-800">{totalXP} XP</span>
+            <Trophy size={14} className="text-amber-400" />
+            <span className="text-xs font-black" style={{ color: 'white' }}>{totalXP} XP</span>
           </button>
           {showRankPopup && (
             <div className="absolute right-0 top-full mt-3 whitespace-nowrap z-10" style={{ filter: 'drop-shadow(0 4px 20px rgba(0,0,0,0.2))' }}>
@@ -438,24 +434,18 @@ export default function TestsClient({ userId, userPlan }: { userId?: string, use
         </div>
       </div>
 
-      <div className="flex bg-slate-100 p-1.5 rounded-[1.8rem] mb-10 w-full max-w-md mx-auto shadow-inner border border-slate-200/50">
+      <div className="flex mb-10 w-full max-w-md mx-auto" style={{ background: 'rgba(10,30,60,0.65)', borderRadius: 50, padding: '6px' }}>
         <button
           onClick={() => setActiveTab("general")}
-          className={`flex-1 flex items-center justify-center gap-1.5 md:gap-2 px-4 py-2 md:py-3.5 rounded-[1.5rem] font-black text-sm md:text-base transition-all ${
-            activeTab === "general"
-            ? "bg-white text-blue-600 shadow-lg scale-100 border border-blue-50"
-            : "text-slate-400 hover:text-slate-600"
-          }`}
+          className="flex-1 flex items-center justify-center gap-1.5 md:gap-2 px-4 py-2 md:py-3.5 rounded-[1.5rem] font-black text-sm md:text-base transition-all"
+          style={{ color: 'white', background: activeTab === "general" ? 'rgba(255,255,255,0.15)' : 'transparent' }}
         >
           <Globe size={14} className="md:hidden" /><Globe size={18} className="hidden md:block" /> {tGeneral.main}
         </button>
         <button
           onClick={() => setActiveTab("professional")}
-          className={`flex-1 flex items-center justify-center gap-1.5 md:gap-2 px-4 py-2 md:py-3.5 rounded-[1.5rem] font-black text-sm md:text-base transition-all ${
-            activeTab === "professional"
-            ? "bg-white text-orange-600 shadow-lg scale-100 border border-orange-50"
-            : "text-slate-400 hover:text-slate-600"
-          }`}
+          className="flex-1 flex items-center justify-center gap-1.5 md:gap-2 px-4 py-2 md:py-3.5 rounded-[1.5rem] font-black text-sm md:text-base transition-all"
+          style={{ color: 'white', background: activeTab === "professional" ? 'rgba(255,255,255,0.15)' : 'transparent' }}
         >
           <HardHat size={14} className="md:hidden" /><HardHat size={18} className="hidden md:block" /> {tProfessional.main}
         </button>

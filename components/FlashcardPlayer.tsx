@@ -167,28 +167,28 @@ export default function FlashcardPlayer({ words, job, isGeneral, onClose }: { wo
     <div className="p-4 md:p-10 flex flex-col animate-in fade-in duration-500 max-w-4xl mx-auto w-full">
 
       {/* --- HEADER (isti layout kao ScenarioClient) --- */}
-      <div style={{ background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(12px)', borderRadius: 16, padding: '1rem 1.25rem', marginBottom: '1.5rem' }}>
+      <div style={{ background: 'rgba(10,30,60,0.65)', borderRadius: 16, padding: '1rem 1.25rem', marginBottom: '1.5rem', color: 'white' }}>
       <div className="mb-8" style={{ marginBottom: 0 }}>
         {isGeneral && onClose ? (
           <button onClick={onClose} className="group inline-flex flex-col mb-6 text-left">
-            <div className="flex items-center gap-2 text-sm font-bold text-slate-400 group-hover:text-orange-500 transition-colors">
+            <div className="flex items-center gap-2 text-sm font-bold transition-colors" style={{ color: 'rgba(255,255,255,0.7)' }}>
               <ArrowLeft size={16} />
               <span>{backBtn.main}</span>
             </div>
             {!backBtn.isOnlyHr && (
-              <span className="text-[10px] font-bold text-slate-300 ml-6 uppercase tracking-tighter italic">
+              <span className="text-[10px] font-bold ml-6 uppercase tracking-tighter italic" style={{ color: 'rgba(255,255,255,0.4)' }}>
                 {backBtn.sub}
               </span>
             )}
           </button>
         ) : (
           <Link href={isGeneral ? '/quizzes' : backUrl} className="group inline-flex flex-col mb-6">
-            <div className="flex items-center gap-2 text-sm font-bold text-slate-400 group-hover:text-orange-500 transition-colors">
+            <div className="flex items-center gap-2 text-sm font-bold transition-colors" style={{ color: 'rgba(255,255,255,0.7)' }}>
               <ArrowLeft size={16} />
               <span>{backBtn.main}</span>
             </div>
             {!backBtn.isOnlyHr && (
-              <span className="text-[10px] font-bold text-slate-300 ml-6 uppercase tracking-tighter italic">
+              <span className="text-[10px] font-bold ml-6 uppercase tracking-tighter italic" style={{ color: 'rgba(255,255,255,0.4)' }}>
                 {backBtn.sub}
               </span>
             )}
@@ -200,12 +200,12 @@ export default function FlashcardPlayer({ words, job, isGeneral, onClose }: { wo
             <BrainCircuit size={28} />
           </div>
           <div>
-            <h1 className="text-2xl md:text-4xl font-black text-slate-800 tracking-tight leading-none flex items-center gap-2 flex-wrap">
+            <h1 className="text-2xl md:text-4xl font-black tracking-tight leading-none flex items-center gap-2 flex-wrap" style={{ color: 'white' }}>
               <span>{titleText.main}{job && !isGeneral ? ':' : ''}</span>
-              {job && !isGeneral && <span className="text-orange-500">{jobName}</span>}
+              {job && !isGeneral && <span className="text-orange-400">{jobName}</span>}
             </h1>
             {!titleText.isOnlyHr && (
-              <p className="text-[11px] font-black text-orange-400 uppercase mt-1 tracking-widest italic opacity-80">
+              <p className="text-[11px] font-black uppercase mt-1 tracking-widest italic opacity-80" style={{ color: 'rgba(255,255,255,0.6)' }}>
                 {titleText.sub}{job && !isGeneral ? `: ${job.name_hr}` : ''}
               </p>
             )}
