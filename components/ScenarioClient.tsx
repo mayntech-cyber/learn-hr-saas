@@ -60,14 +60,14 @@ export default function ScenarioClient({ scenarios, job, category }: { scenarios
     <div className="p-4 md:p-10 min-h-screen flex flex-col animate-in fade-in duration-500">
 
       {/* --- DVOJEZIČNI HEADER --- */}
-      <div className="mb-8">
+      <div className="mb-8" style={{ background: 'rgba(10,30,60,0.65)', borderRadius: 16, padding: '1.5rem' }}>
         <Link href={job?.id ? `/learn/${job.id}` : '/general/scenarios'} className="group inline-flex flex-col mb-6">
-          <div className="flex items-center gap-2 text-sm font-bold text-slate-400 group-hover:text-emerald-600 transition-colors">
+          <div className="flex items-center gap-2 text-sm font-bold transition-colors" style={{ color: 'rgba(255,255,255,0.7)' }}>
             <ArrowLeft size={16} />
             <span>{back.main}</span>
           </div>
           {!back.isOnlyHr && (
-            <span className="text-[10px] font-bold text-slate-300 ml-6 uppercase tracking-tighter italic">
+            <span className="text-[10px] font-bold ml-6 uppercase tracking-tighter italic" style={{ color: 'rgba(255,255,255,0.4)' }}>
               {back.sub}
             </span>
           )}
@@ -78,12 +78,12 @@ export default function ScenarioClient({ scenarios, job, category }: { scenarios
             <MessageSquare size={28} />
           </div>
           <div>
-            <h1 className="text-2xl md:text-4xl font-black text-slate-800 tracking-tight leading-none flex items-center gap-2 flex-wrap">
-              <span>{scenTitle.main}:</span>
-              <span className="text-emerald-600">{job ? jobName : categoryName}</span>
+            <h1 className="text-2xl md:text-4xl font-black tracking-tight leading-none flex items-center gap-2 flex-wrap">
+              <span style={{ color: 'white' }}>{scenTitle.main}:</span>
+              <span className="text-emerald-400">{job ? jobName : categoryName}</span>
             </h1>
             {!scenTitle.isOnlyHr && (
-              <p className="text-[11px] font-black text-emerald-500 uppercase mt-1 tracking-widest italic opacity-80">
+              <p className="text-[11px] font-black uppercase mt-1 tracking-widest italic opacity-80" style={{ color: 'rgba(255,255,255,0.6)' }}>
                 {scenTitle.sub}: {job ? job.name_hr : category?.name_hr}
               </p>
             )}

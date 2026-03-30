@@ -2,7 +2,7 @@
 
 import { User, Mail, Calendar, Briefcase, Settings, Globe2, LogOut, Award, Edit2, CheckCircle2, Loader2, Flame } from "lucide-react";
 import { useLanguage } from "./LanguageContext";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { createClient } from "@/utils/supabase/client"; // Treba nam klijent za promjenu u bazi
 import { useRouter } from "next/navigation"; // Za osvježavanje stranice
 
@@ -10,6 +10,15 @@ export default function ProfileClient({ user, job, allJobs }: { user: any, job: 
   const { euLangName, nativeLangName, uiMode, openModal, t } = useLanguage();
   const router = useRouter();
   const supabase = createClient();
+
+  // DEBUG: provjera Google avatar polja
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      console.log('USER METADATA:', user?.user_metadata);
+      console.log('AVATAR URL:', user?.user_metadata?.avatar_url);
+      console.log('PICTURE:', user?.user_metadata?.picture);
+    });
+  }, []);
 
   // State za promjenu zanimanja
   const [isEditingJob, setIsEditingJob] = useState(false);
@@ -68,7 +77,7 @@ export default function ProfileClient({ user, job, allJobs }: { user: any, job: 
     <div className="p-3 md:p-10 max-w-2xl mx-auto space-y-3 md:space-y-6 animate-in fade-in duration-500">
 
       {/* HEADER KARTICA */}
-      <div className="bg-white rounded-2xl md:rounded-[2.5rem] p-4 md:p-8 shadow-sm border border-slate-100 flex flex-row items-center gap-4 md:gap-8 relative overflow-hidden">
+      <div className="rounded-2xl md:rounded-[2.5rem] p-4 md:p-8 shadow-sm border border-slate-100 flex flex-row items-center gap-4 md:gap-8 relative overflow-hidden" style={{ background: 'rgba(255,255,255,0.85)' }}>
         <div className="absolute top-0 right-0 w-24 h-24 md:w-32 md:h-32 bg-blue-50 rounded-bl-full -z-0 opacity-50"></div>
 
         <div className="w-14 h-14 md:w-24 md:h-24 rounded-2xl md:rounded-3xl shadow-lg relative z-10 overflow-hidden flex-shrink-0">
@@ -142,7 +151,7 @@ export default function ProfileClient({ user, job, allJobs }: { user: any, job: 
         </div>
 
         {/* ZANIMANJE KARTICA */}
-        <div className="bg-white rounded-2xl md:rounded-[2.5rem] p-4 md:p-8 border border-slate-100 shadow-sm flex flex-col justify-between">
+        <div className="rounded-2xl md:rounded-[2.5rem] p-4 md:p-8 border border-slate-100 shadow-sm flex flex-col justify-between" style={{ background: 'rgba(255,255,255,0.85)' }}>
           <div>
             <div className="flex items-center justify-between mb-3 md:mb-6">
               <div className="flex items-center gap-2 md:gap-3">

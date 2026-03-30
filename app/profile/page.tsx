@@ -35,7 +35,7 @@ export default async function ProfilePage() {
     joined: joinedDate,
     jobId: profile?.current_job_id || 1,
     xp_points: profile?.xp_points || 0,
-    avatarUrl: metaAvatar || null,
+    avatarUrl: metaAvatar || profile?.avatar_url || null,
     streak: profile?.streak_days || 0,
   };
 

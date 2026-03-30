@@ -34,30 +34,30 @@ export default function DictionaryClient({ words, job }: { words: any[], job?: a
     <div className="w-full p-4 md:p-10 max-w-7xl mx-auto min-h-screen flex flex-col animate-in fade-in duration-500">
       
       {/* --- DVOJEZIČNI HEADER --- */}
-      <div className="mb-8">
+      <div className="mb-8" style={{ background: 'rgba(10,30,60,0.65)', borderRadius: 16, padding: '1.5rem', color: 'white' }}>
         <Link href={`/learn/${job?.id || ''}`} className="group inline-flex flex-col mb-6">
-          <div className="flex items-center gap-2 text-sm font-bold text-slate-400 group-hover:text-blue-600 transition-colors">
-            <ArrowLeft size={16} /> 
+          <div className="flex items-center gap-2 text-sm font-bold transition-colors" style={{ color: 'rgba(255,255,255,0.7)' }}>
+            <ArrowLeft size={16} />
             <span>{back.main}</span>
           </div>
           {!back.isOnlyHr && (
-            <span className="text-[10px] font-bold text-slate-300 ml-6 uppercase tracking-tighter italic">
+            <span className="text-[10px] font-bold ml-6 uppercase tracking-tighter italic" style={{ color: 'rgba(255,255,255,0.4)' }}>
               {back.sub}
             </span>
           )}
         </Link>
-        
+
         <div className="flex items-center gap-4">
           <div className="bg-blue-600 p-3 rounded-2xl text-white shadow-md">
             <BookOpen size={28} />
           </div>
           <div>
-            <h1 className="text-2xl md:text-4xl font-black text-slate-800 tracking-tight leading-none flex items-center gap-2 flex-wrap">
-              <span>{dictTitle.main}:</span> 
-              <span className="text-blue-600">{jobName}</span>
+            <h1 className="text-2xl md:text-4xl font-black tracking-tight leading-none flex items-center gap-2 flex-wrap">
+              <span style={{ color: 'white' }}>{dictTitle.main}:</span>
+              <span className="text-blue-300">{jobName}</span>
             </h1>
             {!dictTitle.isOnlyHr && (
-              <p className="text-[11px] font-black text-blue-400 uppercase mt-1 tracking-widest italic opacity-80">
+              <p className="text-[11px] font-black uppercase mt-1 tracking-widest italic opacity-80" style={{ color: 'rgba(255,255,255,0.6)' }}>
                 {dictTitle.sub}: {job?.name_hr}
               </p>
             )}

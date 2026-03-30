@@ -255,14 +255,14 @@ export default function GeneralDictionaryClient({ words, categoryData = [] }: { 
       <div className="w-full p-4 md:p-10 max-w-7xl mx-auto min-h-screen flex flex-col animate-in fade-in duration-500">
 
         {/* HEADER */}
-        <div className="mb-5">
+        <div className="mb-5" style={{ background: 'rgba(10,30,60,0.65)', borderRadius: 16, padding: '1.5rem', color: 'white' }}>
           <Link href="/general" className="group inline-flex flex-col mb-4">
-            <div className="flex items-center gap-2 text-sm font-bold text-slate-400 group-hover:text-blue-600 transition-colors">
+            <div className="flex items-center gap-2 text-sm font-bold transition-colors" style={{ color: 'rgba(255,255,255,0.7)' }}>
               <ArrowLeft size={16} />
               <span>{back.main}</span>
             </div>
             {!back.isOnlyHr && (
-              <span className="text-[10px] font-bold text-slate-300 ml-6 uppercase tracking-tighter italic">
+              <span className="text-[10px] font-bold ml-6 uppercase tracking-tighter italic" style={{ color: 'rgba(255,255,255,0.4)' }}>
                 {back.sub}
               </span>
             )}
@@ -275,17 +275,17 @@ export default function GeneralDictionaryClient({ words, categoryData = [] }: { 
                 <Globe2 size={28} className="hidden md:block" />
               </div>
               <div>
-                <h1 className="text-2xl md:text-4xl font-black text-slate-800 tracking-tight leading-none">
+                <h1 className="text-2xl md:text-4xl font-black tracking-tight leading-none" style={{ color: 'white' }}>
                   {head.main}
                 </h1>
                 {!head.isOnlyHr && (
-                  <p className="text-[11px] font-black text-blue-400 uppercase mt-1 tracking-widest italic opacity-80">
+                  <p className="text-[11px] font-black uppercase mt-1 tracking-widest italic opacity-80" style={{ color: 'rgba(255,255,255,0.6)' }}>
                     {head.sub}
                   </p>
                 )}
               </div>
             </div>
-            <div className="flex items-center gap-2 text-slate-500 text-sm font-medium" />
+            <div className="flex items-center gap-2 text-sm font-medium" style={{ color: 'rgba(255,255,255,0.5)' }} />
           </div>
         </div>
 
@@ -301,43 +301,45 @@ export default function GeneralDictionaryClient({ words, categoryData = [] }: { 
         </div>
 
         {/* FILTER BAR */}
-        <div className="flex items-center gap-2 mb-2 flex-wrap">
-          <button
-            onClick={openDrawer}
-            className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-black whitespace-nowrap transition-all border ${
-              isFilterActive
-                ? "bg-blue-600 text-white border-blue-600 shadow-md"
-                : "bg-white text-slate-600 border-slate-200 hover:border-slate-400"
-            }`}
-          >
-            <SlidersHorizontal size={13} />
-            <span>Filtriraj</span>
-          </button>
-          {previewParts.slice(0, 2).map((p, i) => (
-            <span key={i} className="text-xs font-bold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-lg whitespace-nowrap">
-              {p}
-            </span>
-          ))}
-          {previewParts.length > 2 && (
-            <span className="text-xs font-bold text-slate-400">...</span>
+        <div className="mb-3" style={{ background: 'rgba(10,30,60,0.65)', borderRadius: 16, padding: '1rem' }}>
+          <div className="flex items-center gap-2 mb-2 flex-wrap">
+            <button
+              onClick={openDrawer}
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-black whitespace-nowrap transition-all border ${
+                isFilterActive
+                  ? "bg-blue-600 text-white border-blue-600 shadow-md"
+                  : "bg-white text-slate-600 border-slate-200 hover:border-slate-400"
+              }`}
+            >
+              <SlidersHorizontal size={13} />
+              <span>Filtriraj</span>
+            </button>
+            {previewParts.slice(0, 2).map((p, i) => (
+              <span key={i} className="text-xs font-bold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-lg whitespace-nowrap">
+                {p}
+              </span>
+            ))}
+            {previewParts.length > 2 && (
+              <span className="text-xs font-bold" style={{ color: 'rgba(255,255,255,0.5)' }}>...</span>
+            )}
+          </div>
+
+          {/* AKTIVNI FILTER BADGE */}
+          {isFilterActive && (
+            <div className="flex items-center">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-blue-50 text-blue-700 border border-blue-200">
+                🚩 {badgeLabel}
+                <button
+                  onClick={clearActiveFilter}
+                  className="ml-0.5 hover:text-blue-900 transition-colors"
+                  aria-label="Resetiraj filter"
+                >
+                  ✕
+                </button>
+              </span>
+            </div>
           )}
         </div>
-
-        {/* AKTIVNI FILTER BADGE */}
-        {isFilterActive && (
-          <div className="flex items-center mb-4">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-blue-50 text-blue-700 border border-blue-200">
-              🚩 {badgeLabel}
-              <button
-                onClick={clearActiveFilter}
-                className="ml-0.5 hover:text-blue-900 transition-colors"
-                aria-label="Resetiraj filter"
-              >
-                ✕
-              </button>
-            </span>
-          </div>
-        )}
 
         <div className="mb-3" />
 

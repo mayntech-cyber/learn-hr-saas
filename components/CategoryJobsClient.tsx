@@ -17,19 +17,19 @@ export default function CategoryJobsClient({ category, jobs }: { category: any, 
     <div className="p-6 md:p-10 max-w-4xl mx-auto space-y-8 animate-in fade-in duration-500">
       
       {/* HEADER S DVOJEZIČNIM GUMBOM */}
-      <div>
+      <div style={{ background: 'rgba(10,30,60,0.65)', borderRadius: 16, padding: '1.5rem', color: 'white' }}>
         <Link href="/professional" className="group inline-flex flex-col mb-6">
-          <div className="flex items-center gap-2 text-sm font-bold text-slate-400 group-hover:text-blue-600 transition-colors">
-            <ArrowLeft size={16} /> 
+          <div className="flex items-center gap-2 text-sm font-bold transition-colors" style={{ color: 'rgba(255,255,255,0.7)' }}>
+            <ArrowLeft size={16} />
             <span>{back.main}</span>
           </div>
           {!back.isOnlyHr && (
-            <span className="text-[10px] font-bold text-slate-300 ml-6 uppercase tracking-tighter italic">
+            <span className="text-[10px] font-bold ml-6 uppercase tracking-tighter italic" style={{ color: 'rgba(255,255,255,0.4)' }}>
               {back.sub}
             </span>
           )}
         </Link>
-        
+
         {/* Tvoj postojeći CategoryHeader */}
         <CategoryHeader category={category} />
       </div>

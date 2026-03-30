@@ -47,7 +47,7 @@ export default function CategoryHeader({ category }: CategoryHeaderProps) {
         
         {/* 3. NAZIV SEKTORA I ZVUČNIK */}
         <div className="flex items-center gap-3">
-          <h1 className="text-3xl sm:text-4xl font-black text-slate-800 leading-tight">
+          <h1 className="text-3xl sm:text-4xl font-black leading-tight" style={{ color: 'white' }}>
             {category.name_hr}
           </h1>
           <button 
@@ -61,23 +61,23 @@ export default function CategoryHeader({ category }: CategoryHeaderProps) {
         {/* 4. PRIJEVODI IMENA SEKTORA */}
         <div className="flex flex-wrap items-center gap-2 mt-1.5">
           {euLang !== 'hr' && euTranslation && (
-            <span className="text-base sm:text-lg font-bold text-slate-500">{euTranslation}</span>
+            <span className="text-base sm:text-lg font-bold" style={{ color: 'rgba(255,255,255,0.7)' }}>{euTranslation}</span>
           )}
           {nativeTranslation && (
             <>
               {euLang !== 'hr' && euTranslation && <span className="text-slate-300">/</span>}
-              <span className="text-base sm:text-lg font-bold text-blue-600">{nativeTranslation}</span>
+              <span className="text-base sm:text-lg font-bold text-blue-300">{nativeTranslation}</span>
             </>
           )}
         </div>
 
         {/* 5. DVOJEZIČNI PODNASLOV (Popravljeno) */}
         <div className="mt-4">
-          <p className="text-sm text-slate-500 font-bold">
+          <p className="text-sm font-bold" style={{ color: 'rgba(255,255,255,0.6)' }}>
             {subtitle.main}
           </p>
           {!subtitle.isOnlyHr && (
-            <div className="flex gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest mt-0.5">
+            <div className="flex gap-2 text-[10px] font-black uppercase tracking-widest mt-0.5" style={{ color: 'rgba(255,255,255,0.4)' }}>
                <span>{subtitle.sub}</span>
             </div>
           )}

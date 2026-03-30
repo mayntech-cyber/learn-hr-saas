@@ -72,40 +72,40 @@ export default function JobHubClient({ job }: { job: any }) {
     <div className="p-4 md:p-10 max-w-5xl mx-auto min-h-screen flex flex-col animate-in fade-in duration-500">
       
       {/* --- DVOJEZIČNI HEADER --- */}
-      <div className="mb-10">
-        <Link 
-          href={`/professional/${job?.category_id || ''}`} 
+      <div className="mb-10" style={{ background: 'rgba(10,30,60,0.65)', borderRadius: 16, padding: '1.5rem', color: 'white' }}>
+        <Link
+          href={`/professional/${job?.category_id || ''}`}
           className="group inline-flex flex-col mb-6"
         >
-          <div className="flex items-center gap-2 text-sm font-bold text-slate-400 group-hover:text-blue-600 transition-colors">
-            <ArrowLeft size={16} /> 
+          <div className="flex items-center gap-2 text-sm font-bold transition-colors" style={{ color: 'rgba(255,255,255,0.7)' }}>
+            <ArrowLeft size={16} />
             <span>{back.main}</span>
           </div>
           {!back.isOnlyHr && (
-            <span className="text-[10px] font-bold text-slate-300 ml-6 uppercase tracking-tighter italic">
+            <span className="text-[10px] font-bold ml-6 uppercase tracking-tighter italic" style={{ color: 'rgba(255,255,255,0.4)' }}>
               {back.sub}
             </span>
           )}
         </Link>
-        
+
         <div className="flex items-center gap-4">
-          <div className="bg-slate-800 p-3 rounded-2xl text-white shadow-md">
+          <div className="bg-slate-700 p-3 rounded-2xl text-white shadow-md">
             <BookOpen size={28} />
           </div>
           <div>
-            <h1 className="text-3xl md:text-4xl font-black text-slate-800 tracking-tight leading-none">
+            <h1 className="text-3xl md:text-4xl font-black tracking-tight leading-none" style={{ color: 'white' }}>
               {jobTitle.main}
             </h1>
             {jobTitle.sub && (
-              <p className="text-[11px] font-black text-slate-400 uppercase mt-1 tracking-widest italic opacity-80">
+              <p className="text-[11px] font-black uppercase mt-1 tracking-widest italic opacity-80" style={{ color: 'rgba(255,255,255,0.6)' }}>
                 {jobTitle.sub}
               </p>
             )}
-            
-            <div className="text-slate-500 font-medium mt-3 leading-tight">
+
+            <div className="font-medium mt-3 leading-tight" style={{ color: 'rgba(255,255,255,0.7)' }}>
                <p>{subtitle.main}</p>
                {!subtitle.isOnlyHr && (
-                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
+                 <p className="text-[10px] font-bold uppercase tracking-widest mt-0.5" style={{ color: 'rgba(255,255,255,0.4)' }}>
                    {subtitle.sub}
                  </p>
                )}
@@ -115,6 +115,7 @@ export default function JobHubClient({ job }: { job: any }) {
       </div>
 
       {/* --- GLAVNI IZBORNIK --- */}
+      <div style={{ background: 'rgba(10,30,60,0.45)', borderRadius: 16, padding: '1.5rem' }}>
       <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-6">
         
         {/* 1. RJEČNIK */}
@@ -195,6 +196,7 @@ export default function JobHubClient({ job }: { job: any }) {
           </span>
         </Link>
 
+      </div>
       </div>
     </div>
   );

@@ -101,33 +101,33 @@ export default function PricingClient({
     <div className="w-full max-w-6xl mx-auto px-4 py-10 animate-in fade-in duration-500">
 
       {/* HEADER */}
-      <div className="text-center mb-12">
-        <div className="inline-flex items-center gap-2 bg-blue-50 text-blue-600 font-black text-xs uppercase tracking-widest px-4 py-2 rounded-full mb-6 border border-blue-100">
+      <div className="text-center mb-12" style={{ background: 'rgba(10,30,60,0.65)', borderRadius: 16, padding: '1.5rem', color: 'white' }}>
+        <div className="inline-flex items-center gap-2 font-black text-xs uppercase tracking-widest px-4 py-2 rounded-full mb-6" style={{ background: 'rgba(255,255,255,0.15)', color: 'white', border: '1px solid rgba(255,255,255,0.25)' }}>
           <Rocket size={14} /> LearnHR Pro
         </div>
-        <h1 className="text-4xl md:text-5xl font-black text-slate-800 mb-4 tracking-tight">
+        <h1 className="text-4xl md:text-5xl font-black mb-4 tracking-tight" style={{ color: 'white' }}>
           {tTitle.main}
         </h1>
-        <p className="text-slate-500 text-lg font-medium">{tSub.main}</p>
+        <p className="text-lg font-medium" style={{ color: 'rgba(255,255,255,0.7)' }}>{tSub.main}</p>
 
         {/* Toggle Mjesečno / Godišnje */}
-        <div className="flex items-center justify-center gap-4 mt-8">
-          <span className={`text-sm font-bold ${!annual ? "text-slate-800" : "text-slate-400"}`}>
+        <div className="inline-flex items-center gap-4 mt-8" style={{ background: 'rgba(10,30,60,0.65)', borderRadius: 50, padding: '0.5rem 1rem' }}>
+          <span className="text-sm font-bold" style={{ color: !annual ? 'white' : 'rgba(255,255,255,0.4)' }}>
             {tMonthly.main}
           </span>
           <button
             onClick={() => setAnnual(!annual)}
             className={`relative w-14 h-7 rounded-full transition-all duration-300 ${
-              annual ? "bg-blue-600" : "bg-slate-200"
+              annual ? "bg-blue-500" : "bg-white/20"
             }`}
           >
             <div className={`absolute top-1 w-5 h-5 bg-white rounded-full shadow-md transition-all duration-300 ${
               annual ? "left-8" : "left-1"
             }`} />
           </button>
-          <span className={`text-sm font-bold flex items-center gap-2 ${annual ? "text-slate-800" : "text-slate-400"}`}>
+          <span className="text-sm font-bold flex items-center gap-2" style={{ color: annual ? 'white' : 'rgba(255,255,255,0.4)' }}>
             {tAnnual.main}
-            <span className="bg-emerald-100 text-emerald-700 text-xs font-black px-2 py-0.5 rounded-full">
+            <span className="bg-emerald-500 text-white text-xs font-black px-2 py-0.5 rounded-full">
               {tSave.main}
             </span>
           </span>

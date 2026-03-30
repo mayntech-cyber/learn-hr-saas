@@ -16,27 +16,27 @@ export default function SectorsClient({ categories }: { categories: any[] }) {
     <div className="p-6 md:p-10 max-w-4xl mx-auto space-y-8 animate-in fade-in duration-500">
       
       {/* --- DVOJEZIČNI HEADER --- */}
-      <div className="mb-10">
+      <div className="mb-10" style={{ background: 'rgba(10,30,60,0.65)', borderRadius: 16, padding: '1.5rem', color: 'white' }}>
         <div className="flex items-center gap-4 mb-3">
-          <div className="bg-slate-800 p-3 rounded-2xl text-white shadow-md">
+          <div className="bg-slate-700 p-3 rounded-2xl text-white shadow-md">
             <Briefcase size={28} />
           </div>
           <div>
-            <h1 className="text-3xl md:text-4xl font-black text-slate-800 tracking-tight leading-none">
+            <h1 className="text-3xl md:text-4xl font-black tracking-tight leading-none" style={{ color: 'white' }}>
               {title.main}
             </h1>
             {!title.isOnlyHr && (
-              <p className="text-[11px] font-black text-slate-400 uppercase mt-1 tracking-widest italic opacity-80">
+              <p className="text-[11px] font-black uppercase mt-1 tracking-widest italic opacity-80" style={{ color: 'rgba(255,255,255,0.6)' }}>
                 {title.sub}
               </p>
             )}
           </div>
         </div>
-        
-        <div className="text-slate-500 font-medium">
+
+        <div className="font-medium" style={{ color: 'rgba(255,255,255,0.7)' }}>
           <p>{subtitle.main}</p>
           {!subtitle.isOnlyHr && (
-            <p className="text-xs font-bold text-slate-400 uppercase mt-0.5 tracking-wide">
+            <p className="text-xs font-bold uppercase mt-0.5 tracking-wide" style={{ color: 'rgba(255,255,255,0.4)' }}>
               {subtitle.sub}
             </p>
           )}
