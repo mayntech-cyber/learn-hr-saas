@@ -14,6 +14,7 @@ import {
 import Link from "next/link";
 import { useLanguage } from "./LanguageContext";
 import { createClient } from "@/utils/supabase/client";
+import CroatiaSlideshow from "./CroatiaSlideshow";
 
 export default function DashboardClient({ job, profile }: { job: any, profile: any }) {
   const supabase = createClient();
@@ -165,6 +166,19 @@ export default function DashboardClient({ job, profile }: { job: any, profile: a
             </div>
           </div>
 
+        </div>
+      </div>
+
+      {/* ═══════════════════════════════════════════
+          CROATIA SLIDESHOW HERO
+      ═══════════════════════════════════════════ */}
+      <div className="bg-slate-50 px-4 md:px-10 pt-6">
+        <div className="max-w-5xl mx-auto">
+          <CroatiaSlideshow
+            language={nativeLang || "en"}
+            height="380px"
+            className="shadow-xl"
+          />
         </div>
       </div>
 
