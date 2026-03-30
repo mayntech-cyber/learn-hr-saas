@@ -2,18 +2,34 @@
 
 import { usePathname } from "next/navigation";
 import Navigation from "@/components/Navigation";
+import { usePageBackground } from "@/hooks/usePageBackground";
+import { PAGE_BACKGROUND_OVERLAY } from "@/lib/constants";
+
+// Stranice bez navigacije (imaju vlastiti background)
+const NO_NAV_ROUTES = ["/login", "/onboarding"];
+
+// Stranice s navigacijom ali bez background slike (ostaje bg-slate-50)
+const NO_BG_ROUTES = ["/pricing/checkout", "/pricing/success"];
 
 export default function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const bgUrl = usePageBackground();
 
-  // Ovdje definiramo na kojim rutama NE ŽELIMO prikazati Sidebar
-  const hideNavigationRoutes = ["/login", "/onboarding"];
+  const isNoNav = NO_NAV_ROUTES.includes(pathname);
+  const isNoBg = NO_BG_ROUTES.includes(pathname);
 
-  // Provjeravamo je li trenutna putanja na "crnoj listi"
-  const isNavigationHidden = hideNavigationRoutes.includes(pathname);
+  const backgroundStyle =
+    bgUrl && !isNoBg && !isNoNav
+      ? {
+          backgroundImage: `linear-gradient(${PAGE_BACKGROUND_OVERLAY}, ${PAGE_BACKGROUND_OVERLAY}), url(${bgUrl})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundAttachment: "fixed",
+        }
+      : undefined;
 
-  // Ako smo na Login ili Onboarding, prikaži SAMO sadržaj (na sredini, bez margine)
-  if (isNavigationHidden) {
+  // Login / Onboarding — bez navigacije, vlastiti background
+  if (isNoNav) {
     return (
       <main className="min-h-screen bg-slate-50 flex flex-col justify-center">
         {children}
@@ -21,9 +37,11 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
     );
   }
 
-  // Ako smo na bilo kojoj drugoj stranici (Dashboard, General, itd.), prikaži Sidebar + Sadržaj
   return (
-    <div className="flex min-h-screen bg-slate-50">
+    <div
+      className={`flex min-h-screen${!bgUrl || isNoBg ? " bg-slate-50" : ""}`}
+      style={backgroundStyle}
+    >
       <Navigation />
       <main className="flex-1 md:ml-64 pb-20 md:pb-0 flex justify-center">
         {children}

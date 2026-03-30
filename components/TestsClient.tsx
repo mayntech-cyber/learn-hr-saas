@@ -8,7 +8,7 @@ import MatchGamePlayer from "./MatchGamePlayer";
 import QuizPlayer from "./QuizPlayer";
 import GapFillPlayer from "./GapFillPlayer";
 
-export default function TestsClient({ userId, userPlan, bgImage }: { userId?: string, userPlan?: string, bgImage?: string | null }) {
+export default function TestsClient({ userId, userPlan }: { userId?: string, userPlan?: string }) {
   const supabase = createClient();
   const [lessons, setLessons] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -272,7 +272,12 @@ export default function TestsClient({ userId, userPlan, bgImage }: { userId?: st
       </div>
     );
     return (
-      <div className="min-h-screen pt-6 pb-8 px-4">
+      <div className="min-h-screen pt-4 pb-8 px-4">
+        <div className="max-w-4xl mx-auto mb-4">
+          <button onClick={() => setActiveGame("NONE")} className="flex items-center gap-2 text-sm font-black text-white px-4 py-2 rounded-xl" style={{ background: 'rgba(255,255,255,0.18)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.3)' }}>
+            <ArrowLeft size={16} /> {tBackToTests.main}
+          </button>
+        </div>
         <FlashcardPlayer
           words={lessonWords}
           job={{ id: selectedLesson.id, name_hr: selectedLesson.name }}
@@ -291,7 +296,12 @@ export default function TestsClient({ userId, userPlan, bgImage }: { userId?: st
       </div>
     );
     return (
-      <div className="min-h-screen pt-6 pb-8 px-4">
+      <div className="min-h-screen pt-4 pb-8 px-4">
+        <div className="max-w-4xl mx-auto mb-4">
+          <button onClick={() => setActiveGame("NONE")} className="flex items-center gap-2 text-sm font-black text-white px-4 py-2 rounded-xl" style={{ background: 'rgba(255,255,255,0.18)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.3)' }}>
+            <ArrowLeft size={16} /> {tBackToTests.main}
+          </button>
+        </div>
         <MatchGamePlayer lesson={selectedLesson} words={lessonWords} onClose={() => setActiveGame("NONE")} />
       </div>
     );
@@ -300,14 +310,19 @@ export default function TestsClient({ userId, userPlan, bgImage }: { userId?: st
   if (activeGame === "QUIZ" && selectedLesson) {
     if (loadingWords) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="animate-spin" /></div>;
     return (
-      <div className="min-h-screen pt-6 pb-8 px-4">
-        <QuizPlayer 
-          lesson={selectedLesson} 
-          words={lessonWords} 
+      <div className="min-h-screen pt-4 pb-8 px-4">
+        <div className="max-w-4xl mx-auto mb-4">
+          <button onClick={() => setActiveGame("NONE")} className="flex items-center gap-2 text-sm font-black text-white px-4 py-2 rounded-xl" style={{ background: 'rgba(255,255,255,0.18)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.3)' }}>
+            <ArrowLeft size={16} /> {tBackToTests.main}
+          </button>
+        </div>
+        <QuizPlayer
+          lesson={selectedLesson}
+          words={lessonWords}
           onClose={() => setActiveGame("NONE")}
           isProfessional={activeTab === "professional"}
-          userId={userId} 
-          activeLevel={activeLevel} 
+          userId={userId}
+          activeLevel={activeLevel}
         />
       </div>
     );
@@ -316,7 +331,12 @@ export default function TestsClient({ userId, userPlan, bgImage }: { userId?: st
   if (activeGame === "GAPFILL" && selectedLesson) {
     if (loadingWords) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="animate-spin" /></div>;
     return (
-      <div className="min-h-screen pt-6 pb-8 px-4">
+      <div className="min-h-screen pt-4 pb-8 px-4">
+        <div className="max-w-4xl mx-auto mb-4">
+          <button onClick={() => setActiveGame("NONE")} className="flex items-center gap-2 text-sm font-black text-white px-4 py-2 rounded-xl" style={{ background: 'rgba(255,255,255,0.18)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.3)' }}>
+            <ArrowLeft size={16} /> {tBackToTests.main}
+          </button>
+        </div>
         <GapFillPlayer
           lesson={selectedLesson}
           words={lessonWords}
@@ -329,12 +349,7 @@ export default function TestsClient({ userId, userPlan, bgImage }: { userId?: st
 
   // --- GLAVNI UI ---
   return (
-    <div className="w-full max-w-5xl mx-auto p-4 md:p-6 lg:p-10 pt-10 relative animate-in fade-in slide-in-from-bottom-4 duration-500" style={bgImage ? {
-      backgroundImage: `linear-gradient(rgba(255,255,255,0.65), rgba(255,255,255,0.65)), url(${bgImage})`,
-      backgroundSize: 'cover',
-      backgroundPosition: 'center',
-      minHeight: '100vh'
-    } : { minHeight: '100vh' }}>
+    <div className="w-full max-w-5xl mx-auto p-4 md:p-6 lg:p-10 pt-10 relative animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ minHeight: '100vh' }}>
       
       {/* MODAL ZA ODABIR LEVELA */}
       {showLevelModal && selectedLesson && (
