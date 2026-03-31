@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback, useRef } from "react";
 import { createClient } from "@/utils/supabase/client";
+import { Music } from "lucide-react";
 
 interface CroatiaItem {
   id: string;
@@ -118,14 +119,32 @@ export default function CroatiaSlideshow({
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
-      {/* Image */}
-      <img
-        src={item.file_url}
-        alt={item.title}
-        className="absolute inset-0 w-full h-full object-cover transition-opacity duration-400"
-        style={{ opacity: fading ? 0 : 1 }}
-        draggable={false}
-      />
+      {/* Media */}
+      {item.type === "video" ? (
+        <video
+          src={item.file_url}
+          muted
+          autoPlay
+          loop
+          playsInline
+          style={{ width: "100%", height: "100%", objectFit: "cover", opacity: fading ? 0 : 1, position: "absolute", inset: 0, transition: "opacity 400ms" }}
+        />
+      ) : item.type === "audio" ? (
+        <div
+          className="absolute inset-0 flex items-center justify-center bg-slate-900"
+          style={{ opacity: fading ? 0 : 1, transition: "opacity 400ms" }}
+        >
+          <Music size={48} className="text-slate-600" />
+        </div>
+      ) : (
+        <img
+          src={item.file_url}
+          alt={item.title}
+          className="absolute inset-0 w-full h-full object-cover transition-opacity duration-400"
+          style={{ opacity: fading ? 0 : 1 }}
+          draggable={false}
+        />
+      )}
 
       {/* Dark overlay */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
