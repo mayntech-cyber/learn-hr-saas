@@ -91,13 +91,13 @@ export default function DashboardClient({ job, profile }: { job: any, profile: a
   const xpPoints = profile?.xp_points || 0;
 
   return (
-    <div className="min-h-screen flex flex-col animate-in fade-in duration-500">
+    <div className="w-full flex flex-col animate-in fade-in duration-500">
 
       {/* ═══════════════════════════════════════════
           1. TAMNI HEADER
       ═══════════════════════════════════════════ */}
       <div style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%)' }} className="px-4 md:px-10 pt-8 pb-10">
-        <div className="max-w-5xl mx-auto">
+        <div className="w-full">
 
           {/* Pozdrav + avatar */}
           <div className="flex items-start justify-between mb-8">
@@ -173,7 +173,7 @@ export default function DashboardClient({ job, profile }: { job: any, profile: a
           CROATIA SLIDESHOW HERO
       ═══════════════════════════════════════════ */}
       <div className="bg-slate-50 px-4 md:px-10 pt-6">
-        <div className="max-w-5xl mx-auto">
+        <div className="w-full">
           <CroatiaSlideshow
             language={nativeLang || "en"}
             height="380px"
@@ -186,7 +186,7 @@ export default function DashboardClient({ job, profile }: { job: any, profile: a
           CONTENT ISPOD HEADERA
       ═══════════════════════════════════════════ */}
       <div className="flex-1 bg-slate-50 px-4 md:px-10 py-8">
-        <div className="max-w-5xl mx-auto space-y-8">
+        <div className="w-full space-y-8">
 
           {/* ─────────────────────────────────────────
               2. NASTAVI GDJE SI STAO
