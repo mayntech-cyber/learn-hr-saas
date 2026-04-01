@@ -9,6 +9,8 @@ export function usePageBackground(): string | null {
   const [bgUrl, setBgUrl] = useState<string | null>(null);
 
   useEffect(() => {
+    if (typeof window !== "undefined" && window.location.pathname === "/dashboard") return;
+
     const cached = sessionStorage.getItem(SESSION_KEY);
     if (cached) {
       setBgUrl(cached);

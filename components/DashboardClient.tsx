@@ -42,7 +42,7 @@ export default function DashboardClient({ job, profile }: { job: any, profile: a
 
   // --- PRIJEVODI ---
   const displayName = profile?.full_name?.split(' ')[0] || "Radniče";
-  const greeting = t(`Bok, ${displayName}! 👋`);
+  const greeting = t(`Bok, ${displayName}!`);
   const greetingSub = t("Tvoj put do majstora hrvatskog jezika se nastavlja.");
   const streak = t("Niz");
   const days = t("dana");
@@ -96,14 +96,16 @@ export default function DashboardClient({ job, profile }: { job: any, profile: a
       {/* ═══════════════════════════════════════════
           1. TAMNI HEADER
       ═══════════════════════════════════════════ */}
-      <div style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%)' }} className="px-4 md:px-10 pt-8 pb-10">
+      <div style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%)', position: 'relative', overflow: 'hidden' }} className="px-4 md:px-10 pt-8 pb-10">
         <div className="w-full">
 
           {/* Pozdrav + avatar */}
+          <img src="https://iptiklsbjzrsuyaaytfv.supabase.co/storage/v1/object/public/croatia-icons/1774977166808_13.png" alt="" style={{ position: 'absolute', top: 0, left: 0, height: 200, zIndex: 0, opacity: 0.85 }} />
           <div className="flex items-start justify-between mb-8">
-            <div>
-              <h1 className="text-2xl md:text-4xl font-black text-white tracking-tight leading-tight">
+            <div style={{ position: 'relative', zIndex: 1 }}>
+              <h1 className="text-2xl md:text-4xl font-black text-white tracking-tight leading-tight flex items-center gap-2">
                 {greeting.main}
+                <img src="https://iptiklsbjzrsuyaaytfv.supabase.co/storage/v1/object/public/croatia-icons/1774977166372_12.png" alt="" style={{ height: 52, position: 'relative', zIndex: 2 }} className="flex-shrink-0" />
               </h1>
               {!greeting.isOnlyHr && (
                 <p className="text-[10px] font-black text-blue-300 uppercase tracking-widest mt-0.5">{greeting.sub}</p>
@@ -172,7 +174,7 @@ export default function DashboardClient({ job, profile }: { job: any, profile: a
       {/* ═══════════════════════════════════════════
           CONTENT ISPOD HEADERA
       ═══════════════════════════════════════════ */}
-      <div className="flex-1 px-4 md:px-10 py-8" style={{ background: 'rgba(255,255,255,0.08)', backdropFilter: 'blur(12px)', borderTop: '1px solid rgba(255,255,255,0.12)' }}>
+      <div className="flex-1 px-4 md:px-10 py-8" style={{ background: '#cbd5e1' }}>
         <div className="w-full space-y-8">
 
           {/* ─────────────────────────────────────────
