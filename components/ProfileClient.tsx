@@ -74,7 +74,11 @@ export default function ProfileClient({ user, job, allJobs }: { user: any, job: 
   };
 
   return (
-    <div className="p-3 md:p-10 w-full space-y-3 md:space-y-6 animate-in fade-in duration-500">
+    <div className="p-3 md:p-10 w-full animate-in fade-in duration-500">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+      {/* LEFT COLUMN */}
+      <div className="space-y-3 md:space-y-6">
 
       {/* HEADER KARTICA */}
       <div className="rounded-2xl md:rounded-[2.5rem] p-4 md:p-8 shadow-sm border border-slate-100 flex flex-row items-center gap-4 md:gap-8 relative overflow-hidden" style={{ background: 'rgba(255,255,255,0.85)' }}>
@@ -251,6 +255,36 @@ export default function ProfileClient({ user, job, allJobs }: { user: any, job: 
         </button>
       </div>
 
+      </div>{/* END LEFT COLUMN */}
+
+      {/* RIGHT COLUMN — stat cards */}
+      <div className="grid grid-cols-2 gap-4 content-start">
+        {[
+          { title: "Ukupno XP", value: "—" },
+          { title: "Naučene riječi", value: "—" },
+          { title: "Završeni scenariji", value: "—" },
+          { title: "Dnevni niz rekord", value: "—" },
+          { title: "Položeni testovi", value: "—" },
+          { title: "Rang", value: "—" },
+        ].map((stat) => (
+          <div
+            key={stat.title}
+            style={{
+              background: 'rgba(255,255,255,0.08)',
+              backdropFilter: 'blur(8px)',
+              border: '1px solid rgba(255,255,255,0.15)',
+              borderRadius: 16,
+              padding: 20,
+            }}
+          >
+            <div className="w-9 h-9 rounded-full bg-white/15 mb-3" />
+            <p className="text-xs font-bold text-white/60 uppercase tracking-widest mb-1">{stat.title}</p>
+            <p className="text-3xl font-black text-white">{stat.value}</p>
+          </div>
+        ))}
+      </div>{/* END RIGHT COLUMN */}
+
+    </div>{/* END TWO-COLUMN GRID */}
     </div>
   );
 }
