@@ -12,7 +12,7 @@ export function usePageBackground(): string | null {
     if (typeof window !== "undefined" && window.location.pathname === "/dashboard") return;
 
     const cached = sessionStorage.getItem(SESSION_KEY);
-    if (cached) {
+    if (cached && cached.startsWith("http")) {
       setBgUrl(cached);
       return;
     }

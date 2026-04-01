@@ -90,7 +90,7 @@ export default function GeneralHubClient() {
   const pdfBtn = t("Preuzmi PDF");
 
   return (
-    <div className="p-4 md:p-10 max-w-6xl mx-auto min-h-screen flex flex-col animate-in fade-in duration-500">
+    <div className="p-2 md:p-10 w-full min-h-screen flex flex-col animate-in fade-in duration-500">
       
       {/* HEADER */}
       <div className="mb-6 md:mb-12 text-center md:text-left" style={{ background: 'rgba(10,30,60,0.65)', borderRadius: 16, padding: '1.5rem', color: 'white' }}>
@@ -120,108 +120,140 @@ export default function GeneralHubClient() {
         </div>
       </div>
 
-      {/* GLAVNE KARTICE - 2x2 grid */}
-      <div style={{ background: 'rgba(10,30,60,0.45)', borderRadius: 16, padding: '1.5rem' }}>
-      <div className="grid grid-cols-2 gap-3 md:gap-8">
-        
-        {/* RJEČNIK */}
-        <Link href="/general/dictionary" className="group p-4 md:p-8 rounded-2xl md:rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-xl transition-all flex flex-col items-center text-center h-full" style={{ background: 'rgba(201, 38, 38, 0.60)', borderLeft: '10px solid rgba(59,130,246,0.8)' }}>
-          <div className="bg-blue-50 p-3 md:p-6 rounded-full text-blue-600 mb-3 md:mb-6 group-hover:scale-110 transition-transform shadow-inner">
-            <BookOpen size={28} className="md:hidden" /><BookOpen size={48} className="hidden md:block" />
+      {/* GLAVNE KARTICE - single column mobile / 2x2 grid desktop */}
+      <div className="px-0 md:px-6" style={{ background: 'rgba(10,30,60,0.45)', borderRadius: 16, paddingTop: '1.5rem', paddingBottom: '1.5rem' }}>
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-3 md:gap-8">
+
+        {/* RJEČNIK — blue */}
+        <Link href="/general/dictionary" className="group relative flex flex-row md:flex-col items-center md:items-center text-left md:text-center h-20 md:h-auto p-3 md:p-8 rounded-xl md:rounded-[2.5rem] shadow-sm hover:shadow-xl transition-all" style={{ background: 'rgba(255,255,255,0.12)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.15)' }}>
+          <div className="flex-shrink-0 bg-white/15 flex items-center justify-center rounded-full mr-3 md:mr-0 md:mb-6 group-hover:scale-110 transition-transform shadow-inner w-10 h-10 md:w-auto md:h-auto md:p-6">
+            <BookOpen size={20} style={{ color: '#3b82f6' }} className="md:hidden" />
+            <BookOpen size={48} style={{ color: '#3b82f6' }} className="hidden md:block" />
           </div>
-          <h2 className="text-sm md:text-2xl font-black text-slate-800 mb-1">{dict.main}</h2>
-          {!dict.isOnlyHr && <p className="text-[9px] md:text-[10px] font-bold text-blue-400 uppercase mb-2 md:mb-4 tracking-tighter italic">{dict.sub}</p>}
-          <div className="text-slate-500 font-medium mb-3 md:mb-8 flex-1 text-[10px] md:text-base line-clamp-2 md:line-clamp-none block">
-             <p>{dictDesc.main}</p>
-             {!dictDesc.isOnlyHr && <p className="text-[10px] text-slate-400 font-bold mt-1 uppercase italic">{dictDesc.sub}</p>}
-          </div>
-          <div style={{ width: '100%', marginBottom: '0.5rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-              <span style={{ fontSize: 11, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: 0.5 }}>Naučeno</span>
-              <span style={{ fontSize: 11, fontWeight: 700, color: '#3b82f6' }}>{knownWords} riječi</span>
+          <div className="flex-1 min-w-0 md:w-full flex flex-col">
+            <h2 className="text-xs md:text-2xl font-black text-white mb-0.5 md:mb-1">{dict.main}</h2>
+            {!dict.isOnlyHr && <p className="text-[8px] md:text-[10px] font-bold text-white/70 uppercase mb-0.5 md:mb-4 tracking-tighter italic">{dict.sub}</p>}
+            <div className="hidden md:block text-white/80 font-medium mb-3 md:mb-8 flex-1 text-base">
+              <p>{dictDesc.main}</p>
+              {!dictDesc.isOnlyHr && <p className="text-[10px] text-white/60 font-bold mt-1 uppercase italic">{dictDesc.sub}</p>}
             </div>
-            <div style={{ height: 3, background: 'rgba(0,0,0,0.06)', borderRadius: 99 }}>
-              <div style={{ height: '100%', width: '0%', background: '#3b82f6', borderRadius: 99 }} />
+            <div style={{ width: '100%', marginBottom: '0.25rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 2 }}>
+                <span style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', letterSpacing: 0.5 }}>Naučeno</span>
+                <span style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,0.9)' }}>{knownWords} riječi</span>
+              </div>
+              <div style={{ height: 3, background: 'rgba(255,255,255,0.15)', borderRadius: 99 }}>
+                <div style={{ height: '100%', width: '0%', background: '#3b82f6', borderRadius: 99 }} />
+              </div>
             </div>
+            <span className="hidden md:block w-full bg-blue-500 text-white font-black py-4 rounded-2xl text-xs uppercase tracking-wider text-center group-hover:bg-blue-600 transition-colors mt-2">
+              {dictBtn.main}
+            </span>
           </div>
-          <span className="w-full bg-blue-100 text-blue-700 font-black py-2 md:py-4 rounded-xl md:rounded-2xl text-[10px] md:text-xs uppercase tracking-wider group-hover:bg-blue-600 group-hover:text-white transition-colors">
-            {dictBtn.main}
-          </span>
+          <div className="md:hidden flex-shrink-0 ml-2" style={{ minWidth: '80px', maxWidth: '80px' }}>
+            <span className="w-full block bg-blue-500 text-white font-black py-1 rounded-lg text-[8px] uppercase tracking-wider group-hover:bg-blue-600 transition-colors whitespace-nowrap text-center" style={{ paddingLeft: '8px', paddingRight: '8px' }}>
+              OTVORI
+            </span>
+          </div>
         </Link>
 
-        {/* SCENARIJI */}
-        <Link href="/general/scenarios" className="group p-4 md:p-8 rounded-2xl md:rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-xl transition-all flex flex-col items-center text-center h-full" style={{ background: 'rgba(195, 235, 210, 0.85)', borderLeft: '10px solid rgba(34,197,94,0.8)' }}>
-          <div className="bg-emerald-50 p-3 md:p-6 rounded-full text-emerald-600 mb-3 md:mb-6 group-hover:scale-110 transition-transform shadow-inner">
-            <MessageSquare size={28} className="md:hidden" /><MessageSquare size={48} className="hidden md:block" />
+        {/* SCENARIJI — green */}
+        <Link href="/general/scenarios" className="group relative flex flex-row md:flex-col items-center md:items-center text-left md:text-center h-20 md:h-auto p-3 md:p-8 rounded-xl md:rounded-[2.5rem] shadow-sm hover:shadow-xl transition-all" style={{ background: 'rgba(255,255,255,0.12)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.15)' }}>
+          <div className="flex-shrink-0 bg-white/15 flex items-center justify-center rounded-full mr-3 md:mr-0 md:mb-6 group-hover:scale-110 transition-transform w-10 h-10 md:w-auto md:h-auto md:p-6">
+            <MessageSquare size={20} style={{ color: '#16a34a' }} className="md:hidden" />
+            <MessageSquare size={48} style={{ color: '#16a34a' }} className="hidden md:block" />
           </div>
-          <h2 className="text-sm md:text-2xl font-black text-white mb-1">{scen.main}</h2>
-          {!scen.isOnlyHr && <p className="text-[9px] md:text-[10px] font-bold text-emerald-500 uppercase mb-2 md:mb-4 tracking-tighter italic">{scen.sub}</p>}
-          <div className="text-slate-500 font-medium mb-3 md:mb-8 flex-1 text-[10px] md:text-base line-clamp-2 md:line-clamp-none block">
-             <p>{scenDesc.main}</p>
-             {!scenDesc.isOnlyHr && <p className="text-[10px] text-slate-400 font-bold mt-1 uppercase italic">{scenDesc.sub}</p>}
-          </div>
-          <div style={{ width: '100%', marginBottom: '0.5rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-              <span style={{ fontSize: 11, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: 0.5 }}>Završeno</span>
-              <span style={{ fontSize: 11, fontWeight: 700, color: '#10b981' }}>{completedScenarios} završeno</span>
+          <div className="flex-1 min-w-0 md:w-full flex flex-col">
+            <h2 className="text-xs md:text-2xl font-black text-white mb-0.5 md:mb-1">{scen.main}</h2>
+            {!scen.isOnlyHr && <p className="text-[8px] md:text-[10px] font-bold text-white/70 uppercase mb-0.5 md:mb-4 tracking-tighter italic">{scen.sub}</p>}
+            <div className="hidden md:block text-white/80 font-medium mb-3 md:mb-8 flex-1 text-base">
+              <p>{scenDesc.main}</p>
+              {!scenDesc.isOnlyHr && <p className="text-[10px] text-white/60 font-bold mt-1 uppercase italic">{scenDesc.sub}</p>}
             </div>
-            <div style={{ height: 3, background: 'rgba(0,0,0,0.06)', borderRadius: 99 }}>
-              <div style={{ height: '100%', width: '0%', background: '#10b981', borderRadius: 99 }} />
+            <div style={{ width: '100%', marginBottom: '0.25rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 2 }}>
+                <span style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', letterSpacing: 0.5 }}>Završeno</span>
+                <span style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,0.9)' }}>{completedScenarios} završeno</span>
+              </div>
+              <div style={{ height: 3, background: 'rgba(255,255,255,0.15)', borderRadius: 99 }}>
+                <div style={{ height: '100%', width: '0%', background: '#16a34a', borderRadius: 99 }} />
+              </div>
             </div>
+            <span className="hidden md:block w-full bg-green-700 text-white font-black py-4 rounded-2xl text-xs uppercase tracking-wider text-center group-hover:bg-green-800 transition-colors mt-2">
+              {scenBtn.main}
+            </span>
           </div>
-          <span className="w-full bg-emerald-100 text-emerald-700 font-black py-2 md:py-4 rounded-xl md:rounded-2xl text-[10px] md:text-xs uppercase tracking-wider group-hover:bg-emerald-600 group-hover:text-white transition-colors">
-            {scenBtn.main}
-          </span>
+          <div className="md:hidden flex-shrink-0 ml-2" style={{ minWidth: '80px', maxWidth: '80px' }}>
+            <span className="w-full block bg-green-700 text-white font-black py-1 rounded-lg text-[8px] uppercase tracking-wider group-hover:bg-green-800 transition-colors whitespace-nowrap text-center" style={{ paddingLeft: '8px', paddingRight: '8px' }}>
+              OTVORI
+            </span>
+          </div>
         </Link>
 
-        {/* GRAMATIKA */}
-        <Link href="/general/grammar" className="group p-4 md:p-8 rounded-2xl md:rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-xl transition-all flex flex-col items-center text-center h-full" style={{ background: 'rgba(255,255,255,0.90)', borderLeft: '10px solid rgba(168,85,247,0.8)' }}>
-          <div className="bg-purple-50 p-3 md:p-6 rounded-full text-purple-600 mb-3 md:mb-6 group-hover:scale-110 transition-transform shadow-inner">
-            <Puzzle size={28} className="md:hidden" /><Puzzle size={48} className="hidden md:block" />
+        {/* GRAMATIKA — purple */}
+        <Link href="/general/grammar" className="group relative flex flex-row md:flex-col items-center md:items-center text-left md:text-center h-20 md:h-auto p-3 md:p-8 rounded-xl md:rounded-[2.5rem] shadow-sm hover:shadow-xl transition-all" style={{ background: 'rgba(255,255,255,0.12)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.15)' }}>
+          <div className="flex-shrink-0 bg-white/15 flex items-center justify-center rounded-full mr-3 md:mr-0 md:mb-6 group-hover:scale-110 transition-transform w-10 h-10 md:w-auto md:h-auto md:p-6">
+            <Puzzle size={20} style={{ color: '#7c3aed' }} className="md:hidden" />
+            <Puzzle size={48} style={{ color: '#7c3aed' }} className="hidden md:block" />
           </div>
-          <h2 className="text-sm md:text-2xl font-black text-slate-800 mb-1">{gram.main}</h2>
-          {!gram.isOnlyHr && <p className="text-[9px] md:text-[10px] font-bold text-purple-400 uppercase mb-2 md:mb-4 tracking-tighter italic">{gram.sub}</p>}
-          <div className="text-slate-500 font-medium mb-3 md:mb-8 flex-1 text-[10px] md:text-base line-clamp-2 md:line-clamp-none block">
-             <p>{gramDesc.main}</p>
-             {!gramDesc.isOnlyHr && <p className="text-[10px] text-slate-400 font-bold mt-1 uppercase italic">{gramDesc.sub}</p>}
-          </div>
-          <div style={{ width: '100%', marginBottom: '0.5rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-              <span style={{ fontSize: 11, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: 0.5 }}>Lekcije</span>
-              <span style={{ fontSize: 11, fontWeight: 700, color: '#a855f7' }}>0 / 3</span>
+          <div className="flex-1 min-w-0 md:w-full flex flex-col">
+            <h2 className="text-xs md:text-2xl font-black text-white mb-0.5 md:mb-1">{gram.main}</h2>
+            {!gram.isOnlyHr && <p className="text-[8px] md:text-[10px] font-bold text-white/70 uppercase mb-0.5 md:mb-4 tracking-tighter italic">{gram.sub}</p>}
+            <div className="hidden md:block text-white/80 font-medium mb-3 md:mb-8 flex-1 text-base">
+              <p>{gramDesc.main}</p>
+              {!gramDesc.isOnlyHr && <p className="text-[10px] text-white/60 font-bold mt-1 uppercase italic">{gramDesc.sub}</p>}
             </div>
-            <div style={{ height: 3, background: 'rgba(0,0,0,0.06)', borderRadius: 99 }}>
-              <div style={{ height: '100%', width: '0%', background: '#a855f7', borderRadius: 99 }} />
+            <div style={{ width: '100%', marginBottom: '0.25rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 2 }}>
+                <span style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', letterSpacing: 0.5 }}>Lekcije</span>
+                <span style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,0.9)' }}>0 / 3</span>
+              </div>
+              <div style={{ height: 3, background: 'rgba(255,255,255,0.15)', borderRadius: 99 }}>
+                <div style={{ height: '100%', width: '0%', background: '#7c3aed', borderRadius: 99 }} />
+              </div>
             </div>
+            <span className="hidden md:block w-full bg-violet-700 text-white font-black py-4 rounded-2xl text-xs uppercase tracking-wider text-center group-hover:bg-violet-800 transition-colors mt-2">
+              {gramBtn.main}
+            </span>
           </div>
-          <span className="w-full bg-purple-100 text-purple-700 font-black py-2 md:py-4 rounded-xl md:rounded-2xl text-[10px] md:text-xs uppercase tracking-wider group-hover:bg-purple-600 group-hover:text-white transition-colors">
-            {gramBtn.main}
-          </span>
+          <div className="md:hidden flex-shrink-0 ml-2" style={{ minWidth: '80px', maxWidth: '80px' }}>
+            <span className="w-full block bg-violet-700 text-white font-black py-1 rounded-lg text-[8px] uppercase tracking-wider group-hover:bg-violet-800 transition-colors whitespace-nowrap text-center" style={{ paddingLeft: '8px', paddingRight: '8px' }}>
+              OTVORI
+            </span>
+          </div>
         </Link>
 
-        {/* VJEŽBA — tamna kartica, bez border-left */}
-        <Link href="/general/practice" className="group p-4 md:p-8 rounded-2xl md:rounded-[2.5rem] border border-slate-800 shadow-lg hover:shadow-xl transition-all flex flex-col items-center text-center h-full" style={{ background: 'rgba(15,23,42,0.60)' }}>
-          <div className="bg-white/10 p-3 md:p-6 rounded-full text-orange-400 mb-3 md:mb-6 group-hover:scale-110 transition-transform">
-            <BrainCircuit size={28} className="md:hidden" /><BrainCircuit size={48} className="hidden md:block" />
+        {/* VJEŽBA — orange */}
+        <Link href="/general/practice" className="group relative flex flex-row md:flex-col items-center md:items-center text-left md:text-center h-20 md:h-auto p-3 md:p-8 rounded-xl md:rounded-[2.5rem] shadow-lg hover:shadow-xl transition-all" style={{ background: 'rgba(255,255,255,0.12)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.15)' }}>
+          <div className="flex-shrink-0 bg-white/15 flex items-center justify-center rounded-full mr-3 md:mr-0 md:mb-6 group-hover:scale-110 transition-transform w-10 h-10 md:w-auto md:h-auto md:p-6">
+            <BrainCircuit size={20} style={{ color: '#f97316' }} className="md:hidden" />
+            <BrainCircuit size={48} style={{ color: '#f97316' }} className="hidden md:block" />
           </div>
-          <h2 className="text-sm md:text-2xl font-black text-white mb-1">{prac.main}</h2>
-          {!prac.isOnlyHr && <p className="text-[9px] md:text-[10px] font-bold text-orange-400 uppercase mb-2 md:mb-4 tracking-tighter italic">{prac.sub}</p>}
-          <div className="text-slate-300 font-medium mb-3 md:mb-8 flex-1 text-[10px] md:text-base line-clamp-2 md:line-clamp-none block">
-             <p>{pracDesc.main}</p>
-             {!pracDesc.isOnlyHr && <p className="text-[10px] text-slate-400 font-bold mt-1 uppercase italic">{pracDesc.sub}</p>}
-          </div>
-          <div style={{ width: '100%', marginBottom: '0.5rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-              <span style={{ fontSize: 11, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: 0.5 }}>Sesije</span>
-              <span style={{ fontSize: 11, fontWeight: 700, color: '#f97316' }}>{practiceSessions}</span>
+          <div className="flex-1 min-w-0 md:w-full flex flex-col">
+            <h2 className="text-xs md:text-2xl font-black text-white mb-0.5 md:mb-1">{prac.main}</h2>
+            {!prac.isOnlyHr && <p className="text-[8px] md:text-[10px] font-bold text-white/70 uppercase mb-0.5 md:mb-4 tracking-tighter italic">{prac.sub}</p>}
+            <div className="hidden md:block text-white/80 font-medium mb-3 md:mb-8 flex-1 text-base">
+              <p>{pracDesc.main}</p>
+              {!pracDesc.isOnlyHr && <p className="text-[10px] text-white/60 font-bold mt-1 uppercase italic">{pracDesc.sub}</p>}
             </div>
-            <div style={{ height: 3, background: 'rgba(255,255,255,0.1)', borderRadius: 99 }}>
-              <div style={{ height: '100%', width: '0%', background: '#f97316', borderRadius: 99 }} />
+            <div style={{ width: '100%', marginBottom: '0.25rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 2 }}>
+                <span style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', letterSpacing: 0.5 }}>Sesije</span>
+                <span style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,0.9)' }}>{practiceSessions}</span>
+              </div>
+              <div style={{ height: 3, background: 'rgba(255,255,255,0.15)', borderRadius: 99 }}>
+                <div style={{ height: '100%', width: '0%', background: '#f97316', borderRadius: 99 }} />
+              </div>
             </div>
+            <span className="hidden md:block w-full bg-orange-500 text-white font-black py-4 rounded-2xl shadow-md group-hover:bg-orange-600 transition-colors text-xs uppercase tracking-wider text-center mt-2">
+              {pracBtn.main}
+            </span>
           </div>
-          <span className="w-full bg-orange-500 text-white font-black py-2 md:py-4 rounded-xl md:rounded-2xl shadow-md group-hover:bg-orange-600 transition-colors text-[10px] md:text-xs uppercase tracking-wider">
-            {pracBtn.main}
-          </span>
+          <div className="md:hidden flex-shrink-0 ml-2" style={{ minWidth: '80px', maxWidth: '80px' }}>
+            <span className="w-full block bg-orange-500 text-white font-black py-1 rounded-lg text-[8px] uppercase tracking-wider group-hover:bg-orange-600 transition-colors whitespace-nowrap text-center" style={{ paddingLeft: '8px', paddingRight: '8px' }}>
+              NASTAVI
+            </span>
+          </div>
         </Link>
 
       </div>
@@ -233,7 +265,7 @@ export default function GeneralHubClient() {
           href={pdfUrl} 
           target="_blank" 
           rel="noopener noreferrer"
-          className="mt-8 md:mt-12 bg-gradient-to-r from-blue-600 to-purple-600 p-1 rounded-[2.5rem] shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all group block"
+          className="mt-8 md:mt-12 bg-gradient-to-r from-blue-600 to-purple-600 p-1 rounded-[2.5rem] shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all group block -mx-2 md:mx-0"
         >
           <div className="bg-white/10 backdrop-blur-sm rounded-[2.3rem] p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6 border border-white/20 text-white">
             <div className="flex items-center gap-6">
