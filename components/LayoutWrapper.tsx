@@ -43,7 +43,7 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
       style={backgroundStyle}
     >
       <Navigation />
-      <main className="flex-1 md:ml-64 pb-20 md:pb-0 flex justify-center">
+      <main className="flex-1 md:ml-64 pb-20 md:pb-0 flex flex-col">
         {children}
       </main>
     </div>
