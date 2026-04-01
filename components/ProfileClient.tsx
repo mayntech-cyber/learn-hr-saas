@@ -74,7 +74,7 @@ export default function ProfileClient({ user, job, allJobs }: { user: any, job: 
   };
 
   return (
-    <div className="p-3 md:p-10 max-w-2xl mx-auto space-y-3 md:space-y-6 animate-in fade-in duration-500">
+    <div className="p-3 md:p-10 w-full space-y-3 md:space-y-6 animate-in fade-in duration-500">
 
       {/* HEADER KARTICA */}
       <div className="rounded-2xl md:rounded-[2.5rem] p-4 md:p-8 shadow-sm border border-slate-100 flex flex-row items-center gap-4 md:gap-8 relative overflow-hidden" style={{ background: 'rgba(255,255,255,0.85)' }}>
@@ -103,8 +103,8 @@ export default function ProfileClient({ user, job, allJobs }: { user: any, job: 
         </div>
       </div>
 
-      {/* GRID: Postavke + Zanimanje — 2 stupca i na mobileu */}
-      <div className="grid grid-cols-2 gap-3 md:gap-6">
+      {/* GRID: Postavke + Zanimanje — 2 stupca mobile, 40/60 desktop */}
+      <div className="grid grid-cols-2 md:grid-cols-[2fr_3fr] gap-3 md:gap-6">
 
         {/* POSTAVKE JEZIKA KARTICA */}
         <div className="bg-slate-900 rounded-2xl md:rounded-[2.5rem] p-4 md:p-8 text-white shadow-xl relative overflow-hidden">
