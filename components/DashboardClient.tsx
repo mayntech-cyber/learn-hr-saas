@@ -172,7 +172,7 @@ export default function DashboardClient({ job, profile }: { job: any, profile: a
       {/* ═══════════════════════════════════════════
           CONTENT ISPOD HEADERA
       ═══════════════════════════════════════════ */}
-      <div className="flex-1 bg-slate-50 px-4 md:px-10 py-8">
+      <div className="flex-1 px-4 md:px-10 py-8" style={{ background: 'rgba(255,255,255,0.08)', backdropFilter: 'blur(12px)', borderTop: '1px solid rgba(255,255,255,0.12)' }}>
         <div className="w-full space-y-8">
 
           {/* ─────────────────────────────────────────
