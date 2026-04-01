@@ -16,7 +16,9 @@
       "Bash(grep -r const.*[0-9]{4} C:language-front/components)",
       "Bash(find C:language-front -type f -name *admin* -o -name *builder*)",
       "Bash(find C:language-front -maxdepth 2 -type f \\\\\\(-name *.md -o -name *.json \\\\\\))",
-      "Bash(find C:language-front -type f -name *.tsx -o -name *.ts)"
+      "Bash(find C:language-front -type f -name *.tsx -o -name *.ts)",
+      "Bash(git -C C:language-front add -A)",
+      "Bash(git -C C:language-front commit -m \"backup before job hub layout fix\")"
     ]
   }
 }
