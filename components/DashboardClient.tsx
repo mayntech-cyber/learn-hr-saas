@@ -14,7 +14,7 @@ import {
 import Link from "next/link";
 import { useLanguage } from "./LanguageContext";
 import { createClient } from "@/utils/supabase/client";
-import CroatiaSlideshow from "./CroatiaSlideshow";
+import DashboardSlideshowSection from "./DashboardSlideshowSection";
 
 export default function DashboardClient({ job, profile }: { job: any, profile: any }) {
   const supabase = createClient();
@@ -170,19 +170,6 @@ export default function DashboardClient({ job, profile }: { job: any, profile: a
       </div>
 
       {/* ═══════════════════════════════════════════
-          CROATIA SLIDESHOW HERO
-      ═══════════════════════════════════════════ */}
-      <div className="bg-slate-50 px-4 md:px-10 pt-6">
-        <div className="w-full">
-          <CroatiaSlideshow
-            language={nativeLang || "en"}
-            height="380px"
-            className="shadow-xl"
-          />
-        </div>
-      </div>
-
-      {/* ═══════════════════════════════════════════
           CONTENT ISPOD HEADERA
       ═══════════════════════════════════════════ */}
       <div className="flex-1 bg-slate-50 px-4 md:px-10 py-8">
@@ -278,7 +265,12 @@ export default function DashboardClient({ job, profile }: { job: any, profile: a
           </div>
 
           {/* ─────────────────────────────────────────
-              4. TESTOVI + 5. DNEVNI CILJ
+              4. CROATIA SLIDESHOW
+          ───────────────────────────────────────── */}
+          <DashboardSlideshowSection language={nativeLang || "en"} />
+
+          {/* ─────────────────────────────────────────
+              5. TESTOVI + DNEVNI CILJ
           ───────────────────────────────────────── */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 

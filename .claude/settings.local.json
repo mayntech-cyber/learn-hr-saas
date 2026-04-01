@@ -9,7 +9,14 @@
       "Bash(ls -la /c/language-front/components/*.tsx)",
       "Bash(git checkout:*)",
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(find C:language-front/app -type f -name *.ts -o -name *.tsx)",
+      "Bash(find C:language-front -type f \\\\\\(-name *.sql -o -name *migration* -o -name *schema* \\\\\\))",
+      "Bash(find C:language-front -path */app/* -name *route* -o -path */api/* -type f)",
+      "Bash(grep -r const.*[0-9]{4} C:language-front/components)",
+      "Bash(find C:language-front -type f -name *admin* -o -name *builder*)",
+      "Bash(find C:language-front -maxdepth 2 -type f \\\\\\(-name *.md -o -name *.json \\\\\\))",
+      "Bash(find C:language-front -type f -name *.tsx -o -name *.ts)"
     ]
   }
 }
