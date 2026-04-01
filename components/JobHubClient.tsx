@@ -38,10 +38,10 @@ export default function JobHubClient({ job }: { job: any }) {
   // 1. STATIČNI PRIJEVODI IZ BAZE (ui_translations)
   const back = t("Nazad na zanimanja");
   const subtitle = t("Odaberi kako želiš učiti danas.");
-  
+
   const dict = t("Rječnik");
   const dictDesc = t("Pregledaj sve riječi, alate i materijale sa slikama i zvukom.");
-  const dictBtn = t("OTVORI RJEČNIK"); // Velika slova za gumbe!
+  const dictBtn = t("OTVORI RJEČNIK");
 
   const scen = t("Scenariji");
   const scenDesc = t("Nauči korisne rečenice i dijaloge za svakodnevni rad na poslu.");
@@ -55,7 +55,7 @@ export default function JobHubClient({ job }: { job: any }) {
   const getJobTitle = () => {
     if (!job) return { main: "Učenje", sub: "" };
     if (uiMode === 'hr') return { main: job.name_hr, sub: "" };
-    
+
     const trans = job.translations || {};
     if (uiMode === 'native' && trans[nativeLang]) {
       return { main: trans[nativeLang], sub: job.name_hr };
@@ -69,10 +69,10 @@ export default function JobHubClient({ job }: { job: any }) {
   const jobTitle = getJobTitle();
 
   return (
-    <div className="p-4 md:p-10 max-w-5xl mx-auto min-h-screen flex flex-col animate-in fade-in duration-500">
-      
+    <div className="p-2 md:p-10 w-full min-h-screen flex flex-col animate-in fade-in duration-500">
+
       {/* --- DVOJEZIČNI HEADER --- */}
-      <div className="mb-10" style={{ background: 'rgba(10,30,60,0.65)', borderRadius: 16, padding: '1.5rem', color: 'white' }}>
+      <div className="mb-6 md:mb-12" style={{ background: 'rgba(10,30,60,0.65)', borderRadius: 16, padding: '1.5rem', color: 'white' }}>
         <Link
           href={`/professional/${job?.category_id || ''}`}
           className="group inline-flex flex-col mb-6"
@@ -89,7 +89,7 @@ export default function JobHubClient({ job }: { job: any }) {
         </Link>
 
         <div className="flex items-center gap-4">
-          <div className="bg-slate-700 p-3 rounded-2xl text-white shadow-md">
+          <div className="p-3 rounded-2xl text-white shadow-md" style={{ background: '#f59e0b' }}>
             <BookOpen size={28} />
           </div>
           <div>
@@ -115,85 +115,106 @@ export default function JobHubClient({ job }: { job: any }) {
       </div>
 
       {/* --- GLAVNI IZBORNIK --- */}
-      <div style={{ background: 'rgba(10,30,60,0.45)', borderRadius: 16, padding: '1.5rem' }}>
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-6">
-        
-        {/* 1. RJEČNIK */}
-        <Link href={`/learn/${job?.id}/dictionary`} className="group bg-white p-4 md:p-8 rounded-2xl md:rounded-3xl border border-slate-200 shadow-sm hover:shadow-xl transition-all flex flex-col items-center text-center" style={{ borderLeft: '3px solid #3b82f6' }}>
-          <div className="bg-blue-50 p-3 md:p-6 rounded-full text-blue-600 mb-3 md:mb-6 group-hover:scale-110 transition-transform">
-            <BookOpen size={28} className="md:hidden" /><BookOpen size={48} className="hidden md:block" />
-          </div>
-          <h2 className="text-sm md:text-2xl font-black text-slate-800">{dict.main}</h2>
-          {!dict.isOnlyHr && <p className="hidden md:block text-[10px] font-bold text-blue-400 uppercase mb-2 tracking-tighter italic">{dict.sub}</p>}
+      <div className="px-0 md:px-6" style={{ background: 'rgba(10,30,60,0.45)', borderRadius: 16, paddingTop: '1.5rem', paddingBottom: '1.5rem' }}>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-8">
 
-          <div className="text-slate-500 font-medium mb-3 flex-1 text-sm">
-             <p>{dictDesc.main}</p>
-             {!dictDesc.isOnlyHr && <p className="hidden md:block text-[10px] text-slate-400 font-bold mt-1 uppercase italic">{dictDesc.sub}</p>}
+        {/* 1. RJEČNIK — blue */}
+        <Link href={`/learn/${job?.id}/dictionary`} className="group relative flex flex-row md:flex-col items-center md:items-center text-left md:text-center h-20 md:h-auto p-3 md:p-8 rounded-xl md:rounded-[2.5rem] shadow-sm hover:shadow-xl transition-all" style={{ background: 'rgba(255,255,255,0.12)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.15)' }}>
+          <div className="flex-shrink-0 bg-white/15 flex items-center justify-center rounded-full mr-3 md:mr-0 md:mb-6 group-hover:scale-110 transition-transform shadow-inner w-10 h-10 md:w-auto md:h-auto md:p-6">
+            <BookOpen size={20} style={{ color: '#f59e0b' }} className="md:hidden" />
+            <BookOpen size={48} style={{ color: '#f59e0b' }} className="hidden md:block" />
           </div>
-          <div style={{ width: '100%', marginBottom: '0.5rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-              <span style={{ fontSize: 11, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: 0.5 }}>Naučeno</span>
-              <span style={{ fontSize: 11, fontWeight: 700, color: '#3b82f6' }}>{knownWords} riječi</span>
+          <div className="flex-1 min-w-0 md:w-full flex flex-col">
+            <h2 className="text-xs md:text-2xl font-black text-white mb-0.5 md:mb-1">{dict.main}</h2>
+            {!dict.isOnlyHr && <p className="text-[8px] md:text-[10px] font-bold text-white/70 uppercase mb-0.5 md:mb-4 tracking-tighter italic">{dict.sub}</p>}
+            <div className="hidden md:block text-white/80 font-medium mb-3 md:mb-8 flex-1 text-base">
+              <p>{dictDesc.main}</p>
+              {!dictDesc.isOnlyHr && <p className="text-[10px] text-white/60 font-bold mt-1 uppercase italic">{dictDesc.sub}</p>}
             </div>
-            <div style={{ height: 3, background: 'rgba(0,0,0,0.06)', borderRadius: 99 }}>
-              <div style={{ height: '100%', width: '0%', background: '#3b82f6', borderRadius: 99 }} />
+            <div style={{ width: '100%', marginBottom: '0.25rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 2 }}>
+                <span style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', letterSpacing: 0.5 }}>Naučeno</span>
+                <span style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,0.9)' }}>{knownWords} riječi</span>
+              </div>
+              <div style={{ height: 3, background: 'rgba(255,255,255,0.15)', borderRadius: 99 }}>
+                <div style={{ height: '100%', width: '0%', background: '#f59e0b', borderRadius: 99 }} />
+              </div>
             </div>
+            <span className="hidden md:block w-full text-white font-black py-4 rounded-2xl text-xs uppercase tracking-wider text-center transition-colors mt-2" style={{ background: '#f59e0b' }}>
+              {dictBtn.main}
+            </span>
           </div>
-          <span className="w-full bg-blue-100 text-blue-700 font-black py-2 md:py-3 rounded-xl text-[10px] md:text-xs uppercase tracking-wider group-hover:bg-blue-600 group-hover:text-white transition-colors">
-            {dictBtn.main}
-          </span>
+          <div className="md:hidden flex-shrink-0 ml-2" style={{ minWidth: '80px', maxWidth: '80px' }}>
+            <span className="w-full block text-white font-black py-1 rounded-lg text-[8px] uppercase tracking-wider transition-colors whitespace-nowrap text-center" style={{ background: '#f59e0b', paddingLeft: '8px', paddingRight: '8px' }}>
+              OTVORI
+            </span>
+          </div>
         </Link>
 
-        {/* 2. SCENARIJI */}
-        <Link href={`/learn/${job?.id}/scenarios`} className="group bg-white p-4 md:p-8 rounded-2xl md:rounded-3xl border border-slate-200 shadow-sm hover:shadow-xl transition-all flex flex-col items-center text-center" style={{ borderLeft: '3px solid #10b981' }}>
-          <div className="bg-emerald-50 p-3 md:p-6 rounded-full text-emerald-600 mb-3 md:mb-6 group-hover:scale-110 transition-transform">
-            <MessageSquare size={28} className="md:hidden" /><MessageSquare size={48} className="hidden md:block" />
+        {/* 2. SCENARIJI — green */}
+        <Link href={`/learn/${job?.id}/scenarios`} className="group relative flex flex-row md:flex-col items-center md:items-center text-left md:text-center h-20 md:h-auto p-3 md:p-8 rounded-xl md:rounded-[2.5rem] shadow-sm hover:shadow-xl transition-all" style={{ background: 'rgba(255,255,255,0.12)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.15)' }}>
+          <div className="flex-shrink-0 bg-white/15 flex items-center justify-center rounded-full mr-3 md:mr-0 md:mb-6 group-hover:scale-110 transition-transform w-10 h-10 md:w-auto md:h-auto md:p-6">
+            <MessageSquare size={20} style={{ color: '#0891b2' }} className="md:hidden" />
+            <MessageSquare size={48} style={{ color: '#0891b2' }} className="hidden md:block" />
           </div>
-          <h2 className="text-sm md:text-2xl font-black text-slate-800">{scen.main}</h2>
-          {!scen.isOnlyHr && <p className="hidden md:block text-[10px] font-bold text-emerald-500 uppercase mb-2 tracking-tighter italic">{scen.sub}</p>}
-
-          <div className="text-slate-500 font-medium mb-3 flex-1 text-sm">
-             <p>{scenDesc.main}</p>
-             {!scenDesc.isOnlyHr && <p className="hidden md:block text-[10px] text-slate-400 font-bold mt-1 uppercase italic">{scenDesc.sub}</p>}
-          </div>
-          <div style={{ width: '100%', marginBottom: '0.5rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-              <span style={{ fontSize: 11, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: 0.5 }}>Završeno</span>
-              <span style={{ fontSize: 11, fontWeight: 700, color: '#10b981' }}>{completedScenarios} završeno</span>
+          <div className="flex-1 min-w-0 md:w-full flex flex-col">
+            <h2 className="text-xs md:text-2xl font-black text-white mb-0.5 md:mb-1">{scen.main}</h2>
+            {!scen.isOnlyHr && <p className="text-[8px] md:text-[10px] font-bold text-white/70 uppercase mb-0.5 md:mb-4 tracking-tighter italic">{scen.sub}</p>}
+            <div className="hidden md:block text-white/80 font-medium mb-3 md:mb-8 flex-1 text-base">
+              <p>{scenDesc.main}</p>
+              {!scenDesc.isOnlyHr && <p className="text-[10px] text-white/60 font-bold mt-1 uppercase italic">{scenDesc.sub}</p>}
             </div>
-            <div style={{ height: 3, background: 'rgba(0,0,0,0.06)', borderRadius: 99 }}>
-              <div style={{ height: '100%', width: '0%', background: '#10b981', borderRadius: 99 }} />
+            <div style={{ width: '100%', marginBottom: '0.25rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 2 }}>
+                <span style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', letterSpacing: 0.5 }}>Završeno</span>
+                <span style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,0.9)' }}>{completedScenarios} završeno</span>
+              </div>
+              <div style={{ height: 3, background: 'rgba(255,255,255,0.15)', borderRadius: 99 }}>
+                <div style={{ height: '100%', width: '0%', background: '#0891b2', borderRadius: 99 }} />
+              </div>
             </div>
+            <span className="hidden md:block w-full text-white font-black py-4 rounded-2xl text-xs uppercase tracking-wider text-center transition-colors mt-2" style={{ background: '#0891b2' }}>
+              {scenBtn.main}
+            </span>
           </div>
-          <span className="w-full bg-emerald-100 text-emerald-700 font-black py-2 md:py-3 rounded-xl text-[10px] md:text-xs uppercase tracking-wider group-hover:bg-emerald-600 group-hover:text-white transition-colors">
-            {scenBtn.main}
-          </span>
+          <div className="md:hidden flex-shrink-0 ml-2" style={{ minWidth: '80px', maxWidth: '80px' }}>
+            <span className="w-full block text-white font-black py-1 rounded-lg text-[8px] uppercase tracking-wider transition-colors whitespace-nowrap text-center" style={{ background: '#0891b2', paddingLeft: '8px', paddingRight: '8px' }}>
+              OTVORI
+            </span>
+          </div>
         </Link>
 
-        {/* 3. VJEŽBA */}
-        <Link href={`/learn/${job?.id}/practice`} className="group bg-slate-900 p-4 md:p-8 rounded-2xl md:rounded-3xl border border-slate-800 shadow-lg hover:shadow-xl transition-all flex flex-col items-center text-center">
-          <div className="bg-white/10 p-3 md:p-6 rounded-full text-orange-400 mb-3 md:mb-6 group-hover:scale-110 transition-transform">
-            <BrainCircuit size={28} className="md:hidden" /><BrainCircuit size={48} className="hidden md:block" />
+        {/* 3. VJEŽBA — orange */}
+        <Link href={`/learn/${job?.id}/practice`} className="group relative flex flex-row md:flex-col items-center md:items-center text-left md:text-center h-20 md:h-auto p-3 md:p-8 rounded-xl md:rounded-[2.5rem] shadow-lg hover:shadow-xl transition-all" style={{ background: 'rgba(255,255,255,0.12)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.15)' }}>
+          <div className="flex-shrink-0 bg-white/15 flex items-center justify-center rounded-full mr-3 md:mr-0 md:mb-6 group-hover:scale-110 transition-transform w-10 h-10 md:w-auto md:h-auto md:p-6">
+            <BrainCircuit size={20} style={{ color: '#dc2626' }} className="md:hidden" />
+            <BrainCircuit size={48} style={{ color: '#dc2626' }} className="hidden md:block" />
           </div>
-          <h2 className="text-sm md:text-2xl font-black text-white">{prac.main}</h2>
-          {!prac.isOnlyHr && <p className="hidden md:block text-[10px] font-bold text-orange-400 uppercase mb-2 tracking-tighter italic">{prac.sub}</p>}
-
-          <div className="text-slate-300 font-medium mb-3 flex-1 text-sm">
-             <p>{pracDesc.main}</p>
-             {!pracDesc.isOnlyHr && <p className="hidden md:block text-[10px] text-slate-400 font-bold mt-1 uppercase italic">{pracDesc.sub}</p>}
-          </div>
-          <div style={{ width: '100%', marginBottom: '0.5rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-              <span style={{ fontSize: 11, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: 0.5 }}>Sesije</span>
-              <span style={{ fontSize: 11, fontWeight: 700, color: '#f97316' }}>{practiceSessions}</span>
+          <div className="flex-1 min-w-0 md:w-full flex flex-col">
+            <h2 className="text-xs md:text-2xl font-black text-white mb-0.5 md:mb-1">{prac.main}</h2>
+            {!prac.isOnlyHr && <p className="text-[8px] md:text-[10px] font-bold text-white/70 uppercase mb-0.5 md:mb-4 tracking-tighter italic">{prac.sub}</p>}
+            <div className="hidden md:block text-white/80 font-medium mb-3 md:mb-8 flex-1 text-base">
+              <p>{pracDesc.main}</p>
+              {!pracDesc.isOnlyHr && <p className="text-[10px] text-white/60 font-bold mt-1 uppercase italic">{pracDesc.sub}</p>}
             </div>
-            <div style={{ height: 3, background: 'rgba(255,255,255,0.1)', borderRadius: 99 }}>
-              <div style={{ height: '100%', width: '0%', background: '#f97316', borderRadius: 99 }} />
+            <div style={{ width: '100%', marginBottom: '0.25rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 2 }}>
+                <span style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', letterSpacing: 0.5 }}>Sesije</span>
+                <span style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,0.9)' }}>{practiceSessions}</span>
+              </div>
+              <div style={{ height: 3, background: 'rgba(255,255,255,0.15)', borderRadius: 99 }}>
+                <div style={{ height: '100%', width: '0%', background: '#dc2626', borderRadius: 99 }} />
+              </div>
             </div>
+            <span className="hidden md:block w-full text-white font-black py-4 rounded-2xl shadow-md transition-colors text-xs uppercase tracking-wider text-center mt-2" style={{ background: '#dc2626' }}>
+              {pracBtn.main}
+            </span>
           </div>
-          <span className="w-full bg-orange-500 text-white font-black py-2 md:py-3 rounded-xl shadow-md group-hover:bg-orange-600 transition-colors text-[10px] md:text-xs uppercase tracking-wider">
-            {pracBtn.main}
-          </span>
+          <div className="md:hidden flex-shrink-0 ml-2" style={{ minWidth: '80px', maxWidth: '80px' }}>
+            <span className="w-full block text-white font-black py-1 rounded-lg text-[8px] uppercase tracking-wider transition-colors whitespace-nowrap text-center" style={{ background: '#dc2626', paddingLeft: '8px', paddingRight: '8px' }}>
+              NASTAVI
+            </span>
+          </div>
         </Link>
 
       </div>
