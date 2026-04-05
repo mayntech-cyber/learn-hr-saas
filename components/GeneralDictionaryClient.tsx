@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect, useRef } from "react";
 import { createClient } from "@/utils/supabase/client";
-import { Search, Globe2, ArrowLeft, SlidersHorizontal, X } from "lucide-react";
+import { Search, Globe2, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import FlipDictionaryCard from "./FlipDictionaryCard";
 import { useLanguage } from "./LanguageContext";
@@ -33,9 +33,6 @@ export default function GeneralDictionaryClient({ words, categoryData = [] }: { 
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedMainCat, setSelectedMainCat] = useState<string | null>(null);
   const [selectedSubCat, setSelectedSubCat] = useState("sve");
-  const [drawerOpen, setDrawerOpen] = useState(false);
-  const [draftMainCat, setDraftMainCat] = useState<string | null>(null);
-  const [draftSubCat, setDraftSubCat] = useState("sve");
   const [currentPage, setCurrentPage] = useState(1);
   const PAGE_SIZE = selectedSubCat === "abeceda" ? 999 : 60;
   const defaultsApplied = useRef(false);
@@ -62,7 +59,6 @@ export default function GeneralDictionaryClient({ words, categoryData = [] }: { 
     };
     fetchProgress();
   }, [words]);
-  const touchStartY = useRef(0);
 
   const head = t("Cjelokupni rječnik");
   const back = t("Nazad");
@@ -86,13 +82,6 @@ export default function GeneralDictionaryClient({ words, categoryData = [] }: { 
     if (!mainCat) return [];
     return categoryData.filter(c => c.parent_id === mainCat.id);
   }, [categoryData, catDataMap, selectedMainCat]);
-
-  const drawerSubCategories = useMemo(() => {
-    if (draftMainCat === null) return [];
-    const mainCat = catDataMap[draftMainCat];
-    if (!mainCat) return [];
-    return categoryData.filter(c => c.parent_id === mainCat.id);
-  }, [categoryData, catDataMap, draftMainCat]);
 
   // Default pri prvom učitavanju: kategorija roditelja od 'abeceda' + podkategorija 'abeceda'
   useEffect(() => {
@@ -153,143 +142,10 @@ export default function GeneralDictionaryClient({ words, categoryData = [] }: { 
   const totalPages = Math.ceil(filteredWords.length / PAGE_SIZE);
   const paginatedWords = filteredWords.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
-  const openDrawer = () => {
-    setDraftMainCat(selectedMainCat);
-    setDraftSubCat(selectedSubCat);
-    setDrawerOpen(true);
-  };
-
-  const applyFilter = () => {
-    setSelectedMainCat(draftMainCat);
-    setSelectedSubCat(draftSubCat);
-    setDrawerOpen(false);
-  };
-
-  const resetDraft = () => {
-    setDraftMainCat(null);
-    setDraftSubCat("sve");
-  };
-
-  const clearActiveFilter = () => {
-    setSelectedMainCat(null);
-    setSelectedSubCat("sve");
-  };
-
-  // Preview u filter baru: do 2 aktivne labele
-  const isFilterActive = selectedMainCat !== null;
-  const previewParts: string[] = [];
-  if (selectedMainCat) previewParts.push(`${getCatEmoji(selectedMainCat)} ${getCatLabel(selectedMainCat)}`);
-  if (selectedSubCat !== "sve") previewParts.push(`${getCatEmoji(selectedSubCat)} ${getCatLabel(selectedSubCat)}`);
-
-  // Badge label
-  const badgeLabel = [
-    selectedMainCat ? getCatLabel(selectedMainCat) : null,
-    selectedSubCat !== "sve" ? getCatLabel(selectedSubCat) : null,
-  ].filter(Boolean).join(" · ");
-
   if (!euLang || !nativeLang) return null;
 
   return (
     <>
-      {/* DRAWER BACKDROP */}
-      {drawerOpen && (
-        <div
-          className="fixed inset-0 bg-black/40 z-40"
-          onClick={() => setDrawerOpen(false)}
-        />
-      )}
-
-      {/* DRAWER */}
-      <div
-        className={`fixed inset-x-0 bottom-0 z-50 transition-transform duration-300 ease-out ${drawerOpen ? "translate-y-0" : "translate-y-full"}`}
-        onTouchStart={(e) => { touchStartY.current = e.touches[0].clientY; }}
-        onTouchEnd={(e) => { if (e.changedTouches[0].clientY - touchStartY.current > 80) setDrawerOpen(false); }}
-      >
-        <div className="bg-white rounded-t-2xl shadow-2xl max-h-[80vh] flex flex-col">
-          {/* Drag handle */}
-          <div className="flex justify-center pt-3 pb-1 flex-shrink-0">
-            <div className="w-10 h-1 bg-slate-200 rounded-full" />
-          </div>
-          {/* Header */}
-          <div className="flex items-center justify-between px-5 py-3 border-b border-slate-100 flex-shrink-0">
-            <span className="text-sm font-black text-slate-800">⚙️ Filtriraj</span>
-            <button onClick={() => setDrawerOpen(false)} className="p-1 rounded-lg hover:bg-slate-100 transition-colors">
-              <X size={18} className="text-slate-400" />
-            </button>
-          </div>
-          {/* Sadržaj */}
-          <div className="overflow-y-auto px-5 py-4 space-y-5 flex-1">
-            {/* Kategorija */}
-            <div>
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Kategorija</p>
-              <div className="flex flex-wrap gap-2">
-                {mainCategories.map((cat: any) => {
-                  const isActive = draftMainCat === cat.slug;
-                  const cfg = CATEGORY_CONFIG[cat.slug] || { color: "text-slate-600", bg: "bg-slate-50 border-slate-200" };
-                  return (
-                    <button
-                      key={cat.slug}
-                      onClick={() => { setDraftMainCat(isActive ? null : cat.slug); setDraftSubCat("sve"); }}
-                      className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-black whitespace-nowrap transition-all border ${
-                        isActive
-                          ? `${cfg.bg} ${cfg.color} shadow-sm`
-                          : "bg-white text-slate-500 border-slate-200 hover:border-slate-300"
-                      }`}
-                    >
-                      <span>{getCatEmoji(cat.slug)}</span>
-                      <span>{getCatLabel(cat.slug)}</span>
-                      {isActive && <span className="opacity-60">×</span>}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-            {/* Podkategorija */}
-            {draftMainCat !== null && drawerSubCategories.length > 0 && (
-              <div>
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Podkategorija</p>
-                <div className="flex flex-wrap gap-2">
-                  {drawerSubCategories.map((cat: any) => {
-                    const isActive = draftSubCat === cat.slug;
-                    const cfg = CATEGORY_CONFIG[cat.slug] || { color: "text-slate-600", bg: "bg-slate-50 border-slate-200" };
-                    return (
-                      <button
-                        key={cat.slug}
-                        onClick={() => setDraftSubCat(isActive ? "sve" : cat.slug)}
-                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-black whitespace-nowrap transition-all border capitalize ${
-                          isActive
-                            ? `${cfg.bg} ${cfg.color} shadow-sm`
-                            : "bg-white text-slate-500 border-slate-200 hover:border-slate-300"
-                        }`}
-                      >
-                        <span>{getCatEmoji(cat.slug)}</span>
-                        <span>{getCatLabel(cat.slug)}</span>
-                        {isActive && <span className="opacity-60">×</span>}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-          </div>
-          {/* Footer */}
-          <div className="flex gap-3 px-5 py-4 border-t border-slate-100 flex-shrink-0">
-            <button
-              onClick={resetDraft}
-              className="flex-1 py-2.5 rounded-xl border border-slate-200 text-sm font-black text-slate-500 hover:bg-slate-50 transition-colors"
-            >
-              Resetiraj
-            </button>
-            <button
-              onClick={applyFilter}
-              className="flex-1 py-2.5 rounded-xl bg-blue-600 text-white text-sm font-black shadow-md hover:bg-blue-700 transition-colors"
-            >
-              Primijeni
-            </button>
-          </div>
-        </div>
-      </div>
-
       {/* STRANICA */}
       <div className="w-full p-4 md:p-10 max-w-7xl mx-auto min-h-screen flex flex-col animate-in fade-in duration-500">
 
@@ -339,48 +195,55 @@ export default function GeneralDictionaryClient({ words, categoryData = [] }: { 
           />
         </div>
 
-        {/* FILTER BAR */}
-        <div className="mb-3" style={{ background: 'rgba(10,30,60,0.65)', borderRadius: 16, padding: '1rem' }}>
-          <div className="flex items-center gap-2 mb-2 flex-wrap">
+        {/* KATEGORIJE - horizontal scroll chips */}
+        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+          <button
+            onClick={() => { setSelectedMainCat(null); setSelectedSubCat("sve"); }}
+            className={`flex-shrink-0 px-4 py-2 rounded-full text-xs font-black transition-all border ${
+              selectedMainCat === null ? "bg-blue-600 text-white border-blue-600" : "bg-white/20 text-white border-white/30"
+            }`}
+          >
+            Sve
+          </button>
+          {mainCategories.map((cat: any) => (
             <button
-              onClick={openDrawer}
-              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-black whitespace-nowrap transition-all border ${
-                isFilterActive
-                  ? "bg-blue-600 text-white border-blue-600 shadow-md"
-                  : "bg-white text-slate-600 border-slate-200 hover:border-slate-400"
+              key={cat.slug}
+              onClick={() => { setSelectedMainCat(cat.slug === selectedMainCat ? null : cat.slug); setSelectedSubCat("sve"); }}
+              className={`flex-shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-black transition-all border ${
+                selectedMainCat === cat.slug ? "bg-blue-600 text-white border-blue-600" : "bg-white/20 text-white border-white/30"
               }`}
             >
-              <SlidersHorizontal size={13} />
-              <span>Filtriraj</span>
+              <span>{getCatEmoji(cat.slug)}</span>
+              <span>{getCatLabel(cat.slug)}</span>
             </button>
-            {previewParts.slice(0, 2).map((p, i) => (
-              <span key={i} className="text-xs font-bold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-lg whitespace-nowrap">
-                {p}
-              </span>
-            ))}
-            {previewParts.length > 2 && (
-              <span className="text-xs font-bold" style={{ color: 'rgba(255,255,255,0.5)' }}>...</span>
-            )}
-          </div>
-
-          {/* AKTIVNI FILTER BADGE */}
-          {isFilterActive && (
-            <div className="flex items-center">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-blue-50 text-blue-700 border border-blue-200">
-                🚩 {badgeLabel}
-                <button
-                  onClick={clearActiveFilter}
-                  className="ml-0.5 hover:text-blue-900 transition-colors"
-                  aria-label="Resetiraj filter"
-                >
-                  ✕
-                </button>
-              </span>
-            </div>
-          )}
+          ))}
         </div>
 
-        <div className="mb-3" />
+        {/* PODKATEGORIJE - prikazuju se samo kad je odabrana glavna */}
+        {selectedMainCat && subCategories.length > 0 && (
+          <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+            <button
+              onClick={() => setSelectedSubCat("sve")}
+              className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-black transition-all border ${
+                selectedSubCat === "sve" ? "bg-white text-blue-600 border-white" : "bg-white/10 text-white/70 border-white/20"
+              }`}
+            >
+              Sve
+            </button>
+            {subCategories.map((cat: any) => (
+              <button
+                key={cat.slug}
+                onClick={() => setSelectedSubCat(cat.slug === selectedSubCat ? "sve" : cat.slug)}
+                className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-black transition-all border ${
+                  selectedSubCat === cat.slug ? "bg-white text-blue-600 border-white" : "bg-white/10 text-white/70 border-white/20"
+                }`}
+              >
+                <span>{getCatEmoji(cat.slug)}</span>
+                <span>{getCatLabel(cat.slug)}</span>
+              </button>
+            ))}
+          </div>
+        )}
 
         {/* GRID */}
         {filteredWords.length === 0 ? (
