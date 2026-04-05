@@ -1,4 +1,4 @@
-import { createClient } from "@/utils/supabase/server"; // Koristimo novi server klijent
+import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import DashboardClient from "@/components/DashboardClient";
 
@@ -11,25 +11,29 @@ export default async function DashboardPage() {
 
   if (!user) redirect("/login");
 
-  // Dohvaćamo profil iz baze
-  const { data: profile, error } = await supabase
+  const { data: profile } = await supabase
     .from("profiles")
     .select("*")
     .eq("id", user.id)
     .single();
 
-  console.log("DEBUG - Korisnik ID:", user.id);
-  console.log("DEBUG - Profil iz baze:", profile);
-
-  // ---> NOVO: ČUVAR KOJI PREUSMJERAVA NA ONBOARDING <---
-  // Ako je ime prazno ili zanimanje nije odabrano, pošalji ga na onboarding!
   if (!profile?.onboarding_completed) {
     redirect("/onboarding");
   }
 
-  // Ako smo došli do ovdje, znači da korisnik sigurno ima 'current_job_id'
   const jobId = profile.current_job_id;
   const { data: job } = await supabase.from('jobs').select('*').eq('id', jobId).single();
 
-  return <DashboardClient job={job} profile={profile} />;
+  // Prefetch pozadinske slike na serveru — nema client-side flasha
+  const { data: bgData } = await supabase
+    .from("page_backgrounds")
+    .select("url")
+    .eq("active", true)
+    .eq("media_type", "image");
+
+  const bgImages = bgData
+    ? [...bgData].sort(() => Math.random() - 0.5).map((d) => d.url)
+    : [];
+
+  return <DashboardClient job={job} profile={profile} bgImages={bgImages} />;
 }

@@ -16,7 +16,7 @@ import { useLanguage } from "./LanguageContext";
 import { createClient } from "@/utils/supabase/client";
 import DashboardSlideshowSection from "./DashboardSlideshowSection";
 
-export default function DashboardClient({ job, profile }: { job: any, profile: any }) {
+export default function DashboardClient({ job, profile, bgImages = [] }: { job: any, profile: any, bgImages?: string[] }) {
   const supabase = createClient();
   const { euLang, nativeLang, t, uiMode } = useLanguage();
 
@@ -269,7 +269,7 @@ export default function DashboardClient({ job, profile }: { job: any, profile: a
           {/* ─────────────────────────────────────────
               4. CROATIA SLIDESHOW
           ───────────────────────────────────────── */}
-          <DashboardSlideshowSection language={nativeLang || "en"} />
+          <DashboardSlideshowSection language={nativeLang || "en"} bgImages={bgImages} />
 
           {/* ─────────────────────────────────────────
               5. TESTOVI + DNEVNI CILJ
