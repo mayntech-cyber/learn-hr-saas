@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect, useRef } from "react";
+import { createClient } from "@/utils/supabase/client";
 import { Search, Globe2, ArrowLeft, SlidersHorizontal, X } from "lucide-react";
 import Link from "next/link";
 import FlipDictionaryCard from "./FlipDictionaryCard";
@@ -35,6 +36,29 @@ export default function GeneralDictionaryClient({ words, categoryData = [] }: { 
   const [currentPage, setCurrentPage] = useState(1);
   const PAGE_SIZE = 60;
   const defaultsApplied = useRef(false);
+
+  // Batch fetch svih word_progress statusa - jedan request umjesto N
+  useEffect(() => {
+    const fetchProgress = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      setUserId(user.id);
+      const wordIds = words.map(w => w.id);
+      if (wordIds.length === 0) return;
+      const { data } = await supabase
+        .from("word_progress")
+        .select("word_id, status")
+        .eq("user_id", user.id)
+        .in("word_id", wordIds);
+      if (!data) return;
+      const map: Record<number, "known" | "unknown"> = {};
+      data.forEach(p => {
+        map[p.word_id] = p.status === "known" ? "known" : "unknown";
+      });
+      setProgressMap(map);
+    };
+    fetchProgress();
+  }, [words]);
   const touchStartY = useRef(0);
 
   const head = t("Cjelokupni rječnik");
@@ -371,6 +395,8 @@ export default function GeneralDictionaryClient({ words, categoryData = [] }: { 
                     audioUrl={w.audio_url}
                     wordType={w.word_type}
                     category={w.category}
+                    initialStatus={progressMap[w.id] || "none"}
+                    userId={userId || undefined}
                   />
                 );
               })}
