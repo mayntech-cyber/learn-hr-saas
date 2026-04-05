@@ -33,8 +33,8 @@ export default function JobHubClient({ job }: { job: any }) {
         jobWordIds.length > 0
           ? supabase.from('word_progress').select('*', { count: 'exact', head: true }).eq('user_id', user.id).in('word_id', jobWordIds).eq('status', 'known')
           : Promise.resolve({ count: 0 }),
-        supabase.from('scenario_progress').select('*', { count: 'exact', head: true }).eq('user_id', user.id).eq('job_id', job.id).eq('status', 'completed'),
-        supabase.from('user_test_results').select('*', { count: 'exact', head: true }).eq('user_id', user.id).eq('job_id', job.id),
+        supabase.from('scenario_progress').select('*', { count: 'exact', head: true }).eq('user_id', user.id).eq('status', 'completed'),
+        supabase.from('user_test_results').select('*', { count: 'exact', head: true }).eq('user_id', user.id),
       ]);
 
       setKnownWords(wordsRes.count ?? 0);
