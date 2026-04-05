@@ -126,7 +126,7 @@ export default function FlipDictionaryCard({
               {category === 'abeceda' ? (
                 <div style={{ width: "100%", height: "100%", position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
                   {imageUrl && <img src={imageUrl} alt={wordHr} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />}
-                  <span style={{ position: "relative", fontSize: 90, fontWeight: 900, color: "white", lineHeight: 1 }}>{wordHr}</span>
+                  <span style={{ position: "relative", fontSize: "clamp(48px, 15vw, 90px)", fontWeight: 900, color: "white", lineHeight: 1 }}>{wordHr}</span>
                 </div>
               ) : wordType === 'broj' ? (
                 <div style={{ width: "100%", height: "100%", background: "linear-gradient(135deg, #6366f1, #8b5cf6)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 4 }}>
@@ -168,7 +168,7 @@ export default function FlipDictionaryCard({
                 <div style={{ position: "absolute", inset: 0, background: "linear-gradient(135deg, rgba(37,99,235,0.4), rgba(124,58,237,0.4))" }} />
               )}
               <div style={{ position: "relative", textAlign: "center" }}>
-                <h3 style={{ fontSize: category === 'abeceda' ? 80 : 24, fontWeight: 900, color: "white", lineHeight: 1.2, marginBottom: 6 }}>
+                <h3 style={{ fontSize: category === 'abeceda' ? "clamp(48px, 15vw, 80px)" : 24, fontWeight: 900, color: "white", lineHeight: 1.2, marginBottom: 6 }}>
                   {wordHr}
                 </h3>
                 <p style={{ fontSize: 13, color: "rgba(191,219,254,0.9)", fontStyle: "italic" }}>{euTranslation}</p>
