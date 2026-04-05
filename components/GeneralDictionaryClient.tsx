@@ -37,7 +37,7 @@ export default function GeneralDictionaryClient({ words, categoryData = [] }: { 
   const [draftMainCat, setDraftMainCat] = useState<string | null>(null);
   const [draftSubCat, setDraftSubCat] = useState("sve");
   const [currentPage, setCurrentPage] = useState(1);
-  const PAGE_SIZE = 60;
+  const PAGE_SIZE = selectedSubCat === "abeceda" ? 999 : 60;
   const defaultsApplied = useRef(false);
 
   // Batch fetch svih word_progress statusa - jedan request umjesto N
