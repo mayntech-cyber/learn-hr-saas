@@ -147,6 +147,12 @@ export default function FlipDictionaryCard({
                 </div>
               )}
 
+              {wordType && category !== 'abeceda' && (
+                <span style={{ position: "absolute", top: 8, left: 8, background: "rgba(255,255,255,0.9)", color: "#64748b", fontSize: 9, fontWeight: 900, padding: "3px 8px", borderRadius: 8, textTransform: "uppercase", letterSpacing: 1 }}>
+                  {wordType}
+                </span>
+              )}
+
               <button onClick={playAudio} style={{ position: "absolute", bottom: 10, right: 10, background: "#f97316", color: "white", border: "none", borderRadius: "50%", width: 38, height: 38, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", boxShadow: "0 4px 12px rgba(249,115,22,0.4)" }}>
                 <Volume2 size={16} />
               </button>
@@ -171,16 +177,20 @@ export default function FlipDictionaryCard({
                 <h3 style={{ fontSize: category === 'abeceda' ? "clamp(48px, 15vw, 80px)" : 24, fontWeight: 900, color: "white", lineHeight: 1.2, marginBottom: 6 }}>
                   {wordHr}
                 </h3>
-                <p style={{ fontSize: 13, color: "rgba(191,219,254,0.9)", fontStyle: "italic" }}>{euTranslation}</p>
+                {category !== 'abeceda' && (
+                  <p style={{ fontSize: 13, color: "rgba(191,219,254,0.9)", fontStyle: "italic" }}>{euTranslation}</p>
+                )}
               </div>
               <button onClick={playAudio} style={{ position: "absolute", bottom: 10, right: 10, background: "rgba(255,255,255,0.2)", color: "white", border: "none", borderRadius: "50%", width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
                 <Volume2 size={15} />
               </button>
             </div>
             <div style={{ padding: "12px 16px", background: "white" }}>
-              <p style={{ fontSize: 18, fontWeight: 900, color: "#2563eb", textAlign: "center", marginBottom: 10 }}>
-                {nativeTranslation}
-              </p>
+              {category !== 'abeceda' && (
+                <p style={{ fontSize: 18, fontWeight: 900, color: "#2563eb", textAlign: "center", marginBottom: 10 }}>
+                  {nativeTranslation}
+                </p>
+              )}
               <div style={{ display: "flex", gap: 8 }}>
                 <button onClick={handleUnknown} style={{ flex: 1, padding: "8px 0", borderRadius: 12, fontSize: 11, fontWeight: 900, border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 4, background: status === "unknown" ? "#ef4444" : "#fef2f2", color: status === "unknown" ? "white" : "#ef4444" }}>
                   <XCircle size={13} /> {t("Učim").main}

@@ -39,8 +39,9 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
 
   return (
     <div
-      className={`flex min-h-screen${!bgUrl || isNoBg ? " bg-slate-50" : ""}`}
+      className="flex min-h-screen"
       style={backgroundStyle}
+      suppressHydrationWarning
     >
       <Navigation />
       <main className="flex-1 md:ml-64 pb-20 md:pb-0 flex flex-col">
