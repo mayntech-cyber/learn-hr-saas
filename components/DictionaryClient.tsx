@@ -2,14 +2,17 @@
 
 import { ArrowLeft, BookOpen } from "lucide-react";
 import Link from "next/link";
+import { useState, useEffect } from "react";
+import { createClient } from "@/utils/supabase/client";
 import DictionaryCard from "./DictionaryCard";
 import FlipDictionaryCardJob from "./FlipDictionaryCardJob";
 import { useLanguage } from "./LanguageContext";
 
-// DODALI SMO 'job' U PROPS KAKO BI ZNALI NAZIV ZANIMANJA
 export default function DictionaryClient({ words, job }: { words: any[], job?: any }) {
-  // Iz 'mozga' vučemo i t funkciju i uiMode za dinamični naslov
   const { euLang, nativeLang, t, uiMode } = useLanguage();
+  const supabase = createClient();
+  const [userId, setUserId] = useState<string | null>(null);
+  const [progressMap, setProgressMap] = useState<Record<number, "known" | "unknown">>({});
 
   // 1. STATIČNI PRIJEVODI
   const back = t("Nazad na izbornik zanimanja");
@@ -28,6 +31,26 @@ export default function DictionaryClient({ words, job }: { words: any[], job?: a
   };
 
   const jobName = getJobName();
+
+  useEffect(() => {
+    const fetchProgress = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      setUserId(user.id);
+      const wordIds = words.map(w => w.id);
+      if (wordIds.length === 0) return;
+      const { data } = await supabase
+        .from("word_progress")
+        .select("word_id, status")
+        .eq("user_id", user.id)
+        .in("word_id", wordIds);
+      if (!data) return;
+      const map: Record<number, "known" | "unknown"> = {};
+      data.forEach(p => { map[p.word_id] = p.status === "known" ? "known" : "unknown"; });
+      setProgressMap(map);
+    };
+    fetchProgress();
+  }, [words]);
 
   return (
     // GLAVNI OMOTAČ (Sada je ovdje umjesto u page.tsx)
@@ -92,6 +115,8 @@ export default function DictionaryClient({ words, job }: { words: any[], job?: a
               imageUrl={w.image_url}
               audioUrl={w.audio_url}
               wordType={w.word_type}
+              initialStatus={progressMap[w.id] || "none"}
+              userId={userId || undefined}
             />
           );
         })}

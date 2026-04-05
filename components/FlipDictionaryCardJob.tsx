@@ -13,38 +13,29 @@ interface FlipDictionaryCardJobProps {
   audioUrl?: string;
   wordType?: string;
   wordId: number;
+  initialStatus?: "none" | "known" | "unknown";
+  userId?: string;
 }
 
 export default function FlipDictionaryCardJob({
-  wordHr,
-  euTranslation,
-  nativeTranslation,
-  imageUrl,
-  audioUrl,
-  wordType,
-  wordId,
+  wordHr, euTranslation, nativeTranslation,
+  imageUrl, audioUrl, wordType, wordId,
+  initialStatus = "none", userId,
 }: FlipDictionaryCardJobProps) {
   const { t } = useLanguage();
   const supabase = createClient();
   const [isFlipped, setIsFlipped] = useState(false);
-  const [status, setStatus] = useState<"none" | "known" | "unknown">("none");
+  const [status, setStatus] = useState<"none" | "known" | "unknown">(initialStatus);
 
-  // Učitaj postojeći status iz baze
-  useEffect(() => {
-    const loadStatus = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-      const { data } = await supabase
-        .from('word_progress')
-        .select('status')
-        .eq('user_id', user.id)
-        .eq('word_id', wordId)
-        .single();
-      if (data?.status === 'known') setStatus('known');
-      else if (data?.status === 'learning') setStatus('unknown');
-    };
-    loadStatus();
-  }, [wordId]);
+  useEffect(() => { setStatus(initialStatus); }, [initialStatus]);
+
+  const saveProgress = async (newStatus: "known" | "learning") => {
+    if (!userId) return;
+    await supabase.from('word_progress').upsert({
+      user_id: userId, word_id: wordId, status: newStatus,
+      updated_at: new Date().toISOString()
+    }, { onConflict: 'user_id,word_id' });
+  };
 
   const playAudio = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -60,27 +51,13 @@ export default function FlipDictionaryCardJob({
   const handleKnown = async (e: React.MouseEvent) => {
     e.stopPropagation();
     setStatus("known");
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-    await supabase.from('word_progress').upsert({
-      user_id: user.id,
-      word_id: wordId,
-      status: 'known',
-      updated_at: new Date().toISOString()
-    }, { onConflict: 'user_id,word_id' });
+    await saveProgress("known");
   };
 
   const handleUnknown = async (e: React.MouseEvent) => {
     e.stopPropagation();
     setStatus("unknown");
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-    await supabase.from('word_progress').upsert({
-      user_id: user.id,
-      word_id: wordId,
-      status: 'learning',
-      updated_at: new Date().toISOString()
-    }, { onConflict: 'user_id,word_id' });
+    await saveProgress("learning");
   };
   const handleReset = (e: React.MouseEvent) => { e.stopPropagation(); setStatus("none"); setIsFlipped(false); };
 
