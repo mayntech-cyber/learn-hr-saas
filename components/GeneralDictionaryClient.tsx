@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect, useRef } from "react";
 import { createClient } from "@/utils/supabase/client";
-import { Search, Globe2, ArrowLeft } from "lucide-react";
+import { Search, Globe2, ArrowLeft, SlidersHorizontal, X, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import FlipDictionaryCard from "./FlipDictionaryCard";
 import { useLanguage } from "./LanguageContext";
@@ -25,6 +25,8 @@ const CATEGORY_CONFIG: Record<string, { emoji: string; color: string; bg: string
   "ostalo":    { emoji: "📦", color: "text-slate-600",  bg: "bg-slate-50 border-slate-200" },
 };
 
+const HR_SORT_ORDER = ['A','B','C','Č','Ć','D','Dž','Đ','E','F','G','H','I','J','K','L','Lj','M','N','Nj','O','P','R','S','Š','T','U','V','Z','Ž'];
+
 export default function GeneralDictionaryClient({ words, categoryData = [] }: { words: any[], categoryData?: any[] }) {
   const { euLang, nativeLang, uiMode, t } = useLanguage();
   const supabase = createClient();
@@ -34,10 +36,11 @@ export default function GeneralDictionaryClient({ words, categoryData = [] }: { 
   const [selectedMainCat, setSelectedMainCat] = useState<string | null>(null);
   const [selectedSubCat, setSelectedSubCat] = useState("sve");
   const [currentPage, setCurrentPage] = useState(1);
-  const PAGE_SIZE = selectedSubCat === "abeceda" ? 999 : 60;
+  const [modalOpen, setModalOpen] = useState(false);
   const defaultsApplied = useRef(false);
 
-  // Batch fetch svih word_progress statusa - jedan request umjesto N
+  const PAGE_SIZE = selectedSubCat === "abeceda" ? 999 : 60;
+
   useEffect(() => {
     const fetchProgress = async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -52,9 +55,7 @@ export default function GeneralDictionaryClient({ words, categoryData = [] }: { 
         .in("word_id", wordIds);
       if (!data) return;
       const map: Record<number, "known" | "unknown"> = {};
-      data.forEach(p => {
-        map[p.word_id] = p.status === "known" ? "known" : "unknown";
-      });
+      data.forEach(p => { map[p.word_id] = p.status === "known" ? "known" : "unknown"; });
       setProgressMap(map);
     };
     fetchProgress();
@@ -65,16 +66,13 @@ export default function GeneralDictionaryClient({ words, categoryData = [] }: { 
   const placeholder = t("Pretraži rječnik...");
   const noWords = t("Nema pronađenih riječi...");
 
-  // Mapa slug → {id, emoji, label, translations, parent_id} iz baze
   const catDataMap = useMemo(() => {
     const map: Record<string, any> = {};
     categoryData.forEach(c => { map[c.slug] = c; });
     return map;
   }, [categoryData]);
 
-  const mainCategories = useMemo(() =>
-    categoryData.filter(c => !c.parent_id),
-  [categoryData]);
+  const mainCategories = useMemo(() => categoryData.filter(c => !c.parent_id), [categoryData]);
 
   const subCategories = useMemo(() => {
     if (selectedMainCat === null) return [];
@@ -83,7 +81,7 @@ export default function GeneralDictionaryClient({ words, categoryData = [] }: { 
     return categoryData.filter(c => c.parent_id === mainCat.id);
   }, [categoryData, catDataMap, selectedMainCat]);
 
-  // Default pri prvom učitavanju: kategorija roditelja od 'abeceda' + podkategorija 'abeceda'
+  // Default: abeceda
   useEffect(() => {
     if (defaultsApplied.current || categoryData.length === 0) return;
     const abecedaCat = categoryData.find((c: any) => c.slug === "abeceda");
@@ -109,8 +107,6 @@ export default function GeneralDictionaryClient({ words, categoryData = [] }: { 
     return cat?.emoji || CATEGORY_CONFIG[slug]?.emoji || "📦";
   };
 
-  const HR_SORT_ORDER = ['A','B','C','Č','Ć','D','Dž','Đ','E','F','G','H','I','J','K','L','Lj','M','N','Nj','O','P','R','S','Š','T','U','V','Z','Ž'];
-
   const filteredWords = useMemo(() => {
     setCurrentPage(1);
     const filtered = words.filter((w) => {
@@ -135,24 +131,120 @@ export default function GeneralDictionaryClient({ words, categoryData = [] }: { 
         return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);
       });
     }
-
     return filtered;
   }, [words, searchTerm, selectedMainCat, selectedSubCat, subCategories]);
 
   const totalPages = Math.ceil(filteredWords.length / PAGE_SIZE);
   const paginatedWords = filteredWords.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
+  const activeLabel = selectedSubCat !== "sve"
+    ? getCatLabel(selectedSubCat)
+    : selectedMainCat
+    ? getCatLabel(selectedMainCat)
+    : null;
+
+  const activeEmoji = selectedSubCat !== "sve"
+    ? getCatEmoji(selectedSubCat)
+    : selectedMainCat
+    ? getCatEmoji(selectedMainCat)
+    : null;
+
   if (!euLang || !nativeLang) return null;
 
   return (
     <>
+      {/* MODAL */}
+      {modalOpen && (
+        <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setModalOpen(false)} />
+          <div
+            className="relative z-10 bg-white w-full md:max-w-lg md:rounded-2xl rounded-t-3xl max-h-[80vh] flex flex-col shadow-2xl"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+              <div className="flex items-center gap-2">
+                <SlidersHorizontal size={18} className="text-blue-600" />
+                <span className="font-black text-slate-800 text-base">Odaberi kategoriju</span>
+              </div>
+              <button onClick={() => setModalOpen(false)} className="p-2 rounded-xl hover:bg-slate-100 transition-colors">
+                <X size={18} className="text-slate-400" />
+              </button>
+            </div>
+
+            <div className="overflow-y-auto flex-1 px-6 py-4 space-y-2">
+              <button
+                onClick={() => { setSelectedMainCat(null); setSelectedSubCat("sve"); setModalOpen(false); }}
+                className={`w-full flex items-center justify-between px-4 py-3 rounded-xl border transition-all ${
+                  !selectedMainCat ? "bg-blue-50 border-blue-200 text-blue-700" : "border-slate-200 hover:bg-slate-50 text-slate-600"
+                }`}
+              >
+                <span className="text-sm font-black">🔄 Sve kategorije</span>
+                {!selectedMainCat && <span className="w-2 h-2 rounded-full bg-blue-500" />}
+              </button>
+
+              {mainCategories.map((cat: any) => {
+                const isActive = selectedMainCat === cat.slug;
+                const catSubs = categoryData.filter(c => c.parent_id === cat.id);
+                return (
+                  <div key={cat.slug}>
+                    <button
+                      onClick={() => {
+                        if (isActive) { setSelectedMainCat(null); setSelectedSubCat("sve"); }
+                        else { setSelectedMainCat(cat.slug); setSelectedSubCat("sve"); }
+                      }}
+                      className={`w-full flex items-center justify-between px-4 py-3 rounded-xl border transition-all ${
+                        isActive ? "bg-blue-600 border-blue-600 text-white" : "border-slate-200 hover:bg-slate-50 text-slate-700"
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className="text-lg">{getCatEmoji(cat.slug)}</span>
+                        <span className="text-sm font-black">{getCatLabel(cat.slug)}</span>
+                      </div>
+                      <ChevronRight size={16} className={isActive ? "text-white/70 rotate-90" : "text-slate-400"} />
+                    </button>
+
+                    {isActive && catSubs.length > 0 && (
+                      <div className="mt-1 ml-4 flex flex-col gap-1">
+                        <button
+                          onClick={() => { setSelectedSubCat("sve"); setModalOpen(false); }}
+                          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-black transition-all border ${
+                            selectedSubCat === "sve" ? "bg-blue-50 border-blue-200 text-blue-700" : "border-slate-100 text-slate-500 hover:bg-slate-50"
+                          }`}
+                        >
+                          <span>📋</span>
+                          <span>Sve iz {getCatLabel(cat.slug)}</span>
+                          {selectedSubCat === "sve" && <span className="ml-auto w-2 h-2 rounded-full bg-blue-500" />}
+                        </button>
+                        {catSubs.map((sub: any) => (
+                          <button
+                            key={sub.slug}
+                            onClick={() => { setSelectedSubCat(sub.slug); setModalOpen(false); }}
+                            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-black transition-all border ${
+                              selectedSubCat === sub.slug ? "bg-blue-50 border-blue-200 text-blue-700" : "border-slate-100 text-slate-500 hover:bg-slate-50"
+                            }`}
+                          >
+                            <span>{getCatEmoji(sub.slug)}</span>
+                            <span>{getCatLabel(sub.slug)}</span>
+                            {selectedSubCat === sub.slug && <span className="ml-auto w-2 h-2 rounded-full bg-blue-500" />}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* STRANICA */}
       <div className="w-full p-4 md:p-10 max-w-7xl mx-auto min-h-screen flex flex-col animate-in fade-in duration-500">
 
         {/* HEADER */}
         <div className="mb-5" style={{ background: 'rgba(10,30,60,0.65)', borderRadius: 16, padding: '1.5rem', color: 'white' }}>
           <Link href="/general" className="group inline-flex flex-col mb-4">
-            <div className="flex items-center gap-2 text-sm font-bold transition-colors" style={{ color: 'rgba(255,255,255,0.7)' }}>
+            <div className="flex items-center gap-2 text-sm font-bold" style={{ color: 'rgba(255,255,255,0.7)' }}>
               <ArrowLeft size={16} />
               <span>{back.main}</span>
             </div>
@@ -162,88 +254,57 @@ export default function GeneralDictionaryClient({ words, categoryData = [] }: { 
               </span>
             )}
           </Link>
-
-          <div className="flex items-center justify-between gap-4 flex-wrap">
-            <div className="flex items-center gap-4">
-              <div className="bg-blue-600 p-3 rounded-2xl text-white shadow-lg">
-                <Globe2 size={24} className="md:hidden" />
-                <Globe2 size={28} className="hidden md:block" />
-              </div>
-              <div>
-                <h1 className="text-2xl md:text-4xl font-black tracking-tight leading-none" style={{ color: 'white' }}>
-                  {head.main}
-                </h1>
-                {!head.isOnlyHr && (
-                  <p className="text-[11px] font-black uppercase mt-1 tracking-widest italic opacity-80" style={{ color: 'rgba(255,255,255,0.6)' }}>
-                    {head.sub}
-                  </p>
-                )}
-              </div>
+          <div className="flex items-center gap-4">
+            <div className="bg-blue-600 p-3 rounded-2xl text-white shadow-lg">
+              <Globe2 size={24} className="md:hidden" />
+              <Globe2 size={28} className="hidden md:block" />
             </div>
-            <div className="flex items-center gap-2 text-sm font-medium" style={{ color: 'rgba(255,255,255,0.5)' }} />
+            <div>
+              <h1 className="text-2xl md:text-4xl font-black tracking-tight leading-none" style={{ color: 'white' }}>
+                {head.main}
+              </h1>
+              {!head.isOnlyHr && (
+                <p className="text-[11px] font-black uppercase mt-1 tracking-widest italic opacity-80" style={{ color: 'rgba(255,255,255,0.6)' }}>
+                  {head.sub}
+                </p>
+              )}
+            </div>
           </div>
         </div>
 
-        {/* SEARCH */}
-        <div className="relative mb-3">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-          <input
-            type="text"
-            placeholder={placeholder.main}
-            className="w-full pl-11 pr-4 py-3 bg-white border border-slate-200 rounded-2xl font-bold focus:outline-none focus:border-blue-500 transition-all text-sm shadow-sm"
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
-
-        {/* KATEGORIJE - horizontal scroll chips */}
-        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+        {/* SEARCH + FILTER */}
+        <div className="flex gap-2 mb-3">
+          <div className="relative flex-1">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+            <input
+              type="text"
+              placeholder={placeholder.main}
+              className="w-full pl-11 pr-4 py-3 bg-white border border-slate-200 rounded-2xl font-bold focus:outline-none focus:border-blue-500 transition-all text-sm shadow-sm"
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
           <button
-            onClick={() => { setSelectedMainCat(null); setSelectedSubCat("sve"); }}
-            className={`flex-shrink-0 px-4 py-2 rounded-full text-xs font-black transition-all border ${
-              selectedMainCat === null ? "bg-blue-600 text-white border-blue-600" : "bg-white/20 text-white border-white/30"
+            onClick={() => setModalOpen(true)}
+            className={`flex items-center gap-2 px-4 py-3 rounded-2xl font-black text-sm transition-all shadow-sm border whitespace-nowrap ${
+              activeLabel ? "bg-blue-600 text-white border-blue-600" : "bg-white text-slate-600 border-slate-200"
             }`}
           >
-            Sve
-          </button>
-          {mainCategories.map((cat: any) => (
-            <button
-              key={cat.slug}
-              onClick={() => { setSelectedMainCat(cat.slug === selectedMainCat ? null : cat.slug); setSelectedSubCat("sve"); }}
-              className={`flex-shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-black transition-all border ${
-                selectedMainCat === cat.slug ? "bg-blue-600 text-white border-blue-600" : "bg-white/20 text-white border-white/30"
-              }`}
-            >
-              <span>{getCatEmoji(cat.slug)}</span>
-              <span>{getCatLabel(cat.slug)}</span>
-            </button>
-          ))}
-        </div>
-
-        {/* PODKATEGORIJE - prikazuju se samo kad je odabrana glavna */}
-        {selectedMainCat && subCategories.length > 0 && (
-          <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-            <button
-              onClick={() => setSelectedSubCat("sve")}
-              className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-black transition-all border ${
-                selectedSubCat === "sve" ? "bg-white text-blue-600 border-white" : "bg-white/10 text-white/70 border-white/20"
-              }`}
-            >
-              Sve
-            </button>
-            {subCategories.map((cat: any) => (
-              <button
-                key={cat.slug}
-                onClick={() => setSelectedSubCat(cat.slug === selectedSubCat ? "sve" : cat.slug)}
-                className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-black transition-all border ${
-                  selectedSubCat === cat.slug ? "bg-white text-blue-600 border-white" : "bg-white/10 text-white/70 border-white/20"
-                }`}
+            <SlidersHorizontal size={16} />
+            {activeLabel ? (
+              <span>{activeEmoji} {activeLabel}</span>
+            ) : (
+              <span>Kategorija</span>
+            )}
+            {activeLabel && (
+              <span
+                onClick={e => { e.stopPropagation(); setSelectedMainCat(null); setSelectedSubCat("sve"); }}
+                className="ml-1 hover:opacity-70"
               >
-                <span>{getCatEmoji(cat.slug)}</span>
-                <span>{getCatLabel(cat.slug)}</span>
-              </button>
-            ))}
-          </div>
-        )}
+                <X size={13} />
+              </span>
+            )}
+          </button>
+        </div>
 
         {/* GRID */}
         {filteredWords.length === 0 ? (
@@ -253,7 +314,6 @@ export default function GeneralDictionaryClient({ words, categoryData = [] }: { 
           </div>
         ) : (
           <>
-            {/* Broj rezultata */}
             <p className="text-xs font-bold text-slate-400 mb-3">
               {filteredWords.length} {filteredWords.length === 1 ? "riječ" : "riječi"}
               {totalPages > 1 && ` · stranica ${currentPage} / ${totalPages}`}
@@ -280,7 +340,6 @@ export default function GeneralDictionaryClient({ words, categoryData = [] }: { 
               })}
             </div>
 
-            {/* PAGINACIJA */}
             {totalPages > 1 && (
               <div className="flex items-center justify-center gap-3 mt-10">
                 <button
