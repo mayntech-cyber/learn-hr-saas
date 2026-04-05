@@ -21,8 +21,18 @@ export default function JobHubClient({ job }: { job: any }) {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
+      // Prvo dohvati word_id-eve za ovo zanimanje
+      const { data: jobWords } = await supabase
+        .from('dictionary')
+        .select('id')
+        .eq('job_id', job.id);
+
+      const jobWordIds = (jobWords || []).map((w: any) => w.id);
+
       const [wordsRes, scenariosRes, sessionsRes] = await Promise.all([
-        supabase.from('word_progress').select('*', { count: 'exact', head: true }).eq('user_id', user.id).eq('job_id', job.id).eq('status', 'known'),
+        jobWordIds.length > 0
+          ? supabase.from('word_progress').select('*', { count: 'exact', head: true }).eq('user_id', user.id).in('word_id', jobWordIds).eq('status', 'known')
+          : Promise.resolve({ count: 0 }),
         supabase.from('scenario_progress').select('*', { count: 'exact', head: true }).eq('user_id', user.id).eq('job_id', job.id).eq('status', 'completed'),
         supabase.from('user_test_results').select('*', { count: 'exact', head: true }).eq('user_id', user.id).eq('job_id', job.id),
       ]);
