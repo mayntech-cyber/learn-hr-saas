@@ -27,6 +27,9 @@ const CATEGORY_CONFIG: Record<string, { emoji: string; color: string; bg: string
 
 export default function GeneralDictionaryClient({ words, categoryData = [] }: { words: any[], categoryData?: any[] }) {
   const { euLang, nativeLang, uiMode, t } = useLanguage();
+  const supabase = createClient();
+  const [userId, setUserId] = useState<string | null>(null);
+  const [progressMap, setProgressMap] = useState<Record<number, "known" | "unknown">>({});
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedMainCat, setSelectedMainCat] = useState<string | null>(null);
   const [selectedSubCat, setSelectedSubCat] = useState("sve");
