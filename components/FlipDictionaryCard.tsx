@@ -147,12 +147,6 @@ export default function FlipDictionaryCard({
                 </div>
               )}
 
-              {wordType && category !== 'abeceda' && (
-                <span style={{ position: "absolute", top: 8, left: 8, background: "rgba(255,255,255,0.9)", color: "#64748b", fontSize: 9, fontWeight: 900, padding: "3px 8px", borderRadius: 8, textTransform: "uppercase", letterSpacing: 1 }}>
-                  {wordType}
-                </span>
-              )}
-
               <button onClick={playAudio} style={{ position: "absolute", bottom: 10, right: 10, background: "#f97316", color: "white", border: "none", borderRadius: "50%", width: 38, height: 38, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", boxShadow: "0 4px 12px rgba(249,115,22,0.4)" }}>
                 <Volume2 size={16} />
               </button>
