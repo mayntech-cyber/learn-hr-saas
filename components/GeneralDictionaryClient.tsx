@@ -120,9 +120,11 @@ export default function GeneralDictionaryClient({ words, categoryData = [] }: { 
     return cat?.emoji || CATEGORY_CONFIG[slug]?.emoji || "📦";
   };
 
+  const HR_SORT_ORDER = ['A','B','C','Č','Ć','D','Dž','Đ','E','F','G','H','I','J','K','L','Lj','M','N','Nj','O','P','R','S','Š','T','U','V','Z','Ž'];
+
   const filteredWords = useMemo(() => {
     setCurrentPage(1);
-    return words.filter((w) => {
+    const filtered = words.filter((w) => {
       let matchesCategory = true;
       if (selectedSubCat !== "sve") {
         matchesCategory = w.category === selectedSubCat;
@@ -136,6 +138,16 @@ export default function GeneralDictionaryClient({ words, categoryData = [] }: { 
       const matchesSearch = w.hr_word?.toLowerCase().includes(searchTerm.toLowerCase());
       return matchesCategory && matchesSearch;
     });
+
+    if (selectedSubCat === "abeceda") {
+      return filtered.sort((a, b) => {
+        const ai = HR_SORT_ORDER.indexOf(a.hr_word);
+        const bi = HR_SORT_ORDER.indexOf(b.hr_word);
+        return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);
+      });
+    }
+
+    return filtered;
   }, [words, searchTerm, selectedMainCat, selectedSubCat, subCategories]);
 
   const totalPages = Math.ceil(filteredWords.length / PAGE_SIZE);
