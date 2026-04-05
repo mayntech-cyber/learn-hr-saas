@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect, useRef } from "react";
 import { createClient } from "@/utils/supabase/client";
-import { Search, Globe2, ArrowLeft, SlidersHorizontal, X, ChevronRight } from "lucide-react";
+import { Search, Globe2, ArrowLeft, SlidersHorizontal, X, ChevronRight, RotateCcw } from "lucide-react";
 import Link from "next/link";
 import FlipDictionaryCard from "./FlipDictionaryCard";
 import { useLanguage } from "./LanguageContext";
@@ -37,6 +37,7 @@ export default function GeneralDictionaryClient({ words, categoryData = [] }: { 
   const [selectedSubCat, setSelectedSubCat] = useState("sve");
   const [currentPage, setCurrentPage] = useState(1);
   const [modalOpen, setModalOpen] = useState(false);
+  const [defaultMainCat, setDefaultMainCat] = useState<string | null>(null);
   const defaultsApplied = useRef(false);
 
   const PAGE_SIZE = selectedSubCat === "abeceda" ? 999 : 60;
@@ -87,7 +88,10 @@ export default function GeneralDictionaryClient({ words, categoryData = [] }: { 
     const abecedaCat = categoryData.find((c: any) => c.slug === "abeceda");
     if (abecedaCat) {
       const parentCat = categoryData.find((c: any) => c.id === abecedaCat.parent_id);
-      if (parentCat) setSelectedMainCat(parentCat.slug);
+      if (parentCat) {
+        setSelectedMainCat(parentCat.slug);
+        setDefaultMainCat(parentCat.slug);
+      }
       setSelectedSubCat("abeceda");
     }
     defaultsApplied.current = true;
@@ -106,6 +110,15 @@ export default function GeneralDictionaryClient({ words, categoryData = [] }: { 
     const cat = catDataMap[slug];
     return cat?.emoji || CATEGORY_CONFIG[slug]?.emoji || "📦";
   };
+
+  const goToAbeceda = () => {
+    if (defaultMainCat) setSelectedMainCat(defaultMainCat);
+    setSelectedSubCat("abeceda");
+    setSearchTerm("");
+    setCurrentPage(1);
+  };
+
+  const isOnAbeceda = selectedSubCat === "abeceda";
 
   const filteredWords = useMemo(() => {
     setCurrentPage(1);
@@ -137,18 +150,6 @@ export default function GeneralDictionaryClient({ words, categoryData = [] }: { 
   const totalPages = Math.ceil(filteredWords.length / PAGE_SIZE);
   const paginatedWords = filteredWords.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
-  const activeLabel = selectedSubCat !== "sve"
-    ? getCatLabel(selectedSubCat)
-    : selectedMainCat
-    ? getCatLabel(selectedMainCat)
-    : null;
-
-  const activeEmoji = selectedSubCat !== "sve"
-    ? getCatEmoji(selectedSubCat)
-    : selectedMainCat
-    ? getCatEmoji(selectedMainCat)
-    : null;
-
   if (!euLang || !nativeLang) return null;
 
   return (
@@ -158,10 +159,11 @@ export default function GeneralDictionaryClient({ words, categoryData = [] }: { 
         <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setModalOpen(false)} />
           <div
-            className="relative z-10 bg-white w-full md:max-w-lg md:rounded-2xl rounded-t-3xl max-h-[80vh] flex flex-col shadow-2xl"
+            className="relative z-10 bg-white w-full md:max-w-lg md:rounded-2xl rounded-t-3xl max-h-[85vh] flex flex-col shadow-2xl"
             onClick={e => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+            {/* Modal header */}
+            <div className="flex items-center justify-between px-6 py-4 border-b-2 border-slate-100">
               <div className="flex items-center gap-2">
                 <SlidersHorizontal size={18} className="text-blue-600" />
                 <span className="font-black text-slate-800 text-base">Odaberi kategoriju</span>
@@ -171,16 +173,39 @@ export default function GeneralDictionaryClient({ words, categoryData = [] }: { 
               </button>
             </div>
 
+            {/* Aktivna navigacija u modalu */}
+            <div className="px-6 py-3 bg-blue-50 border-b border-blue-100 flex items-center gap-2 text-xs font-black text-blue-600">
+              <span>Trenutno:</span>
+              {selectedMainCat ? (
+                <>
+                  <span>{getCatEmoji(selectedMainCat)} {getCatLabel(selectedMainCat)}</span>
+                  {selectedSubCat !== "sve" && (
+                    <>
+                      <ChevronRight size={12} />
+                      <span>{getCatEmoji(selectedSubCat)} {getCatLabel(selectedSubCat)}</span>
+                    </>
+                  )}
+                </>
+              ) : (
+                <span>🔄 Sve kategorije</span>
+              )}
+            </div>
+
             <div className="overflow-y-auto flex-1 px-6 py-4 space-y-2">
+              {/* Sve kategorije */}
               <button
                 onClick={() => { setSelectedMainCat(null); setSelectedSubCat("sve"); setModalOpen(false); }}
-                className={`w-full flex items-center justify-between px-4 py-3 rounded-xl border transition-all ${
-                  !selectedMainCat ? "bg-blue-50 border-blue-200 text-blue-700" : "border-slate-200 hover:bg-slate-50 text-slate-600"
+                className={`w-full flex items-center justify-between px-4 py-3 rounded-xl border-2 transition-all ${
+                  !selectedMainCat ? "bg-blue-600 border-blue-600 text-white" : "border-slate-200 hover:bg-slate-50 text-slate-600"
                 }`}
               >
                 <span className="text-sm font-black">🔄 Sve kategorije</span>
-                {!selectedMainCat && <span className="w-2 h-2 rounded-full bg-blue-500" />}
               </button>
+
+              {/* Separator */}
+              <div className="pt-2 pb-1">
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Kategorije</p>
+              </div>
 
               {mainCategories.map((cat: any) => {
                 const isActive = selectedMainCat === cat.slug;
@@ -192,40 +217,42 @@ export default function GeneralDictionaryClient({ words, categoryData = [] }: { 
                         if (isActive) { setSelectedMainCat(null); setSelectedSubCat("sve"); }
                         else { setSelectedMainCat(cat.slug); setSelectedSubCat("sve"); }
                       }}
-                      className={`w-full flex items-center justify-between px-4 py-3 rounded-xl border transition-all ${
-                        isActive ? "bg-blue-600 border-blue-600 text-white" : "border-slate-200 hover:bg-slate-50 text-slate-700"
+                      className={`w-full flex items-center justify-between px-4 py-3.5 rounded-xl border-2 transition-all ${
+                        isActive ? "bg-blue-600 border-blue-600 text-white" : "border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-700"
                       }`}
                     >
                       <div className="flex items-center gap-3">
-                        <span className="text-lg">{getCatEmoji(cat.slug)}</span>
+                        <span className="text-xl">{getCatEmoji(cat.slug)}</span>
                         <span className="text-sm font-black">{getCatLabel(cat.slug)}</span>
                       </div>
-                      <ChevronRight size={16} className={isActive ? "text-white/70 rotate-90" : "text-slate-400"} />
+                      <ChevronRight size={16} className={`transition-transform ${isActive ? "text-white/70 rotate-90" : "text-slate-400"}`} />
                     </button>
 
+                    {/* Podkategorije */}
                     {isActive && catSubs.length > 0 && (
-                      <div className="mt-1 ml-4 flex flex-col gap-1">
+                      <div className="mt-2 mb-1 ml-6 flex flex-col gap-1.5 border-l-2 border-blue-200 pl-4">
+                        <p className="text-[10px] font-black text-blue-400 uppercase tracking-widest py-1">Podkategorije</p>
                         <button
                           onClick={() => { setSelectedSubCat("sve"); setModalOpen(false); }}
-                          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-black transition-all border ${
-                            selectedSubCat === "sve" ? "bg-blue-50 border-blue-200 text-blue-700" : "border-slate-100 text-slate-500 hover:bg-slate-50"
+                          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-black transition-all border-2 ${
+                            selectedSubCat === "sve" ? "bg-blue-50 border-blue-300 text-blue-700" : "border-slate-100 text-slate-500 hover:bg-slate-50 hover:border-slate-200"
                           }`}
                         >
                           <span>📋</span>
                           <span>Sve iz {getCatLabel(cat.slug)}</span>
-                          {selectedSubCat === "sve" && <span className="ml-auto w-2 h-2 rounded-full bg-blue-500" />}
+                          {selectedSubCat === "sve" && <span className="ml-auto w-2.5 h-2.5 rounded-full bg-blue-500" />}
                         </button>
                         {catSubs.map((sub: any) => (
                           <button
                             key={sub.slug}
                             onClick={() => { setSelectedSubCat(sub.slug); setModalOpen(false); }}
-                            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-black transition-all border ${
-                              selectedSubCat === sub.slug ? "bg-blue-50 border-blue-200 text-blue-700" : "border-slate-100 text-slate-500 hover:bg-slate-50"
+                            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-black transition-all border-2 ${
+                              selectedSubCat === sub.slug ? "bg-blue-50 border-blue-300 text-blue-700" : "border-slate-100 text-slate-500 hover:bg-slate-50 hover:border-slate-200"
                             }`}
                           >
                             <span>{getCatEmoji(sub.slug)}</span>
                             <span>{getCatLabel(sub.slug)}</span>
-                            {selectedSubCat === sub.slug && <span className="ml-auto w-2 h-2 rounded-full bg-blue-500" />}
+                            {selectedSubCat === sub.slug && <span className="ml-auto w-2.5 h-2.5 rounded-full bg-blue-500" />}
                           </button>
                         ))}
                       </div>
@@ -285,40 +312,53 @@ export default function GeneralDictionaryClient({ words, categoryData = [] }: { 
           </div>
           <button
             onClick={() => setModalOpen(true)}
-            className={`flex items-center gap-2 px-4 py-3 rounded-2xl font-black text-sm transition-all shadow-sm border whitespace-nowrap ${
-              activeLabel ? "bg-blue-600 text-white border-blue-600" : "bg-white text-slate-600 border-slate-200"
-            }`}
+            className="flex items-center gap-2 px-4 py-3 rounded-2xl font-black text-sm bg-white text-slate-600 border border-slate-200 hover:border-slate-300 shadow-sm transition-all"
           >
             <SlidersHorizontal size={16} />
-            {activeLabel ? (
-              <span>{activeEmoji} {activeLabel}</span>
-            ) : (
-              <span>Kategorija</span>
-            )}
-            {activeLabel && (
-              <span
-                onClick={e => { e.stopPropagation(); setSelectedMainCat(null); setSelectedSubCat("sve"); }}
-                className="ml-1 hover:opacity-70"
-              >
-                <X size={13} />
-              </span>
-            )}
           </button>
+        </div>
+
+        {/* BREADCRUMB + RESET */}
+        <div className="flex items-center justify-between mb-4 min-h-[32px]">
+          {/* Breadcrumb */}
+          <div className="flex items-center gap-1.5 text-sm font-black">
+            {selectedMainCat ? (
+              <>
+                <span className="text-white/80">{getCatEmoji(selectedMainCat)}</span>
+                <span className="text-white/80">{getCatLabel(selectedMainCat)}</span>
+                {selectedSubCat !== "sve" && (
+                  <>
+                    <ChevronRight size={14} className="text-white/40" />
+                    <span className="text-white">{getCatEmoji(selectedSubCat)}</span>
+                    <span className="text-white">{getCatLabel(selectedSubCat)}</span>
+                  </>
+                )}
+              </>
+            ) : (
+              <span className="text-white/60 text-xs">Sve kategorije</span>
+            )}
+          </div>
+
+          {/* Reset na abecedu */}
+          {!isOnAbeceda && (
+            <button
+              onClick={goToAbeceda}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/20 hover:bg-white/30 text-white text-xs font-black transition-all"
+            >
+              <RotateCcw size={12} />
+              <span>Abeceda</span>
+            </button>
+          )}
         </div>
 
         {/* GRID */}
         {filteredWords.length === 0 ? (
           <div className="flex-1 flex flex-col items-center justify-center py-20">
             <div className="text-5xl mb-4">🔍</div>
-            <p className="text-slate-400 font-bold text-lg">{noWords.main}</p>
+            <p className="text-white/60 font-bold text-lg">{noWords.main}</p>
           </div>
         ) : (
           <>
-            <p className="text-xs font-bold text-slate-400 mb-3">
-              {filteredWords.length} {filteredWords.length === 1 ? "riječ" : "riječi"}
-              {totalPages > 1 && ` · stranica ${currentPage} / ${totalPages}`}
-            </p>
-
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
               {paginatedWords.map((w) => {
                 const trans = typeof w.translations === "string" ? JSON.parse(w.translations) : w.translations || {};
@@ -349,7 +389,7 @@ export default function GeneralDictionaryClient({ words, categoryData = [] }: { 
                 >
                   ← Prethodna
                 </button>
-                <span className="text-sm font-black text-slate-500 bg-slate-100 px-4 py-2 rounded-xl">
+                <span className="text-sm font-black text-white/60 px-4 py-2">
                   {currentPage} / {totalPages}
                 </span>
                 <button
