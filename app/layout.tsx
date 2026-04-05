@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 
+import { createClient } from "@/utils/supabase/server";
+
 import { LanguageProvider } from "@/components/LanguageContext"; 
 import LanguageSetupModal from "@/components/LanguageSetupModal";
 import LayoutWrapper from "@/components/LayoutWrapper";
@@ -37,14 +39,26 @@ export const viewport: Viewport = {
   userScalable: false,
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const supabase = await createClient();
+  const { data: bgData } = await supabase
+    .from("page_backgrounds")
+    .select("url")
+    .eq("active", true)
+    .eq("media_type", "image");
+
+  const bgUrl = bgData && bgData.length > 0
+    ? bgData[Math.floor(Math.random() * bgData.length)].url
+    : null;
+
   return (
     <html lang="hr">
       <head>
+        {bgUrl && <meta name="x-bg-url" content={bgUrl} />}
         {/* PWA — iOS Safari specifično */}
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
