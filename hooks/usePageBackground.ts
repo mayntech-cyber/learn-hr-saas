@@ -11,8 +11,8 @@ export function usePageBackground(): string | null {
     if (typeof window === "undefined") return null;
     if (window.location.pathname === "/dashboard") return null;
     // Prvo provjeri meta tag (server-rendered)
-    const meta = document.querySelector('meta[name="x-bg-url"]');
-    if (meta) return meta.getAttribute("content");
+    const bodyUrl = document.body.getAttribute("data-bg-url");
+    if (bodyUrl) return bodyUrl;
     // Onda sessionStorage
     const cached = sessionStorage.getItem(SESSION_KEY);
     const expiry = sessionStorage.getItem(SESSION_EXPIRY_KEY);

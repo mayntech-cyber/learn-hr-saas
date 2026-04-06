@@ -67,7 +67,7 @@ export default async function RootLayout({
         <meta name="msapplication-TileColor" content="#6366f1" />
         <meta name="msapplication-TileImage" content="/icons/icon-144x144.png" />
       </head>
-      <body className={inter.className}>
+      <body className={inter.className} data-bg-url={bgUrl ?? ""}>
         <LanguageProvider>
           <LanguageSetupModal />
           <LayoutWrapper>
