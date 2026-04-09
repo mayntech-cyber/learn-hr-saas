@@ -19,7 +19,8 @@
       "Bash(find C:language-front -type f -name *.tsx -o -name *.ts)",
       "Bash(git -C C:language-front add -A)",
       "Bash(git -C C:language-front commit -m \"backup before job hub layout fix\")",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Bash(git push:*)"
     ]
   }
 }
