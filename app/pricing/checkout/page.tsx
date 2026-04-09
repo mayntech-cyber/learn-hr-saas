@@ -8,8 +8,12 @@ import { Loader2 } from "lucide-react";
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "https://admin.maynpost.com";
 
 const PLAN_NAMES: Record<string, string> = {
-  ind_general: "Opći",
-  ind_pro: "Full Pro",
+  ind_basic_monthly: "Crolingo Basic",
+  ind_basic_yearly: "Crolingo Basic (Godišnje)",
+  ind_plus_monthly: "Crolingo Plus",
+  ind_plus_yearly: "Crolingo Plus (Godišnje)",
+  ind_pro_monthly: "Crolingo Pro",
+  ind_pro_yearly: "Crolingo Pro (Godišnje)",
 };
 
 function CheckoutContent() {

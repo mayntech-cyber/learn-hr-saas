@@ -16,10 +16,13 @@ const PLAN_CONFIG: Record<string, {
   color: string;
   bg: string;
   border: string;
-  badge?: string;
+  badge?: string | null;
   icon: any;
   features: string[];
+  monthlyPrice: number;
+  annualPlanId: string;
   annualPrice: number;
+  annualMonthly: number;
 }> = {
   ind_free: {
     emoji: "🌱",
@@ -27,45 +30,78 @@ const PLAN_CONFIG: Record<string, {
     bg: "bg-white",
     border: "border-slate-200",
     icon: Star,
+    monthlyPrice: 0,
+    annualPlanId: "ind_free",
     annualPrice: 0,
+    annualMonthly: 0,
+    badge: null,
     features: [
-      "Prvih 10 lekcija (A1 osnove)",
+      "Level 1 (A1 osnove)",
+      "3 scenarija i 3 testa",
       "Rječnik s audio izgovorom",
       "XP bodovi i dnevni streaks",
       "UI na svom jeziku",
+      "Preview zaključanog sadržaja 🔒",
     ],
   },
-  ind_general: {
+  ind_basic_monthly: {
     emoji: "📚",
     color: "text-blue-700",
     bg: "bg-blue-50",
     border: "border-blue-200",
     icon: Zap,
-    annualPrice: 39,
+    monthlyPrice: 6.99,
+    annualPlanId: "ind_basic_yearly",
+    annualPrice: 55.99,
+    annualMonthly: 4.67,
+    badge: null,
     features: [
-      "Cijeli A1 + A2 tečaj",
-      "Svakodnevni scenariji",
-      "Pomoćni jezik po izboru",
-      "Osnovni testovi i ocjene",
-      "Leaderboard",
+      "Kompletni A1 + A2 tečaj",
+      "Sve igre i gamifikacija",
+      "Svi scenariji A1+A2",
+      "Interni certifikat A1 i A2",
+      "XP, streaks, leaderboard",
+      "1 pomoćni jezik sučelja",
     ],
   },
-  ind_pro: {
+  ind_plus_monthly: {
+    emoji: "⭐",
+    color: "text-purple-700",
+    bg: "bg-purple-50",
+    border: "border-purple-200",
+    icon: Star,
+    monthlyPrice: 9.99,
+    annualPlanId: "ind_plus_yearly",
+    annualPrice: 79.99,
+    annualMonthly: 6.67,
+    badge: "Najpopularnije",
+    features: [
+      "Sve iz Basic plana",
+      "A1 → B2 sve razine",
+      "Svi certifikati A1-B2",
+      "Offline mod",
+      "do 3 jezika sučelja",
+      "1 zanimanje stručnog (teaser)",
+    ],
+  },
+  ind_pro_monthly: {
     emoji: "🏆",
     color: "text-white",
     bg: "bg-gradient-to-br from-blue-600 to-indigo-700",
     border: "border-blue-500",
-    badge: "Najpopularnije",
     icon: Rocket,
-    annualPrice: 59,
+    monthlyPrice: 14.99,
+    annualPlanId: "ind_pro_yearly",
+    annualPrice: 119.99,
+    annualMonthly: 10.00,
+    badge: null,
     features: [
-      "Cijeli A1 + A2 tečaj",
-      "Stručni jezik (1 sektor)",
+      "Sve iz Plus plana",
+      "Stručni rječnik — sva zanimanja (73)",
       "Scenariji s radnog mjesta",
-      "Svi testovi i ocjene",
-      "Interni certifikat završetka",
-      "Offline mod",
-      "Progres se prenosi u B2B",
+      "Stručni certifikati po zanimanju",
+      "Neograničeni jezici sučelja",
+      "Spreman za tržište rada! 🚀",
     ],
   },
 };
@@ -84,7 +120,7 @@ export default function PricingClient({
   const tSub = t("Počni besplatno. Nadogradi kad si spreman.");
   const tMonthly = t("Mjesečno");
   const tAnnual = t("Godišnje");
-  const tSave = t("Uštedi 2 mj.");
+  const tSave = t("Uštedi 20%");
   const tCurrent = t("Trenutni plan");
   const tUpgrade = t("Odaberi plan");
   const tDowngrade = t("Promijeni plan");
@@ -95,7 +131,7 @@ export default function PricingClient({
   const tAllCurrencies = t("Sve cijene u eurima");
   const tPopular = t("Najpopularnije");
 
-  const planOrder = ["ind_free", "ind_general", "ind_pro"];
+  const planOrder = ["ind_free", "ind_basic_monthly", "ind_plus_monthly", "ind_pro_monthly"];
 
   return (
     <div className="w-full max-w-6xl mx-auto px-4 py-10 animate-in fade-in duration-500">
@@ -103,7 +139,7 @@ export default function PricingClient({
       {/* HEADER */}
       <div className="text-center mb-12" style={{ background: 'rgba(10,30,60,0.65)', borderRadius: 16, padding: '1.5rem', color: 'white' }}>
         <div className="inline-flex items-center gap-2 font-black text-xs uppercase tracking-widest px-4 py-2 rounded-full mb-6" style={{ background: 'rgba(255,255,255,0.15)', color: 'white', border: '1px solid rgba(255,255,255,0.25)' }}>
-          <Rocket size={14} /> LearnHR Pro
+          <Rocket size={14} /> Crolingo
         </div>
         <h1 className="text-4xl md:text-5xl font-black mb-4 tracking-tight" style={{ color: 'white' }}>
           {tTitle.main}
@@ -135,17 +171,16 @@ export default function PricingClient({
       </div>
 
       {/* CARDS */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
         {planOrder.map((planId) => {
           const plan = plans.find(p => p.id === planId);
           const config = PLAN_CONFIG[planId];
           if (!config) return null;
 
           const isCurrent = currentPlanId === planId;
-          const isPopular = planId === "ind_pro";
-          const isPro = planId === "ind_pro";
-          const price = plan?.price_eur ?? 0;
-          const annualPrice = config.annualPrice;
+          const isPopular = config.badge === "Najpopularnije";
+          const isPro = planId === "ind_pro_monthly";
+          const displayPrice = annual ? config.annualMonthly : config.monthlyPrice;
           const Icon = config.icon;
 
           return (
@@ -178,7 +213,7 @@ export default function PricingClient({
 
               {/* Cijena */}
               <div className="mb-8">
-                {price === 0 ? (
+                {displayPrice === 0 ? (
                   <div className={`text-3xl font-black ${isPro ? "text-white" : "text-slate-800"}`}>
                     {tFree.main}
                   </div>
@@ -186,7 +221,7 @@ export default function PricingClient({
                   <div>
                     <div className={`flex items-baseline gap-1 ${isPro ? "text-white" : "text-slate-800"}`}>
                       <span className="text-4xl font-black">
-                        €{annual ? (annualPrice / 12).toFixed(2) : price}
+                        €{displayPrice.toFixed(2)}
                       </span>
                       <span className={`text-sm font-bold ${isPro ? "text-blue-200" : "text-slate-400"}`}>
                         {tPerMonth.main}
@@ -194,7 +229,7 @@ export default function PricingClient({
                     </div>
                     {annual && (
                       <p className={`text-sm font-bold mt-1 ${isPro ? "text-blue-200" : "text-slate-400"}`}>
-                        €{annualPrice} {tPerYear.main}
+                        €{config.annualPrice} {tPerYear.main}
                       </p>
                     )}
                   </div>
@@ -229,7 +264,7 @@ export default function PricingClient({
                 </div>
               ) : (
                 <Link
-                  href={`/pricing/checkout?plan=${planId}`}
+                  href={`/pricing/checkout?plan=${annual && planId !== 'ind_free' ? config.annualPlanId : planId}`}
                   className={`w-full py-4 rounded-2xl font-black text-center text-sm transition-all flex items-center justify-center gap-2 ${
                     isPro
                       ? "bg-white text-blue-600 hover:bg-blue-50 shadow-lg"
