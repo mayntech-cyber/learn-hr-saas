@@ -1,9 +1,22 @@
 "use client";
 
+import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 import Navigation from "@/components/Navigation";
 import { usePageBackground } from "@/hooks/usePageBackground";
 import { PAGE_BACKGROUND_OVERLAY } from "@/lib/constants";
+import { createClient } from "@/utils/supabase/client";
+
+const LAST_SEEN_KEY = "last_seen_ping";
+const THROTTLE_MS = 5 * 60 * 1000; // 5 minuta
+
+async function updateLastSeen(userId: string) {
+  const supabase = createClient();
+  await supabase
+    .from("profiles")
+    .update({ last_seen_at: new Date().toISOString() })
+    .eq("id", userId);
+}
 
 // Stranice bez navigacije (imaju vlastiti background)
 const NO_NAV_ROUTES = ["/login", "/onboarding"];
@@ -14,6 +27,37 @@ const NO_BG_ROUTES = ["/pricing/checkout", "/pricing/success"];
 export default function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const bgUrl = usePageBackground();
+
+  useEffect(() => {
+    const supabase = createClient();
+
+    // Ažuriraj last_seen_at pri prijavi
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_IN" && session?.user?.id) {
+        updateLastSeen(session.user.id);
+      }
+    });
+
+    // Throttled update pri window focus
+    const handleFocus = async () => {
+      const now = Date.now();
+      const last = Number(localStorage.getItem(LAST_SEEN_KEY) ?? 0);
+      if (now - last < THROTTLE_MS) return;
+
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      localStorage.setItem(LAST_SEEN_KEY, String(now));
+      await updateLastSeen(user.id);
+    };
+
+    window.addEventListener("focus", handleFocus);
+
+    return () => {
+      subscription.unsubscribe();
+      window.removeEventListener("focus", handleFocus);
+    };
+  }, []);
 
   const isNoNav = NO_NAV_ROUTES.includes(pathname);
   const isNoBg = NO_BG_ROUTES.includes(pathname);
