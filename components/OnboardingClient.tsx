@@ -10,33 +10,43 @@ const PLANS = [
   {
     id: "ind_free",
     emoji: "🌱",
-    nameKey: "Free",
+    nameKey: "Crolingo Start",
     priceKey: "Besplatno zauvijek",
-    descKey: "Isprobaj platformu. Prvih 10 lekcija besplatno.",
+    descKey: "Level 1, 3 scenarija, rječnik s audio izgovorom.",
     color: "border-slate-200 hover:border-slate-300",
     activeColor: "border-slate-800 bg-slate-50",
     icon: Star,
   },
   {
-    id: "ind_general",
+    id: "ind_basic_monthly",
     emoji: "📚",
-    nameKey: "Opći",
-    priceKey: "€4.99 / mj.",
-    descKey: "Cijeli A1+A2 tečaj, scenariji i testovi.",
+    nameKey: "Crolingo Basic",
+    priceKey: "€6.99 / mj.",
+    descKey: "Kompletni A1+A2 tečaj, sve igre i scenariji.",
     color: "border-blue-100 hover:border-blue-300",
     activeColor: "border-blue-600 bg-blue-50",
     icon: Zap,
   },
   {
-    id: "ind_pro",
-    emoji: "🏆",
-    nameKey: "Full Pro",
-    priceKey: "€7.99 / mj.",
-    descKey: "Sve + stručni jezik, certifikat i offline mod.",
+    id: "ind_plus_monthly",
+    emoji: "⭐",
+    nameKey: "Crolingo Plus",
+    priceKey: "€9.99 / mj.",
+    descKey: "A1→B2 sve razine, certifikati, offline mod.",
     color: "border-indigo-100 hover:border-indigo-300",
     activeColor: "border-indigo-600 bg-indigo-50",
     badge: "Najpopularnije",
     icon: Rocket,
+  },
+  {
+    id: "ind_pro_monthly",
+    emoji: "🏆",
+    nameKey: "Crolingo Pro",
+    priceKey: "€14.99 / mj.",
+    descKey: "Sve + stručni rječnik sva zanimanja, stručni certifikati.",
+    color: "border-amber-100 hover:border-amber-300",
+    activeColor: "border-amber-600 bg-amber-50",
+    icon: Star,
   },
 ];
 
@@ -51,7 +61,7 @@ export default function OnboardingClient({ allJobs }: { allJobs: any[] }) {
   const [jobId, setJobId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const isProPlan = selectedPlan === "ind_pro";
+  const isProPlan = selectedPlan === "ind_pro_monthly" || selectedPlan === "ind_plus_monthly";
   const totalSteps = isProPlan ? 3 : 2;
 
   // Prijevodi
@@ -79,10 +89,7 @@ export default function OnboardingClient({ allJobs }: { allJobs: any[] }) {
   };
 
   const getPlanDesc = (planId: string) => {
-    if (planId === "ind_free") return tFreePlanDesc.main;
-    if (planId === "ind_general") return tGeneralDesc.main;
-    if (planId === "ind_pro") return tProDesc.main;
-    return "";
+    return t(PLANS.find(p => p.id === planId)?.descKey ?? "").main;
   };
 
   const handleSave = async () => {
